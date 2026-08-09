@@ -4,6 +4,7 @@ export type AccessTokenPayload = {
   sub: string;
   tenantId: string;
   role: Role;
+  tokenVersion: number;
 };
 
 export type RefreshTokenPayload = {

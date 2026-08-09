@@ -149,16 +149,18 @@ describe("AuthService", () => {
       );
     });
 
-    it("emite nuevos tokens si el tokenVersion coincide", async () => {
+    it("emite nuevos tokens y rota tokenVersion (invalidando el refresh token usado)", async () => {
       jwtService.verifyAsync.mockResolvedValue({
         sub: "user-1",
         tenantId: "tenant-1",
         tokenVersion: 0,
       });
       usersService.findById.mockResolvedValue(baseUser);
+      usersService.incrementTokenVersion.mockResolvedValue({ ...baseUser, tokenVersion: 1 });
 
       const result = await authService.refresh({ refreshToken: "valid" });
 
+      expect(usersService.incrementTokenVersion).toHaveBeenCalledWith("user-1");
       expect(result.accessToken).toBe("signed-token");
       expect(result.refreshToken).toBe("signed-token");
     });

@@ -15,6 +15,12 @@ const ACCESS_TOKEN_TTL = "15m";
 const REFRESH_TOKEN_TTL = "30d";
 const SALT_ROUNDS = 10;
 
+// Hash de una contraseña que nunca se usa para autenticar a nadie. Se compara
+// contra ella cuando el email no existe, para que login() tarde lo mismo con
+// email inválido que con contraseña incorrecta y no se pueda enumerar cuentas
+// por tiempo de respuesta.
+const DUMMY_PASSWORD_HASH = bcrypt.hashSync("timing-attack-mitigation", SALT_ROUNDS);
+
 export type AuthTokens = {
   accessToken: string;
   refreshToken: string;
@@ -67,12 +73,15 @@ export class AuthService {
 
   async login(dto: LoginDto): Promise<AuthResult> {
     const user = await this.usersService.findByEmail(dto.email);
-    if (!user) {
-      throw new UnauthorizedException("Credenciales inválidas");
-    }
 
-    const passwordMatches = await bcrypt.compare(dto.password, user.password);
-    if (!passwordMatches) {
+    // Siempre se ejecuta un bcrypt.compare, exista o no el usuario, para que
+    // el tiempo de respuesta no revele si un email está registrado.
+    const passwordMatches = await bcrypt.compare(
+      dto.password,
+      user?.password ?? DUMMY_PASSWORD_HASH,
+    );
+
+    if (!user || !passwordMatches) {
       throw new UnauthorizedException("Credenciales inválidas");
     }
 
@@ -95,9 +104,15 @@ export class AuthService {
       throw new UnauthorizedException("Refresh token inválido");
     }
 
+    // Rotación: cada refresh invalida el refresh token que se acaba de usar,
+    // emitiendo uno nuevo con tokenVersion incrementado. Si un refresh token
+    // robado se reutiliza después de que el legítimo ya rotó, este chequeo de
+    // tokenVersion lo rechaza.
+    const rotated = await this.usersService.incrementTokenVersion(user.id);
+
     return {
-      accessToken: this.signAccessToken(user),
-      refreshToken: this.signRefreshToken(user),
+      accessToken: this.signAccessToken(rotated),
+      refreshToken: this.signRefreshToken(rotated),
     };
   }
 
@@ -133,7 +148,7 @@ export class AuthService {
 
   private signAccessToken(user: User): string {
     return this.jwtService.sign(
-      { sub: user.id, tenantId: user.tenantId, role: user.role },
+      { sub: user.id, tenantId: user.tenantId, role: user.role, tokenVersion: user.tokenVersion },
       { secret: this.config.getOrThrow<string>("JWT_SECRET"), expiresIn: ACCESS_TOKEN_TTL },
     );
   }
