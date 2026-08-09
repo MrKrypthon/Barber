@@ -24,9 +24,10 @@ Convenciones generales (ver `CLAUDE.md` §15):
 - id (uuid)
 - tenant_id
 - name
-- email
+- email (único globalmente — un usuario pertenece a un solo tenant, el login no pide elegir negocio)
 - password (hash)
 - role (`owner` | `employee`)
+- token_version (entero, default 0 — se incrementa en logout para invalidar refresh tokens ya emitidos; detalle de implementación del flujo de auth, no un campo de negocio)
 - created_at
 - updated_at
 

@@ -7,5 +7,41 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Modelos (Tenant, User, Customer, Service, Sale, SaleItem, CashMovement,
-// BusinessSettings) se agregan en Fase 1, siguiendo docs/DATABASE.md.
+// Customer, Service, Sale, SaleItem, CashMovement y BusinessSettings se
+// agregan en fases posteriores, siguiendo docs/DATABASE.md.
+
+enum Role {
+  owner
+  employee
+}
+
+model Tenant {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  users User[]
+
+  @@map("tenants")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  tenantId  String   @map("tenant_id")
+  name      String
+  email     String   @unique
+  password  String
+  role      Role
+  // Incrementado en logout para invalidar refresh tokens ya emitidos.
+  // No forma parte del modelo documentado en docs/DATABASE.md porque es un
+  // detalle de implementación del flujo de auth, no un campo de negocio.
+  tokenVersion Int   @default(0) @map("token_version")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("users")
+}
