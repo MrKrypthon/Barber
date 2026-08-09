@@ -1,0 +1,16 @@
+{
+  "name": "barber-saas",
+  "private": true,
+  "version": "0.1.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@9.15.9",
+  "scripts": {
+    "dev": "pnpm --parallel --if-present -r run dev",
+    "build": "pnpm --if-present -r run build",
+    "lint": "pnpm --if-present -r run lint",
+    "typecheck": "pnpm --if-present -r run typecheck",
+    "test": "pnpm --if-present -r run test"
+  }
+}

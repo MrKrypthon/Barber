@@ -1,0 +1,37 @@
+# dependencies
+node_modules/
+
+# env
+.env
+.env.local
+.env.*.local
+
+# build output
+dist/
+build/
+.next/
+.turbo/
+out/
+
+# prisma
+apps/api/prisma/generated/
+
+# tests / coverage
+coverage/
+
+# typescript incremental build cache
+*.tsbuildinfo
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# editor / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+
+# Claude Code local settings (per-developer, not shared)
+.claude/settings.local.json

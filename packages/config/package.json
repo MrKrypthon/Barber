@@ -1,0 +1,14 @@
+{
+  "name": "@barber/config",
+  "version": "0.1.0",
+  "private": true,
+  "exports": {
+    "./tsconfig.base.json": "./tsconfig.base.json",
+    "./eslint.base.js": "./eslint.base.js",
+    "./prettier.config.js": "./prettier.config.js"
+  },
+  "dependencies": {
+    "typescript-eslint": "^8.19.0",
+    "eslint-config-prettier": "^9.1.0"
+  }
+}

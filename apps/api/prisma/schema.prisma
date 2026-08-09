@@ -1,0 +1,11 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Modelos (Tenant, User, Customer, Service, Sale, SaleItem, CashMovement,
+// BusinessSettings) se agregan en Fase 1, siguiendo docs/DATABASE.md.
