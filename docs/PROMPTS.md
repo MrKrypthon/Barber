@@ -42,21 +42,23 @@ No utilizar ventanas modales cuando no sean necesarias.
 
 # Prompt Backend
 
-Utilizar Java 21.
+Utilizar Node.js + NestJS.
 
-Spring Boot.
+TypeScript.
 
-Arquitectura Hexagonal ligera.
+Módulos por dominio (auth, tenants, users, customers, services, sales, cash, settings, notifications, shared).
 
-Separar Controller, Service y Repository.
+Separar Controller, Service y Prisma (repositorio).
 
 DTO para entrada y salida.
 
-Nunca exponer entidades JPA.
+Nunca exponer modelos de Prisma directamente en las respuestas de la API.
 
 ---
 
 # Prompt Frontend
+
+Next.js.
 
 React.
 
@@ -65,6 +67,8 @@ TypeScript.
 Hooks.
 
 TanStack Query.
+
+React Hook Form + Zod.
 
 Componentes reutilizables.
 

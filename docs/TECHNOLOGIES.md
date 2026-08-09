@@ -2,7 +2,7 @@
 
 # Barber SaaS — Stack Tecnológico
 
-**Versión:** 0.1.0  
+**Versión:** 0.2.0  
 **Estado:** Diseño  
 **Última actualización:** 2026-08-08
 
@@ -134,6 +134,8 @@ Porque permite tener en un mismo ecosistema:
 ---
 
 # 5. Aplicación móvil
+
+> Implementación diferida hasta después del MVP (ver ADR-007 en `docs/DECISIONS.md` y `docs/ROADMAP.md` v1.0). El MVP es web-only mediante Next.js con capacidades PWA. Esta sección describe la arquitectura prevista para cuando se construya.
 
 ## Tecnología
 
@@ -521,9 +523,9 @@ Estructura propuesta:
 barber-saas/
 
 ├── apps/
-│   ├── web/
-│   ├── mobile/
-│   └── api/
+│   ├── web/          (Next.js)
+│   ├── api/           (NestJS, incluye prisma/)
+│   └── mobile/        (React Native + Expo — reservado, implementación diferida post-MVP, ver ADR-007)
 │
 ├── packages/
 │   ├── types/
@@ -532,10 +534,11 @@ barber-saas/
 │   └── config/
 │
 ├── docs/
-├── prisma/
 ├── docker/
 └── package.json
 ```
+
+`prisma/` vive dentro de `apps/api/`, no en la raíz. Web y mobile nunca acceden a la base de datos directamente, solo a través de la API, por lo que no hay necesidad de compartir el schema como paquete de workspace.
 
 ---
 

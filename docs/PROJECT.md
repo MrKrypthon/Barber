@@ -2,9 +2,11 @@
 
 > Documento maestro del proyecto
 >
-> Versión: 0.1
+> Versión: 0.2
 >
 > Estado: En diseño
+>
+> Última actualización: 2026-08-08 — stack reconciliado con `docs/TECHNOLOGIES.md` (ver ADR-006 y ADR-007 en `docs/DECISIONS.md`)
 
 ---
 
@@ -304,35 +306,49 @@ Automatización.
 
 # Arquitectura
 
-## Frontend
+## Frontend (Web)
+
+Next.js
 
 React
 
 TypeScript
 
-Vite
-
 TailwindCSS
-
-React Router
 
 TanStack Query
 
-PWA
+React Hook Form + Zod
 
-Offline First
+Capacidades PWA (instalable, sin depender de App Store)
+
+Mobile First
+
+> Offline First es un objetivo de arquitectura a futuro, no un entregable del MVP. Ver `docs/TECHNOLOGIES.md` §35 y `CLAUDE.md` §20.
+
+---
+
+## Mobile
+
+React Native + Expo
+
+TypeScript
+
+Aplicación de primer nivel, no una copia de la Web.
+
+Su implementación queda **diferida hasta después del MVP** (ver `docs/ROADMAP.md` v1.0 y ADR-007). El monorepo reserva `apps/mobile/` desde el inicio para no reestructurar más adelante.
 
 ---
 
 ## Backend
 
-Java 21
+Node.js
 
-Spring Boot
+NestJS
 
-Spring Security
+TypeScript
 
-JWT
+JWT (access + refresh token)
 
 REST API
 
@@ -347,6 +363,8 @@ No Microservicios.
 ## Base de datos
 
 PostgreSQL
+
+Prisma ORM
 
 Todas las tablas tendrán
 
@@ -384,11 +402,11 @@ Nginx
 
 ↓
 
-Frontend React (PWA)
+Frontend Next.js (PWA)
 
 ↓
 
-Backend Spring Boot
+Backend NestJS
 
 ↓
 
@@ -400,13 +418,25 @@ PostgreSQL
 
 barber-saas/
 
+apps/
+
+&nbsp;&nbsp;web/ (Next.js)
+
+&nbsp;&nbsp;api/ (NestJS)
+
+&nbsp;&nbsp;mobile/ (React Native + Expo, reservado)
+
+packages/
+
+&nbsp;&nbsp;types/
+
+&nbsp;&nbsp;validation/
+
+&nbsp;&nbsp;api-client/
+
+&nbsp;&nbsp;config/
+
 docs/
-
-backend/
-
-frontend/
-
-database/
 
 docker/
 
@@ -416,11 +446,13 @@ docker/
 
 # Backend
 
-com.barbersaas
+apps/api/src/
 
 auth
 
-business
+tenants
+
+users
 
 customers
 
@@ -432,9 +464,9 @@ cash
 
 settings
 
-shared
+notifications
 
-common
+shared
 
 Cada módulo será independiente.
 
@@ -442,7 +474,7 @@ Cada módulo será independiente.
 
 # Frontend
 
-src/
+apps/web/src/
 
 modules/
 
