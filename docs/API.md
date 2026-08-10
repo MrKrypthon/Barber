@@ -26,6 +26,8 @@ GET /api/v1/auth/me
 
 ## Clientes
 
+Todas las rutas requieren `accessToken`. GET disponible para `owner` y `employee`; POST/PUT/DELETE solo `owner` (`docs/TECHNOLOGIES.md` §17).
+
 GET /api/v1/customers
 
 POST /api/v1/customers
@@ -37,6 +39,8 @@ DELETE /api/v1/customers/{id}
 ---
 
 ## Servicios
+
+Mismo esquema de permisos que Clientes: GET para ambos roles, POST/PUT/DELETE solo `owner`.
 
 GET /api/v1/services
 
@@ -52,9 +56,15 @@ DELETE /api/v1/services/{id}
 
 POST /api/v1/sales
 
+&nbsp;&nbsp;Disponible para `owner` y `employee` (es el flujo "Registrar venta" del día a día). Body: `{ customerId?, serviceIds: string[], paymentMethod: "cash" | "transfer" }`. El `total` y el precio de cada item se calculan en el servidor a partir del precio actual de cada servicio — nunca se acepta un total enviado por el cliente.
+
 GET /api/v1/sales
 
+&nbsp;&nbsp;Solo `owner` (`docs/TECHNOLOGIES.md` §17: "Consultar ventas" está listado solo para Owner). Acepta `?range=today|week|month` para los filtros de Historial de `docs/PROJECT.md`; sin el parámetro devuelve todas las ventas del tenant.
+
 GET /api/v1/sales/{id}
+
+&nbsp;&nbsp;Solo `owner`.
 
 ---
 
@@ -62,7 +72,11 @@ GET /api/v1/sales/{id}
 
 GET /api/v1/cash
 
+&nbsp;&nbsp;Solo `owner`. Acepta `?range=today|week|month` (default `today`). Devuelve `{ range, income, expense, balance, movements }`, donde `income` = ventas cobradas en efectivo + movimientos manuales de tipo `income`, `expense` = movimientos manuales de tipo `expense`, y `balance = income - expense`. Las ventas por transferencia no afectan la caja física.
+
 POST /api/v1/cash/movement
+
+&nbsp;&nbsp;Disponible para `owner` y `employee`. Body: `{ type: "income" | "expense", amount, description? }`.
 
 ---
 

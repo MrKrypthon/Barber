@@ -76,12 +76,14 @@ Convenciones generales (ver `CLAUDE.md` §15):
 - id (uuid)
 - sale_id
 - service_id
-- price
+- price (precio del servicio al momento de la venta — independiente de cambios futuros en `services.price`)
 - created_at
 
 ---
 
 ## cash_movements
+
+Movimientos manuales de caja (aportes, gastos). No incluye un registro por cada venta: la "caja actual" (`GET /api/v1/cash`) se calcula combinando `sales` (solo `payment_method = cash`) con estos movimientos, para no duplicar el mismo ingreso en dos tablas. Ver `docs/API.md` (Caja).
 
 - id (uuid)
 - tenant_id
