@@ -78,14 +78,17 @@ model Customer {
 }
 
 model Service {
-  id        String    @id @default(uuid())
-  tenantId  String    @map("tenant_id")
-  name      String
-  price     Decimal   @db.Decimal(10, 2)
-  active    Boolean   @default(true)
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-  deletedAt DateTime? @map("deleted_at")
+  id              String    @id @default(uuid())
+  tenantId        String    @map("tenant_id")
+  name            String
+  price           Decimal   @db.Decimal(10, 2)
+  active          Boolean   @default(true)
+  durationMinutes Int?      @map("duration_minutes")
+  // Color hex (p.ej. "#24406B") para distinguir servicios en agenda/listas.
+  color           String?
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  deletedAt       DateTime? @map("deleted_at")
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
   saleItems SaleItem[]

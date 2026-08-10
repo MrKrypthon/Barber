@@ -1,24 +1,33 @@
 "use client";
 
-import { useState } from "react";
-import { mockServices } from "@/mocks/services";
-import type { Service } from "@/mocks/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { CreateServiceInput, Service } from "@barber/types";
+import { apiClient } from "@/lib/api-client";
 
-// Mismo patrón que use-customers: caché en módulo hasta conectar el API.
-let servicesCache: Service[] = [...mockServices];
-
-export type NewService = Pick<Service, "name" | "price"> &
-  Partial<Pick<Service, "durationMinutes" | "color">>;
+const SERVICES_QUERY_KEY = ["services"] as const;
 
 export function useServices() {
-  const [services, setServices] = useState<Service[]>(servicesCache);
+  const queryClient = useQueryClient();
 
-  function addService(data: NewService): Service {
-    const service: Service = { id: crypto.randomUUID(), active: true, ...data };
-    servicesCache = [...servicesCache, service];
-    setServices(servicesCache);
-    return service;
-  }
+  const { data, isLoading, isError } = useQuery({
+    queryKey: SERVICES_QUERY_KEY,
+    queryFn: () => apiClient.services.list(),
+  });
 
-  return { services, addService };
+  const createMutation = useMutation({
+    mutationFn: (input: CreateServiceInput) => apiClient.services.create(input),
+    onSuccess: (service) => {
+      queryClient.setQueryData<Service[]>(SERVICES_QUERY_KEY, (prev) =>
+        [...(prev ?? []), service].sort((a, b) => a.name.localeCompare(b.name)),
+      );
+    },
+  });
+
+  return {
+    services: data ?? [],
+    isLoading,
+    isError,
+    addService: createMutation.mutateAsync,
+    isAdding: createMutation.isPending,
+  };
 }
