@@ -12,7 +12,7 @@ import { SERVICE_COLORS, SERVICE_DURATIONS } from "@/mocks/services";
 
 export function NewServiceView() {
   const router = useRouter();
-  const { addService } = useServices();
+  const { addService, isAdding } = useServices();
 
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
@@ -22,9 +22,9 @@ export function NewServiceView() {
   const priceNumber = Number(price);
   const isValid = name.trim().length > 0 && Number.isFinite(priceNumber) && priceNumber >= 0;
 
-  function save() {
+  async function save() {
     if (!isValid) return;
-    addService({ name: name.trim(), price: priceNumber, durationMinutes: duration, color });
+    await addService({ name: name.trim(), price: priceNumber, durationMinutes: duration, color });
     router.push("/config/servicios");
   }
 
@@ -95,8 +95,8 @@ export function NewServiceView() {
           </div>
         </div>
 
-        <Button size="lg" fullWidth onClick={save} disabled={!isValid} className="md:w-auto">
-          Guardar servicio
+        <Button size="lg" fullWidth onClick={save} disabled={!isValid || isAdding} className="md:w-auto">
+          {isAdding ? "Guardando..." : "Guardar servicio"}
         </Button>
       </Card>
     </div>

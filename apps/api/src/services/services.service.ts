@@ -9,6 +9,8 @@ export type ServiceResponse = {
   name: string;
   price: number;
   active: boolean;
+  durationMinutes: number | null;
+  color: string | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -19,6 +21,8 @@ function toServiceResponse(service: Service): ServiceResponse {
     name: service.name,
     price: Number(service.price),
     active: service.active,
+    durationMinutes: service.durationMinutes,
+    color: service.color,
     createdAt: service.createdAt,
     updatedAt: service.updatedAt,
   };
@@ -43,6 +47,8 @@ export class ServicesService {
         name: dto.name,
         price: dto.price,
         active: dto.active ?? true,
+        durationMinutes: dto.durationMinutes,
+        color: dto.color,
       },
     });
     return toServiceResponse(service);

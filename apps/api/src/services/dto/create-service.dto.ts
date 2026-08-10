@@ -1,4 +1,4 @@
-import { IsBoolean, IsNumber, IsOptional, IsString, Min, MinLength } from "class-validator";
+import { IsBoolean, IsHexColor, IsInt, IsNumber, IsOptional, IsString, Min, MinLength } from "class-validator";
 
 export class CreateServiceDto {
   @IsString()
@@ -12,4 +12,13 @@ export class CreateServiceDto {
   @IsOptional()
   @IsBoolean()
   active?: boolean;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  durationMinutes?: number;
+
+  @IsOptional()
+  @IsHexColor()
+  color?: string;
 }

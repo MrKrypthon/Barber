@@ -53,6 +53,8 @@ Convenciones generales (ver `CLAUDE.md` §15):
 - name
 - price
 - active
+- duration_minutes (nullable — usado en agenda; los servicios existentes antes de esta fase no lo tienen)
+- color (hex, nullable — distingue servicios en agenda/listas)
 - created_at
 - updated_at
 - deleted_at (soft delete, nullable)

@@ -4,8 +4,11 @@ import type {
   AuthTokens,
   Customer,
   CreateCustomerInput,
+  CreateServiceInput,
   PublicUser,
+  Service,
   UpdateCustomerInput,
+  UpdateServiceInput,
 } from "@barber/types";
 
 export class ApiError extends Error {
@@ -117,8 +120,26 @@ export function createApiClient(config: ApiClientConfig) {
         call<Customer>(`/customers/${id}`, { method: "PUT", body: JSON.stringify(input) }),
       remove: (id: string) => call<{ success: boolean }>(`/customers/${id}`, { method: "DELETE" }),
     },
+    services: {
+      list: () => call<Service[]>("/services"),
+      create: (input: CreateServiceInput) =>
+        call<Service>("/services", { method: "POST", body: JSON.stringify(input) }),
+      update: (id: string, input: UpdateServiceInput) =>
+        call<Service>(`/services/${id}`, { method: "PUT", body: JSON.stringify(input) }),
+      remove: (id: string) => call<{ success: boolean }>(`/services/${id}`, { method: "DELETE" }),
+    },
   };
 }
 
 export type ApiClient = ReturnType<typeof createApiClient>;
-export type { AuthResult, AuthTokens, Customer, CreateCustomerInput, PublicUser, UpdateCustomerInput };
+export type {
+  AuthResult,
+  AuthTokens,
+  Customer,
+  CreateCustomerInput,
+  CreateServiceInput,
+  PublicUser,
+  Service,
+  UpdateCustomerInput,
+  UpdateServiceInput,
+};

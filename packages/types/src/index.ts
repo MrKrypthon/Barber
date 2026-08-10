@@ -34,3 +34,24 @@ export type CreateCustomerInput = {
 };
 
 export type UpdateCustomerInput = Partial<CreateCustomerInput>;
+
+export type Service = {
+  id: string;
+  name: string;
+  price: number;
+  active: boolean;
+  durationMinutes: number | null;
+  color: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CreateServiceInput = {
+  name: string;
+  price: number;
+  active?: boolean;
+  durationMinutes?: number;
+  color?: string;
+};
+
+export type UpdateServiceInput = Partial<CreateServiceInput>;
