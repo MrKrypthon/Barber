@@ -15,7 +15,7 @@ const FILTERS: { value: SalesFilter; label: string }[] = [
 
 export function SalesView() {
   const [filter, setFilter] = useState<SalesFilter>("today");
-  const { sales } = useSales(filter);
+  const { sales, isLoading, isError } = useSales(filter);
 
   return (
     <div>
@@ -29,7 +29,15 @@ export function SalesView() {
         ))}
       </div>
 
-      {sales.length === 0 ? (
+      {isLoading ? (
+        <Card>
+          <p className="py-6 text-center text-neutral-400">Cargando ventas...</p>
+        </Card>
+      ) : isError ? (
+        <Card>
+          <p className="py-6 text-center text-secondary">No se pudieron cargar las ventas.</p>
+        </Card>
+      ) : sales.length === 0 ? (
         <Card>
           <p className="py-6 text-center text-neutral-400">No hay ventas en este período.</p>
         </Card>
@@ -41,8 +49,10 @@ export function SalesView() {
                 {formatTime(sale.createdAt)}
               </span>
               <div className="flex-1">
-                <p className="font-medium">{sale.customerName ?? "Cliente ocasional"}</p>
-                <p className="text-sm text-neutral-400">{sale.serviceNames.join(" + ")}</p>
+                <p className="font-medium">{sale.customer?.name ?? "Cliente ocasional"}</p>
+                <p className="text-sm text-neutral-400">
+                  {sale.items.map((item) => item.serviceName).join(" + ")}
+                </p>
               </div>
               <span
                 className={

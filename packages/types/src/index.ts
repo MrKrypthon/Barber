@@ -55,3 +55,29 @@ export type CreateServiceInput = {
 };
 
 export type UpdateServiceInput = Partial<CreateServiceInput>;
+
+export type PaymentMethod = "cash" | "transfer";
+
+export type SaleItem = {
+  serviceId: string;
+  serviceName: string;
+  price: number;
+};
+
+export type Sale = {
+  id: string;
+  customer: { id: string; name: string } | null;
+  employee: { id: string; name: string };
+  paymentMethod: PaymentMethod;
+  total: number;
+  items: SaleItem[];
+  createdAt: string;
+};
+
+export type CreateSaleInput = {
+  customerId?: string;
+  serviceIds: string[];
+  paymentMethod: PaymentMethod;
+};
+
+export type SalesRange = "today" | "week" | "month";

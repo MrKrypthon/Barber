@@ -24,7 +24,7 @@ export function CobrarWizard() {
   const router = useRouter();
   const { services } = useServices();
   const { customers, addCustomer } = useCustomers();
-  const { addSale } = useSales();
+  const { addSale, isAdding } = useSales();
 
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [service, setService] = useState<Service | null>(null);
@@ -61,13 +61,12 @@ export function CobrarWizard() {
     pickCustomer(await addCustomer({ name }));
   }
 
-  function confirmSale() {
+  async function confirmSale() {
     if (!service || !customer) return;
-    addSale({
-      customerName: customer === OCCASIONAL ? null : customer.name,
-      serviceNames: [service.name],
+    await addSale({
+      customerId: customer === OCCASIONAL ? undefined : customer.id,
+      serviceIds: [service.id],
       paymentMethod,
-      total: service.price,
     });
     setStep(4);
   }
@@ -233,8 +232,8 @@ export function CobrarWizard() {
             </div>
           </div>
 
-          <Button size="lg" fullWidth onClick={confirmSale}>
-            Cobrar {formatCurrency(service.price)}
+          <Button size="lg" fullWidth onClick={confirmSale} disabled={isAdding}>
+            {isAdding ? "Cobrando..." : `Cobrar ${formatCurrency(service.price)}`}
           </Button>
         </section>
       ) : null}

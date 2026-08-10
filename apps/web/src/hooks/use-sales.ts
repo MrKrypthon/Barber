@@ -1,37 +1,31 @@
 "use client";
 
-import { useState } from "react";
-import { mockSales } from "@/mocks/sales";
-import { isSameDay, isWithinLastDays } from "@/lib/format";
-import type { Sale } from "@/mocks/types";
-
-// Mismo patrón que use-customers: caché en módulo hasta conectar el API.
-let salesCache: Sale[] = [...mockSales];
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { CreateSaleInput } from "@barber/types";
+import { apiClient } from "@/lib/api-client";
 
 export type SalesFilter = "today" | "week" | "month";
 
-export type NewSale = Pick<Sale, "customerName" | "serviceNames" | "paymentMethod" | "total">;
-
 export function useSales(filter: SalesFilter = "today") {
-  const [sales, setSales] = useState<Sale[]>(salesCache);
+  const queryClient = useQueryClient();
 
-  const now = new Date();
-  const filtered = sales
-    .filter((s) =>
-      filter === "today"
-        ? isSameDay(s.createdAt, now)
-        : filter === "week"
-          ? isWithinLastDays(s.createdAt, 7, now)
-          : isWithinLastDays(s.createdAt, 30, now),
-    )
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["sales", filter],
+    queryFn: () => apiClient.sales.list(filter),
+  });
 
-  function addSale(data: NewSale): Sale {
-    const sale: Sale = { id: crypto.randomUUID(), createdAt: new Date().toISOString(), ...data };
-    salesCache = [...salesCache, sale];
-    setSales(salesCache);
-    return sale;
-  }
+  const createMutation = useMutation({
+    mutationFn: (input: CreateSaleInput) => apiClient.sales.create(input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sales"] });
+    },
+  });
 
-  return { sales: filtered, addSale };
+  return {
+    sales: data ?? [],
+    isLoading,
+    isError,
+    addSale: createMutation.mutateAsync,
+    isAdding: createMutation.isPending,
+  };
 }
