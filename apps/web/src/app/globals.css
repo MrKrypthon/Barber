@@ -1,3 +1,18 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  /* Marca del tenant. Valores del mockup (docs/Propuesta.pdf, "Barbería El
+     Andaluz"); cuando exista business_settings se setean por negocio. */
+  --color-primary: 36 64 107; /* #24406B */
+  --color-primary-dark: 27 50 85; /* #1B3255 */
+  --color-secondary: 192 57 43; /* #C0392B */
+  --color-secondary-light: 245 230 227; /* #F5E6E3 */
+  --color-cream: 245 241 232; /* #F5F1E8 */
+  --color-success: 37 211 102; /* #25D366 */
+}
+
+body {
+  @apply bg-cream text-neutral-800 antialiased;
+}
