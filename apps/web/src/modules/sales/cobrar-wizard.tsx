@@ -15,7 +15,8 @@ import { cn } from "@/lib/cn";
 import { formatCurrency } from "@/lib/format";
 import { buildReceiptMessage, buildWhatsAppUrl } from "@/lib/whatsapp";
 import { mockBusiness } from "@/mocks/business";
-import { PAYMENT_METHOD_LABELS, type Customer, type PaymentMethod, type Service } from "@/mocks/types";
+import { PAYMENT_METHOD_LABELS, type PaymentMethod, type Service } from "@/mocks/types";
+import type { Customer } from "@barber/types";
 
 const OCCASIONAL = "occasional" as const;
 
@@ -54,10 +55,10 @@ export function CobrarWizard() {
     setStep(3);
   }
 
-  function saveNewCustomer() {
+  async function saveNewCustomer() {
     const name = newCustomerName.trim();
     if (!name) return;
-    pickCustomer(addCustomer({ name }));
+    pickCustomer(await addCustomer({ name }));
   }
 
   function confirmSale() {

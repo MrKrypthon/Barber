@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/button";
 import { Card } from "@/components/card";
 import { ChevronRightIcon } from "@/components/icons";
 import { PageHeader } from "@/components/page-header";
 import { Toggle } from "@/components/toggle";
+import { useAuth } from "@/hooks/use-auth";
 import { mockBusiness } from "@/mocks/business";
 
 function ConfigRow({
@@ -33,6 +35,13 @@ function ConfigRow({
 
 export function ConfigView() {
   const [reminderEnabled, setReminderEnabled] = useState(true);
+  const { logout } = useAuth();
+  const router = useRouter();
+
+  async function handleLogout() {
+    await logout();
+    router.replace("/login");
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -72,8 +81,7 @@ export function ConfigView() {
         </Card>
       </div>
 
-      {/* Sin acción real hasta conectar auth (logout del API invalida tokens). */}
-      <Button variant="danger-soft" fullWidth onClick={() => {}}>
+      <Button variant="danger-soft" fullWidth onClick={handleLogout}>
         Cerrar sesión
       </Button>
     </div>

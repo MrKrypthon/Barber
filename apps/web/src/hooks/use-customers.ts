@@ -1,31 +1,33 @@
 "use client";
 
-import { useState } from "react";
-import { mockCustomers } from "@/mocks/customers";
-import type { Customer } from "@/mocks/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { CreateCustomerInput, Customer } from "@barber/types";
+import { apiClient } from "@/lib/api-client";
 
-// Caché a nivel módulo: las altas hechas en una vista se ven en las demás
-// durante la sesión. Este hook entero se reemplaza por TanStack Query +
-// packages/api-client cuando el backend esté listo.
-let customersCache: Customer[] = [...mockCustomers];
-
-export type NewCustomer = Pick<Customer, "name"> & Partial<Pick<Customer, "phone" | "notes">>;
+const CUSTOMERS_QUERY_KEY = ["customers"] as const;
 
 export function useCustomers() {
-  const [customers, setCustomers] = useState<Customer[]>(customersCache);
+  const queryClient = useQueryClient();
 
-  function addCustomer(data: NewCustomer): Customer {
-    const customer: Customer = {
-      id: crypto.randomUUID(),
-      name: data.name,
-      phone: data.phone ?? null,
-      notes: data.notes ?? null,
-      lastVisitAt: null,
-    };
-    customersCache = [...customersCache, customer];
-    setCustomers(customersCache);
-    return customer;
-  }
+  const { data, isLoading, isError } = useQuery({
+    queryKey: CUSTOMERS_QUERY_KEY,
+    queryFn: () => apiClient.customers.list(),
+  });
 
-  return { customers, addCustomer };
+  const createMutation = useMutation({
+    mutationFn: (input: CreateCustomerInput) => apiClient.customers.create(input),
+    onSuccess: (customer) => {
+      queryClient.setQueryData<Customer[]>(CUSTOMERS_QUERY_KEY, (prev) =>
+        [...(prev ?? []), customer].sort((a, b) => a.name.localeCompare(b.name)),
+      );
+    },
+  });
+
+  return {
+    customers: data ?? [],
+    isLoading,
+    isError,
+    addCustomer: createMutation.mutateAsync,
+    isAdding: createMutation.isPending,
+  };
 }

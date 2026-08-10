@@ -11,7 +11,7 @@ import { useCustomers } from "@/hooks/use-customers";
 import { formatRelativeVisit } from "@/lib/format";
 
 export function CustomersView() {
-  const { customers, addCustomer } = useCustomers();
+  const { customers, isLoading, isError, addCustomer, isAdding } = useCustomers();
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [name, setName] = useState("");
@@ -22,9 +22,9 @@ export function CustomersView() {
     .filter((c) => c.name.toLowerCase().includes(search.trim().toLowerCase()))
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  function save() {
+  async function save() {
     if (!name.trim()) return;
-    addCustomer({ name: name.trim(), phone: phone.trim() || undefined, notes: notes.trim() || undefined });
+    await addCustomer({ name: name.trim(), phone: phone.trim() || undefined, notes: notes.trim() || undefined });
     setModalOpen(false);
     setName("");
     setPhone("");
@@ -59,26 +59,34 @@ export function CustomersView() {
       </label>
 
       <Card className="p-0">
-        <ul className="grid divide-y divide-neutral-100 md:grid-cols-2 md:divide-y-0">
-          {filtered.map((c) => (
-            <li
-              key={c.id}
-              className="flex items-center gap-3 px-4 py-3.5 md:border-b md:border-neutral-100"
-            >
-              <Avatar name={c.name} />
-              <div className="flex-1">
-                <p className="font-medium">{c.name}</p>
-                <p className="text-sm text-neutral-400">{formatRelativeVisit(c.lastVisitAt)}</p>
-              </div>
-              <span className="h-3 w-3 rounded-full bg-success/30 ring-4 ring-success/10">
-                <span className="sr-only">Activo</span>
-              </span>
-            </li>
-          ))}
-        </ul>
-        {filtered.length === 0 ? (
-          <p className="py-6 text-center text-neutral-400">Sin resultados.</p>
-        ) : null}
+        {isLoading ? (
+          <p className="py-6 text-center text-neutral-400">Cargando clientes...</p>
+        ) : isError ? (
+          <p className="py-6 text-center text-secondary">No se pudieron cargar los clientes.</p>
+        ) : (
+          <>
+            <ul className="grid divide-y divide-neutral-100 md:grid-cols-2 md:divide-y-0">
+              {filtered.map((c) => (
+                <li
+                  key={c.id}
+                  className="flex items-center gap-3 px-4 py-3.5 md:border-b md:border-neutral-100"
+                >
+                  <Avatar name={c.name} />
+                  <div className="flex-1">
+                    <p className="font-medium">{c.name}</p>
+                    <p className="text-sm text-neutral-400">{formatRelativeVisit(null)}</p>
+                  </div>
+                  <span className="h-3 w-3 rounded-full bg-success/30 ring-4 ring-success/10">
+                    <span className="sr-only">Activo</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+            {filtered.length === 0 ? (
+              <p className="py-6 text-center text-neutral-400">Sin resultados.</p>
+            ) : null}
+          </>
+        )}
       </Card>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Nuevo cliente">
@@ -103,8 +111,8 @@ export function CustomersView() {
             placeholder="Notas (opcional)"
             className="h-12 rounded-xl border border-neutral-200 px-4 outline-none focus:border-primary"
           />
-          <Button fullWidth onClick={save} disabled={!name.trim()}>
-            Guardar cliente
+          <Button fullWidth onClick={save} disabled={!name.trim() || isAdding}>
+            {isAdding ? "Guardando..." : "Guardar cliente"}
           </Button>
         </div>
       </Modal>
