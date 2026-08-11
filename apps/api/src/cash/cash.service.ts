@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { ConflictException, Injectable } from "@nestjs/common";
 import { CashMovement, CashMovementType, PaymentMethod } from "@prisma/client";
 import { DateRange, getDateRangeBounds } from "../common/utils/date-range.util";
 import { PrismaService } from "../prisma/prisma.service";
@@ -18,6 +18,16 @@ export type CashSummaryResponse = {
   expense: number;
   balance: number;
   movements: CashMovementResponse[];
+  closedAt: Date | null;
+};
+
+export type CashClosingResponse = {
+  id: string;
+  income: number;
+  expense: number;
+  balance: number;
+  closedBy: { id: string; name: string };
+  closedAt: Date;
 };
 
 function toCashMovementResponse(movement: CashMovement): CashMovementResponse {
@@ -41,7 +51,7 @@ export class CashService {
     const bounds = getDateRangeBounds(range)!;
     const dateFilter = { gte: bounds.start, lt: bounds.end };
 
-    const [cashSales, movements] = await Promise.all([
+    const [cashSales, movements, closing] = await Promise.all([
       this.prisma.sale.aggregate({
         where: { tenantId, paymentMethod: PaymentMethod.cash, createdAt: dateFilter },
         _sum: { total: true },
@@ -50,6 +60,13 @@ export class CashService {
         where: { tenantId, createdAt: dateFilter },
         orderBy: { createdAt: "desc" },
       }),
+      // El corte de caja es por día calendario: solo tiene sentido para
+      // range="today" (una semana/mes no tiene un único cierre).
+      range === "today"
+        ? this.prisma.cashClosing.findUnique({
+            where: { tenantId_date: { tenantId, date: bounds.start } },
+          })
+        : null,
     ]);
 
     const salesIncome = Number(cashSales._sum.total ?? 0);
@@ -67,6 +84,7 @@ export class CashService {
       expense,
       balance: income - expense,
       movements: movements.map(toCashMovementResponse),
+      closedAt: closing?.createdAt ?? null,
     };
   }
 
@@ -83,5 +101,42 @@ export class CashService {
       },
     });
     return toCashMovementResponse(movement);
+  }
+
+  // Snapshot inmutable del resumen del día — no bloquea nuevos movimientos
+  // ni ventas, es un registro de auditoría de "así quedó la caja al
+  // cerrar" (docs/ROADMAP.md v0.1, "Corte de caja").
+  async close(tenantId: string, userId: string): Promise<CashClosingResponse> {
+    const today = getDateRangeBounds("today")!.start;
+
+    const existing = await this.prisma.cashClosing.findUnique({
+      where: { tenantId_date: { tenantId, date: today } },
+    });
+    if (existing) {
+      throw new ConflictException("La caja de hoy ya fue cerrada");
+    }
+
+    const summary = await this.getSummary(tenantId, "today");
+
+    const closing = await this.prisma.cashClosing.create({
+      data: {
+        tenantId,
+        date: today,
+        income: summary.income,
+        expense: summary.expense,
+        balance: summary.balance,
+        closedById: userId,
+      },
+      include: { closedBy: true },
+    });
+
+    return {
+      id: closing.id,
+      income: Number(closing.income),
+      expense: Number(closing.expense),
+      balance: Number(closing.balance),
+      closedBy: { id: closing.closedBy.id, name: closing.closedBy.name },
+      closedAt: closing.createdAt,
+    };
   }
 }

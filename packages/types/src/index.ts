@@ -81,3 +81,37 @@ export type CreateSaleInput = {
 };
 
 export type SalesRange = "today" | "week" | "month";
+
+export type CashMovementType = "income" | "expense";
+
+export type CashMovement = {
+  id: string;
+  type: CashMovementType;
+  amount: number;
+  description: string | null;
+  createdAt: string;
+};
+
+export type CashSummary = {
+  range: SalesRange;
+  income: number;
+  expense: number;
+  balance: number;
+  movements: CashMovement[];
+  closedAt: string | null;
+};
+
+export type CreateCashMovementInput = {
+  type: CashMovementType;
+  amount: number;
+  description?: string;
+};
+
+export type CashClosing = {
+  id: string;
+  income: number;
+  expense: number;
+  balance: number;
+  closedBy: { id: string; name: string };
+  closedAt: string;
+};

@@ -32,4 +32,11 @@ export class CashController {
   ) {
     return this.cashService.registerMovement(user.tenantId, dto);
   }
+
+  // Solo Owner, igual que consultar caja.
+  @Roles(Role.owner)
+  @Post("close")
+  close(@CurrentUser() user: AuthenticatedUser) {
+    return this.cashService.close(user.tenantId, user.userId);
+  }
 }

@@ -2,6 +2,9 @@
 import type {
   AuthResult,
   AuthTokens,
+  CashClosing,
+  CashSummary,
+  CreateCashMovementInput,
   CreateCustomerInput,
   CreateSaleInput,
   CreateServiceInput,
@@ -137,6 +140,16 @@ export function createApiClient(config: ApiClientConfig) {
       create: (input: CreateSaleInput) =>
         call<Sale>("/sales", { method: "POST", body: JSON.stringify(input) }),
     },
+    cash: {
+      getSummary: (range?: SalesRange) =>
+        call<CashSummary>(`/cash${range ? `?range=${range}` : ""}`),
+      registerMovement: (input: CreateCashMovementInput) =>
+        call<CashSummary["movements"][number]>("/cash/movement", {
+          method: "POST",
+          body: JSON.stringify(input),
+        }),
+      close: () => call<CashClosing>("/cash/close", { method: "POST" }),
+    },
   };
 }
 
@@ -144,6 +157,9 @@ export type ApiClient = ReturnType<typeof createApiClient>;
 export type {
   AuthResult,
   AuthTokens,
+  CashClosing,
+  CashSummary,
+  CreateCashMovementInput,
   Customer,
   CreateCustomerInput,
   CreateSaleInput,
