@@ -40,10 +40,19 @@ const config: Config = {
           "0%": { opacity: "0", transform: "translateY(12px) scale(0.98)" },
           "100%": { opacity: "1", transform: "translateY(0) scale(1)" },
         },
+        // Feedback de "modo arrastre" al mantener presionado un turno de la
+        // agenda (docs/Propuesta.pdf agenda) — mismo lenguaje que el
+        // "jiggle" de reordenar íconos, para indicar que ya se puede soltar
+        // y mover.
+        wiggle: {
+          "0%, 100%": { transform: "scale(1.04) rotate(-1.5deg)" },
+          "50%": { transform: "scale(1.04) rotate(1.5deg)" },
+        },
       },
       animation: {
         "fade-in": "fade-in 0.15s ease-out",
         "sheet-in": "sheet-in 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+        wiggle: "wiggle 0.15s ease-in-out infinite",
       },
     },
   },

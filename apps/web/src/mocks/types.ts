@@ -67,6 +67,7 @@ export type DashboardSummary = {
 export type Appointment = {
   id: string;
   customerName: string;
+  serviceId: string;
   serviceName: string;
   startTime: string; // "HH:MM"
   durationMinutes: number;

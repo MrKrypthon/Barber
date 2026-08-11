@@ -59,6 +59,15 @@ export function CashIcon(props: IconProps) {
   );
 }
 
+export function AgendaIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <rect x="3" y="4.5" width="18" height="16" rx="2" />
+      <path d="M3 9.5h18M8 2.5v4M16 2.5v4" />
+    </Svg>
+  );
+}
+
 export function ConfigIcon(props: IconProps) {
   return (
     <Svg {...props}>
@@ -105,6 +114,14 @@ export function CheckIcon(props: IconProps) {
   return (
     <Svg {...props}>
       <path d="m5 12 5 5L20 7" />
+    </Svg>
+  );
+}
+
+export function CloseIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M6 6l12 12M18 6 6 18" />
     </Svg>
   );
 }

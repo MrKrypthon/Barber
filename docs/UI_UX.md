@@ -47,6 +47,8 @@ Optimizado para celulares.
 
 Dashboard
 
+Agenda
+
 Ventas
 
 Clientes
