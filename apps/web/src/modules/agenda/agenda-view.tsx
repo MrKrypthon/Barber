@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Card } from "@/components/card";
 import { ChevronLeftIcon, ChevronRightIcon } from "@/components/icons";
 import { PageHeader } from "@/components/page-header";
@@ -13,6 +13,9 @@ import { DayTimeline, HourGutter, useNow } from "./day-timeline";
 
 const RESCHEDULE_CONFLICT_MESSAGE =
   "No se pudo mover el turno: el empleado ya tiene otro turno en ese horario.";
+// Swipe horizontal sobre el área del día (no solo los botones ‹ ›) para
+// cambiar de día en móvil, estilo Google Calendar.
+const SWIPE_THRESHOLD_PX = 60;
 
 function withTime(date: Date, time: string): Date {
   const [h, m] = time.split(":").map(Number);
@@ -44,6 +47,22 @@ export function AgendaView() {
   const now = useNow();
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [rescheduleError, setRescheduleError] = useState<string | null>(null);
+  const swipeOrigin = useRef<{ x: number; y: number } | null>(null);
+
+  function handleSwipeStart(e: React.PointerEvent) {
+    swipeOrigin.current = { x: e.clientX, y: e.clientY };
+  }
+
+  function handleSwipeEnd(e: React.PointerEvent) {
+    const origin = swipeOrigin.current;
+    swipeOrigin.current = null;
+    if (!origin) return;
+    const dx = e.clientX - origin.x;
+    const dy = e.clientY - origin.y;
+    if (Math.abs(dx) < SWIPE_THRESHOLD_PX || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    if (dx < 0) goToNextDay();
+    else goToPreviousDay();
+  }
 
   async function saveServiceChange(serviceId: string) {
     if (!selectedAppointment) return;
@@ -153,8 +172,12 @@ export function AgendaView() {
         ))}
       </div>
 
-      {/* Móvil: un solo día. */}
-      <Card className="overflow-x-auto md:hidden">
+      {/* Móvil: un solo día. Swipe horizontal (no solo los botones ‹ ›) cambia de día. */}
+      <Card
+        className="overflow-x-auto md:hidden"
+        onPointerDown={handleSwipeStart}
+        onPointerUp={handleSwipeEnd}
+      >
         {isLoading ? (
           <p className="py-10 text-center text-neutral-400">Cargando agenda...</p>
         ) : isError ? (

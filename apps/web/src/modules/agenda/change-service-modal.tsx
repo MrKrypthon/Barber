@@ -21,6 +21,7 @@ export function ChangeServiceModal({
 }) {
   const { services } = useServices();
   const [selectedServiceId, setSelectedServiceId] = useState(appointment.serviceId);
+  const hasChanged = selectedServiceId !== appointment.serviceId;
 
   return (
     <Modal open onClose={onClose} title={`Turno de ${appointment.customerName}`}>
@@ -53,13 +54,16 @@ export function ChangeServiceModal({
               </button>
             ))}
         </div>
-        <Button
-          fullWidth
-          onClick={() => onSave(selectedServiceId)}
-          disabled={selectedServiceId === appointment.serviceId || isSaving}
-        >
-          {isSaving ? "Guardando..." : "Guardar cambio"}
-        </Button>
+        <div className="flex flex-col gap-3">
+          {hasChanged ? (
+            <Button fullWidth onClick={() => onSave(selectedServiceId)} disabled={isSaving}>
+              {isSaving ? "Guardando..." : "Guardar cambio"}
+            </Button>
+          ) : null}
+          <Button variant="danger-outline" fullWidth onClick={onClose} disabled={isSaving}>
+            Cancelar
+          </Button>
+        </div>
       </div>
     </Modal>
   );

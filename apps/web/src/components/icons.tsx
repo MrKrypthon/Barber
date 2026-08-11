@@ -118,6 +118,14 @@ export function CheckIcon(props: IconProps) {
   );
 }
 
+export function CloseIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M6 6l12 12M18 6 6 18" />
+    </Svg>
+  );
+}
+
 export function ClockIcon(props: IconProps) {
   return (
     <Svg {...props}>

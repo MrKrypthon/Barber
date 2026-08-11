@@ -10,8 +10,12 @@ export const PX_PER_HOUR = 64;
 export const TIMELINE_HEIGHT = (END_HOUR - START_HOUR) * PX_PER_HOUR;
 export const HOURS = Array.from({ length: END_HOUR - START_HOUR + 1 }, (_, i) => START_HOUR + i);
 
-// Umbral de movimiento (px) para distinguir un tap/click de un drag.
-const DRAG_THRESHOLD_PX = 4;
+// Mantener presionado este tiempo activa el modo arrastre (mismo criterio
+// en mouse y touch, vía Pointer Events); un tap/click más corto abre el modal.
+const LONG_PRESS_MS = 400;
+// Si el puntero se mueve más que esto ANTES de completarse el long-press,
+// es un scroll/swipe, no una espera quieta — se cancela.
+const MOVE_CANCEL_THRESHOLD_PX = 8;
 // El horario se ajusta a pasos de 5 minutos al arrastrar.
 const SNAP_MINUTES = 5;
 
@@ -83,8 +87,9 @@ export function HourGutter() {
 
 // Estilo Google Calendar: líneas de grilla por hora, línea roja de "ahora"
 // (solo si el día mostrado es hoy), turnos como chips sólidos con el color
-// del servicio. Los turnos se pueden arrastrar verticalmente para cambiar
-// su horario (mismo día), y un tap/click sin arrastre abre el modal.
+// del servicio. Un tap/click corto abre el modal; mantener presionado activa
+// el modo arrastre (con un pequeño temblor de feedback) para reprogramar el
+// horario arrastrando verticalmente, igual en mouse (desktop) que en touch.
 export function DayTimeline({
   date,
   appointments,
@@ -107,37 +112,62 @@ export function DayTimeline({
   const [dragId, setDragId] = useState<string | null>(null);
   const [dragOffsetPx, setDragOffsetPx] = useState(0);
   const dragOrigin = useRef({ pointerY: 0, offsetPx: 0 });
-  const dragMoved = useRef(false);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function clearLongPressTimer() {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  }
 
   function handlePointerDown(e: React.PointerEvent<HTMLButtonElement>, a: Appointment) {
+    // No dejar que el gesto llegue al swipe de cambio de día del contenedor.
+    e.stopPropagation();
     e.currentTarget.setPointerCapture(e.pointerId);
     dragOrigin.current = { pointerY: e.clientY, offsetPx: timeToOffset(a.startTime) };
-    dragMoved.current = false;
-    setDragId(a.id);
-    setDragOffsetPx(dragOrigin.current.offsetPx);
+    clearLongPressTimer();
+    longPressTimer.current = setTimeout(() => {
+      setDragId(a.id);
+      setDragOffsetPx(dragOrigin.current.offsetPx);
+    }, LONG_PRESS_MS);
   }
 
   function handlePointerMove(e: React.PointerEvent<HTMLButtonElement>, a: Appointment) {
-    if (dragId !== a.id) return;
-    const deltaY = e.clientY - dragOrigin.current.pointerY;
-    if (Math.abs(deltaY) > DRAG_THRESHOLD_PX) dragMoved.current = true;
-    const maxOffset = TIMELINE_HEIGHT - appointmentHeight(a.durationMinutes);
-    setDragOffsetPx(Math.max(0, Math.min(dragOrigin.current.offsetPx + deltaY, maxOffset)));
+    if (dragId === a.id) {
+      e.stopPropagation();
+      const deltaY = e.clientY - dragOrigin.current.pointerY;
+      const maxOffset = TIMELINE_HEIGHT - appointmentHeight(a.durationMinutes);
+      setDragOffsetPx(Math.max(0, Math.min(dragOrigin.current.offsetPx + deltaY, maxOffset)));
+      return;
+    }
+    // Todavía esperando el long-press: moverse antes de tiempo es un
+    // scroll/swipe, no una espera quieta — se cancela.
+    if (Math.abs(e.clientY - dragOrigin.current.pointerY) > MOVE_CANCEL_THRESHOLD_PX) {
+      clearLongPressTimer();
+    }
   }
 
   function handlePointerUp(e: React.PointerEvent<HTMLButtonElement>, a: Appointment) {
-    if (dragId !== a.id) return;
+    e.stopPropagation();
     e.currentTarget.releasePointerCapture(e.pointerId);
-    setDragId(null);
+    clearLongPressTimer();
 
-    if (!dragMoved.current) {
+    if (dragId !== a.id) {
+      // Se soltó antes de completar el long-press: es un tap/click.
       onAppointmentClick?.(a);
       return;
     }
+    setDragId(null);
     const newStartTime = offsetToTime(dragOffsetPx);
     if (newStartTime !== a.startTime) {
       onAppointmentReschedule?.(a, newStartTime);
     }
+  }
+
+  function handlePointerCancel() {
+    clearLongPressTimer();
+    setDragId(null);
   }
 
   return (
@@ -167,9 +197,12 @@ export function DayTimeline({
             onPointerDown={(e) => handlePointerDown(e, a)}
             onPointerMove={(e) => handlePointerMove(e, a)}
             onPointerUp={(e) => handlePointerUp(e, a)}
+            onPointerCancel={handlePointerCancel}
             className={cn(
-              "absolute left-0.5 right-0.5 overflow-hidden rounded-md px-2 py-1 text-left text-white active:scale-[0.98]",
-              dragging ? "z-30 shadow-card-hover" : "transition-all duration-150 hover:z-20 hover:shadow-card-hover",
+              "absolute left-0.5 right-0.5 overflow-hidden rounded-md px-2 py-1 text-left text-white",
+              dragging
+                ? "z-30 animate-wiggle shadow-card-hover"
+                : "transition-all duration-150 hover:z-20 hover:shadow-card-hover active:scale-[0.98]",
               past && "opacity-45",
             )}
             style={{
