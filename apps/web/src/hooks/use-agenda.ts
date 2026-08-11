@@ -19,21 +19,34 @@ const DAY_LABELS = ["L", "M", "M", "J", "V", "S", "D"];
 // (servicios creados antes de la fase de agenda, docs/DATABASE.md).
 const DEFAULT_APPOINTMENT_COLOR = "#24406B";
 
-function buildWeek(ref: Date): WeekDay[] {
-  const monday = new Date(ref);
-  monday.setHours(0, 0, 0, 0);
+function startOfDay(date: Date): Date {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function addDays(date: Date, amount: number): Date {
+  const d = new Date(date);
+  d.setDate(d.getDate() + amount);
+  return d;
+}
+
+// weekOf ancla qué semana (lunes a domingo) se construye; today se compara
+// aparte para no confundir "el día que se está mirando" con "hoy" cuando se
+// navega a otra semana.
+function buildWeek(weekOf: Date, today: Date): WeekDay[] {
+  const monday = startOfDay(weekOf);
   // getDay(): 0 = domingo ... 6 = sábado → retroceder hasta el lunes.
   monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
 
   return Array.from({ length: 7 }, (_, i) => {
-    const date = new Date(monday);
-    date.setDate(date.getDate() + i);
+    const date = addDays(monday, i);
     return {
       index: i,
       dayLabel: DAY_LABELS[i],
       dayNumber: date.getDate(),
       date,
-      isToday: date.toDateString() === ref.toDateString(),
+      isToday: date.toDateString() === today.toDateString(),
     };
   });
 }
@@ -69,41 +82,63 @@ function groupByWeekDay(appointments: ApiAppointment[]): Record<number, Appointm
 
 export function useAgenda() {
   const queryClient = useQueryClient();
-  const [week] = useState(() => buildWeek(new Date()));
-  const [selectedIndex, setSelectedIndex] = useState(
-    () => week.find((d) => d.isToday)?.index ?? 0,
-  );
+  const [referenceDate, setReferenceDate] = useState(() => startOfDay(new Date()));
+
+  const week = buildWeek(referenceDate, new Date());
+  const selectedIndex = weekDayIndex(referenceDate);
+  const selectedDay = week[selectedIndex];
+  const isCurrentWeek = week.some((d) => d.isToday);
+  // Ancla de semana (lunes) como parte de la query key: cambiar de día
+  // dentro de la misma semana no refetchea, solo cruzar de semana.
+  const weekStartIso = week[0].date.toISOString();
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["appointments", "week"],
-    queryFn: () => apiClient.appointments.list({ range: "week" }),
+    queryKey: ["appointments", "week", weekStartIso],
+    queryFn: () => apiClient.appointments.list({ range: "week", date: weekStartIso }),
   });
 
   const changeServiceMutation = useMutation({
     mutationFn: ({ id, serviceId }: { id: string; serviceId: string }) =>
       apiClient.appointments.update(id, { serviceId }),
-    // Invalida "week" y "today" (avisos de turno próximo) a la vez.
+    // Invalida todas las queries de turnos (semana actual, otras semanas
+    // cacheadas y "today" de los avisos de turno próximo) a la vez.
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["appointments"] }),
+  });
+
+  const rescheduleMutation = useMutation({
+    mutationFn: ({ id, startAt }: { id: string; startAt: string }) =>
+      apiClient.appointments.update(id, { startAt }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["appointments"] }),
   });
 
   const appointmentsByDay = groupByWeekDay(data ?? []);
-  const selectedDay = week[selectedIndex];
   const appointments = appointmentsByDay[selectedIndex] ?? [];
 
   function appointmentsFor(index: number): Appointment[] {
     return appointmentsByDay[index] ?? [];
   }
 
+  function selectDay(index: number) {
+    setReferenceDate(week[index].date);
+  }
+
   return {
     week,
     selectedDay,
     selectedIndex,
-    setSelectedIndex,
+    selectDay,
     appointments,
     appointmentsFor,
     isLoading,
     isError,
+    isCurrentWeek,
+    goToPreviousDay: () => setReferenceDate((d) => addDays(d, -1)),
+    goToNextDay: () => setReferenceDate((d) => addDays(d, 1)),
+    goToPreviousWeek: () => setReferenceDate((d) => addDays(d, -7)),
+    goToNextWeek: () => setReferenceDate((d) => addDays(d, 7)),
+    goToToday: () => setReferenceDate(startOfDay(new Date())),
     changeService: changeServiceMutation.mutateAsync,
     isChangingService: changeServiceMutation.isPending,
+    reschedule: rescheduleMutation.mutateAsync,
   };
 }
