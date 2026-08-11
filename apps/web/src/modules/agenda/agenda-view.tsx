@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { Card } from "@/components/card";
 import { PageHeader } from "@/components/page-header";
 import { useAgenda } from "@/hooks/use-agenda";
 import { cn } from "@/lib/cn";
 import { formatLongDate } from "@/lib/format";
+import type { Appointment } from "@/mocks/types";
+import { ChangeServiceModal } from "./change-service-modal";
 import { DayTimeline, HourGutter, useNow } from "./day-timeline";
 
 export function AgendaView() {
@@ -17,8 +20,17 @@ export function AgendaView() {
     appointmentsFor,
     isLoading,
     isError,
+    changeService,
+    isChangingService,
   } = useAgenda();
   const now = useNow();
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+
+  async function saveServiceChange(serviceId: string) {
+    if (!selectedAppointment) return;
+    await changeService({ id: selectedAppointment.id, serviceId });
+    setSelectedAppointment(null);
+  }
 
   return (
     <div>
@@ -63,7 +75,11 @@ export function AgendaView() {
         ) : (
           <div className="flex">
             <HourGutter />
-            <DayTimeline appointments={appointments} now={selectedDay.isToday ? now : null} />
+            <DayTimeline
+              appointments={appointments}
+              now={selectedDay.isToday ? now : null}
+              onAppointmentClick={setSelectedAppointment}
+            />
           </div>
         )}
       </Card>
@@ -98,12 +114,25 @@ export function AgendaView() {
             <HourGutter />
             {week.map((d) => (
               <div key={d.index} className="flex-1 border-l border-neutral-100">
-                <DayTimeline appointments={appointmentsFor(d.index)} now={d.isToday ? now : null} />
+                <DayTimeline
+                  appointments={appointmentsFor(d.index)}
+                  now={d.isToday ? now : null}
+                  onAppointmentClick={setSelectedAppointment}
+                />
               </div>
             ))}
           </div>
         )}
       </Card>
+
+      {selectedAppointment ? (
+        <ChangeServiceModal
+          appointment={selectedAppointment}
+          onClose={() => setSelectedAppointment(null)}
+          onSave={saveServiceChange}
+          isSaving={isChangingService}
+        />
+      ) : null}
     </div>
   );
 }

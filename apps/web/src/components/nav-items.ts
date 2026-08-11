@@ -1,5 +1,5 @@
 import type { ComponentType, SVGProps } from "react";
-import { CashIcon, ConfigIcon, CustomersIcon, DashboardIcon, SalesIcon } from "./icons";
+import { AgendaIcon, CashIcon, ConfigIcon, CustomersIcon, DashboardIcon, SalesIcon } from "./icons";
 
 export type NavItem = {
   href: string;
@@ -7,9 +7,10 @@ export type NavItem = {
   icon: ComponentType<SVGProps<SVGSVGElement>>;
 };
 
-// Orden del mockup: Dashboard, Ventas, Clientes, Caja, Config (docs/UI_UX.md §Navegación).
+// Orden: Dashboard, Agenda, Ventas, Clientes, Caja, Config (docs/UI_UX.md §Navegación).
 export const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Dashboard", icon: DashboardIcon },
+  { href: "/agenda", label: "Agenda", icon: AgendaIcon },
   { href: "/ventas", label: "Ventas", icon: SalesIcon },
   { href: "/clientes", label: "Clientes", icon: CustomersIcon },
   { href: "/caja", label: "Caja", icon: CashIcon },

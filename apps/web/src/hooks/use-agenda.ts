@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Appointment as ApiAppointment } from "@barber/types";
 import { apiClient } from "@/lib/api-client";
 import type { Appointment } from "@/mocks/types";
@@ -47,6 +47,7 @@ function toViewAppointment(appointment: ApiAppointment): Appointment {
   return {
     id: appointment.id,
     customerName: appointment.customer.name,
+    serviceId: appointment.service.id,
     serviceName: appointment.service.name,
     startTime: `${String(start.getHours()).padStart(2, "0")}:${String(start.getMinutes()).padStart(2, "0")}`,
     durationMinutes: appointment.durationMinutes,
@@ -67,6 +68,7 @@ function groupByWeekDay(appointments: ApiAppointment[]): Record<number, Appointm
 }
 
 export function useAgenda() {
+  const queryClient = useQueryClient();
   const [week] = useState(() => buildWeek(new Date()));
   const [selectedIndex, setSelectedIndex] = useState(
     () => week.find((d) => d.isToday)?.index ?? 0,
@@ -75,6 +77,13 @@ export function useAgenda() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["appointments", "week"],
     queryFn: () => apiClient.appointments.list({ range: "week" }),
+  });
+
+  const changeServiceMutation = useMutation({
+    mutationFn: ({ id, serviceId }: { id: string; serviceId: string }) =>
+      apiClient.appointments.update(id, { serviceId }),
+    // Invalida "week" y "today" (avisos de turno próximo) a la vez.
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["appointments"] }),
   });
 
   const appointmentsByDay = groupByWeekDay(data ?? []);
@@ -94,5 +103,7 @@ export function useAgenda() {
     appointmentsFor,
     isLoading,
     isError,
+    changeService: changeServiceMutation.mutateAsync,
+    isChangingService: changeServiceMutation.isPending,
   };
 }

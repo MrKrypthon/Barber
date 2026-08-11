@@ -57,10 +57,12 @@ export function DayTimeline({
   appointments,
   now,
   minWidth,
+  onAppointmentClick,
 }: {
   appointments: Appointment[];
   now: Date | null;
   minWidth?: number;
+  onAppointmentClick?: (appointment: Appointment) => void;
 }) {
   const currentOffset = now ? nowOffset(now) : null;
 
@@ -85,9 +87,11 @@ export function DayTimeline({
       ) : null}
 
       {appointments.map((a) => (
-        <div
+        <button
           key={a.id}
-          className="absolute left-0.5 right-0.5 overflow-hidden rounded-md px-2 py-1 text-white transition-all duration-150 hover:z-20 hover:shadow-card-hover"
+          type="button"
+          onClick={() => onAppointmentClick?.(a)}
+          className="absolute left-0.5 right-0.5 overflow-hidden rounded-md px-2 py-1 text-left text-white transition-all duration-150 hover:z-20 hover:shadow-card-hover active:scale-[0.98]"
           style={{
             top: timeToOffset(a.startTime),
             height: Math.max((a.durationMinutes / 60) * PX_PER_HOUR - 2, 20),
@@ -96,7 +100,7 @@ export function DayTimeline({
         >
           <p className="truncate text-[11px] font-semibold leading-tight">{a.customerName}</p>
           <p className="truncate text-[10px] leading-tight text-white/80">{a.serviceName}</p>
-        </div>
+        </button>
       ))}
     </div>
   );

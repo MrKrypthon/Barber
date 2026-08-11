@@ -59,6 +59,15 @@ export function CashIcon(props: IconProps) {
   );
 }
 
+export function AgendaIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <rect x="3" y="4.5" width="18" height="16" rx="2" />
+      <path d="M3 9.5h18M8 2.5v4M16 2.5v4" />
+    </Svg>
+  );
+}
+
 export function ConfigIcon(props: IconProps) {
   return (
     <Svg {...props}>
