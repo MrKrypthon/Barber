@@ -8,8 +8,16 @@ import { formatLongDate } from "@/lib/format";
 import { DayTimeline, HourGutter, useNow } from "./day-timeline";
 
 export function AgendaView() {
-  const { week, selectedDay, selectedIndex, setSelectedIndex, appointments, appointmentsFor } =
-    useAgenda();
+  const {
+    week,
+    selectedDay,
+    selectedIndex,
+    setSelectedIndex,
+    appointments,
+    appointmentsFor,
+    isLoading,
+    isError,
+  } = useAgenda();
   const now = useNow();
 
   return (
@@ -46,7 +54,11 @@ export function AgendaView() {
 
       {/* Móvil: un solo día. */}
       <Card className="overflow-x-auto md:hidden">
-        {appointments.length === 0 ? (
+        {isLoading ? (
+          <p className="py-10 text-center text-neutral-400">Cargando agenda...</p>
+        ) : isError ? (
+          <p className="py-10 text-center text-secondary">No se pudo cargar la agenda.</p>
+        ) : appointments.length === 0 ? (
           <p className="py-10 text-center text-neutral-400">Sin turnos para este día.</p>
         ) : (
           <div className="flex">
@@ -77,14 +89,20 @@ export function AgendaView() {
             </div>
           ))}
         </div>
-        <div className="flex min-w-[720px] px-0 pb-4 pt-2">
-          <HourGutter />
-          {week.map((d) => (
-            <div key={d.index} className="flex-1 border-l border-neutral-100">
-              <DayTimeline appointments={appointmentsFor(d.index)} now={d.isToday ? now : null} />
-            </div>
-          ))}
-        </div>
+        {isLoading ? (
+          <p className="py-10 text-center text-neutral-400">Cargando agenda...</p>
+        ) : isError ? (
+          <p className="py-10 text-center text-secondary">No se pudo cargar la agenda.</p>
+        ) : (
+          <div className="flex min-w-[720px] px-0 pb-4 pt-2">
+            <HourGutter />
+            {week.map((d) => (
+              <div key={d.index} className="flex-1 border-l border-neutral-100">
+                <DayTimeline appointments={appointmentsFor(d.index)} now={d.isToday ? now : null} />
+              </div>
+            ))}
+          </div>
+        )}
       </Card>
     </div>
   );

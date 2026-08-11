@@ -1,9 +1,12 @@
 // Cliente HTTP tipado hacia apps/api, consumido por apps/web y apps/mobile.
 import type {
+  Appointment,
+  AppointmentsRange,
   AuthResult,
   AuthTokens,
   CashClosing,
   CashSummary,
+  CreateAppointmentInput,
   CreateCashMovementInput,
   CreateCustomerInput,
   CreateSaleInput,
@@ -14,6 +17,7 @@ import type {
   SalesRange,
   Service,
   Settings,
+  UpdateAppointmentInput,
   UpdateCustomerInput,
   UpdateServiceInput,
   UpdateSettingsInput,
@@ -157,15 +161,33 @@ export function createApiClient(config: ApiClientConfig) {
       update: (input: UpdateSettingsInput) =>
         call<Settings>("/settings", { method: "PUT", body: JSON.stringify(input) }),
     },
+    appointments: {
+      list: (params?: { date?: string; range?: AppointmentsRange }) => {
+        const query = new URLSearchParams();
+        if (params?.date) query.set("date", params.date);
+        if (params?.range) query.set("range", params.range);
+        const qs = query.toString();
+        return call<Appointment[]>(`/appointments${qs ? `?${qs}` : ""}`);
+      },
+      create: (input: CreateAppointmentInput) =>
+        call<Appointment>("/appointments", { method: "POST", body: JSON.stringify(input) }),
+      update: (id: string, input: UpdateAppointmentInput) =>
+        call<Appointment>(`/appointments/${id}`, { method: "PUT", body: JSON.stringify(input) }),
+      remove: (id: string) =>
+        call<{ success: boolean }>(`/appointments/${id}`, { method: "DELETE" }),
+    },
   };
 }
 
 export type ApiClient = ReturnType<typeof createApiClient>;
 export type {
+  Appointment,
+  AppointmentsRange,
   AuthResult,
   AuthTokens,
   CashClosing,
   CashSummary,
+  CreateAppointmentInput,
   CreateCashMovementInput,
   Customer,
   CreateCustomerInput,
@@ -176,6 +198,7 @@ export type {
   SalesRange,
   Service,
   Settings,
+  UpdateAppointmentInput,
   UpdateCustomerInput,
   UpdateServiceInput,
   UpdateSettingsInput,
