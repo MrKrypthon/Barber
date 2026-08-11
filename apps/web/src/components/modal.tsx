@@ -18,14 +18,14 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 md:items-center"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 animate-fade-in md:items-center"
       onClick={onClose}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="w-full rounded-t-3xl bg-white p-6 md:max-w-md md:rounded-2xl"
+        className="w-full origin-bottom animate-sheet-in rounded-t-3xl bg-white p-6 shadow-card-hover md:max-w-md md:origin-center md:rounded-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="mb-4 text-lg font-semibold">{title}</h2>

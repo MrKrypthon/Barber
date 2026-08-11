@@ -35,7 +35,9 @@ Cada negocio podrá modificar:
 
 Minimalista.
 
-Sin animaciones innecesarias.
+Sin animaciones innecesarias — las que existen son feedback (sombra, presión de botón, entrada de modal), no decoración. Nunca deben interponerse entre el usuario y la siguiente acción.
+
+Sombra con tinte del color primario (no gris genérico) para dar profundidad a tarjetas y botones sin salir de la paleta de marca.
 
 Optimizado para celulares.
 

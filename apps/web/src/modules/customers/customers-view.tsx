@@ -47,7 +47,7 @@ export function CustomersView() {
         }
       />
 
-      <label className="mb-4 flex items-center gap-2 rounded-xl bg-white px-4 shadow-sm">
+      <label className="mb-4 flex items-center gap-2 rounded-xl bg-white px-4 shadow-card">
         <SearchIcon className="h-5 w-5 text-neutral-400" />
         <input
           type="search"
@@ -69,7 +69,7 @@ export function CustomersView() {
               {filtered.map((c) => (
                 <li
                   key={c.id}
-                  className="flex items-center gap-3 px-4 py-3.5 md:border-b md:border-neutral-100"
+                  className="flex items-center gap-3 px-4 py-3.5 transition-colors duration-150 hover:bg-neutral-50 md:border-b md:border-neutral-100"
                 >
                   <Avatar name={c.name} />
                   <div className="flex-1">

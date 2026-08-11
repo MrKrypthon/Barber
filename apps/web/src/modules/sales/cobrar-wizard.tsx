@@ -114,7 +114,7 @@ export function CobrarWizard() {
                   key={s.id}
                   type="button"
                   onClick={() => pickService(s)}
-                  className="rounded-2xl bg-white p-5 text-left shadow-sm transition active:scale-[0.98]"
+                  className="rounded-2xl bg-white p-5 text-left shadow-card transition duration-150 hover:shadow-card-hover active:scale-[0.98]"
                 >
                   <p className="font-semibold">{s.name}</p>
                   <p className="mt-1 text-lg font-bold">{formatCurrency(s.price)}</p>
@@ -133,7 +133,7 @@ export function CobrarWizard() {
             </Chip>
           </div>
 
-          <label className="flex items-center gap-2 rounded-xl bg-white px-4 shadow-sm">
+          <label className="flex items-center gap-2 rounded-xl bg-white px-4 shadow-card">
             <SearchIcon className="h-5 w-5 text-neutral-400" />
             <input
               type="search"
@@ -172,7 +172,7 @@ export function CobrarWizard() {
               <button
                 type="button"
                 onClick={() => pickCustomer(OCCASIONAL)}
-                className="flex w-full items-center gap-3 px-4 py-3.5 text-left"
+                className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors duration-150 hover:bg-neutral-50 active:bg-neutral-100"
               >
                 <Avatar name="CO" className="bg-neutral-400" />
                 <span className="flex-1 font-medium">Cliente ocasional</span>
@@ -183,7 +183,7 @@ export function CobrarWizard() {
                   key={c.id}
                   type="button"
                   onClick={() => pickCustomer(c)}
-                  className="flex w-full items-center gap-3 px-4 py-3.5 text-left"
+                  className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors duration-150 hover:bg-neutral-50 active:bg-neutral-100"
                 >
                   <Avatar name={c.name} />
                   <span className="flex-1 font-medium">{c.name}</span>

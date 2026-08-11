@@ -8,12 +8,12 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 const VARIANTS: Record<NonNullable<ButtonProps["variant"]>, string> = {
-  primary: "bg-primary text-white",
-  secondary: "bg-secondary text-white",
+  primary: "bg-primary text-white shadow-button hover:brightness-110",
+  secondary: "bg-secondary text-white shadow-button-secondary hover:brightness-110",
   outline: "bg-white text-neutral-700 border border-neutral-200",
   "danger-outline": "bg-white text-secondary border border-secondary",
-  success: "bg-success text-white",
-  dark: "bg-neutral-900 text-white",
+  success: "bg-success text-white shadow-button hover:brightness-110",
+  dark: "bg-neutral-900 text-white shadow-button hover:brightness-110",
   "danger-soft": "bg-secondary-light text-secondary",
 };
 
@@ -27,7 +27,7 @@ export function Button({
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition active:brightness-95 disabled:opacity-50",
+        "inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition duration-150 active:scale-[0.97] active:brightness-95 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none",
         // Touch targets grandes (docs/UI_UX.md §Principios).
         size === "md" ? "min-h-12 px-5 text-base" : "min-h-14 px-6 text-lg",
         VARIANTS[variant],

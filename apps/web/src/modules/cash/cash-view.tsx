@@ -112,7 +112,10 @@ export function CashView() {
               <p className="py-6 text-center text-neutral-400">Sin movimientos manuales hoy.</p>
             ) : (
               summary.movements.map((m) => (
-                <div key={m.id} className="flex items-center gap-4 px-4 py-3.5">
+                <div
+                  key={m.id}
+                  className="flex items-center gap-4 px-4 py-3.5 transition-colors duration-150 hover:bg-neutral-50"
+                >
                   <span className="w-12 text-sm font-semibold text-secondary">
                     {formatTime(m.createdAt)}
                   </span>

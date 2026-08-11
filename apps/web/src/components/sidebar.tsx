@@ -13,7 +13,7 @@ export function Sidebar() {
   const businessName = settings?.businessName ?? "";
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col bg-primary md:flex">
+    <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col bg-primary shadow-sidebar md:flex">
       <div className="flex items-center gap-3 px-5 py-6">
         <Avatar name={businessName} className="bg-white/15" />
         <span className="text-base font-semibold leading-tight text-white">{businessName}</span>
@@ -28,8 +28,8 @@ export function Sidebar() {
                   href={href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition",
-                    active ? "bg-white/15 text-white" : "text-white/60 hover:bg-white/5",
+                    "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors duration-150",
+                    active ? "bg-white/15 text-white" : "text-white/60 hover:bg-white/10 hover:text-white/90",
                   )}
                 >
                   <Icon className="h-5 w-5" />
