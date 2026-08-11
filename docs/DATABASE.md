@@ -6,7 +6,7 @@ Convenciones generales (ver `CLAUDE.md` §15):
 - `created_at` existe en toda tabla.
 - `updated_at` existe en toda tabla cuyos registros se puedan editar después de creados.
 - `sales`, `sale_items` y `cash_movements` son registros de auditoría/financieros: no se editan una vez creados, por lo que no llevan `updated_at`. Correcciones se hacen mediante nuevos movimientos, nunca sobrescribiendo.
-- `deleted_at` (soft delete) se usa en `customers` y `services`, porque pueden estar referenciados por ventas históricas y no deben desaparecer físicamente de la base de datos.
+- `deleted_at` (soft delete) se usa en `customers`, `services` y `appointments`, porque pueden estar referenciados por ventas o turnos históricos y no deben desaparecer físicamente de la base de datos.
 
 ---
 
@@ -123,3 +123,22 @@ Corte de caja: snapshot inmutable del resumen del día al momento de cerrar (`PO
 - address
 - created_at
 - updated_at
+
+---
+
+## appointments
+
+Agenda manual (v0.2, `docs/ROADMAP.md`): el empleado registra los turnos que llegan por WhatsApp (`docs/PROJECT.md`, "Segunda etapa" de la integración con WhatsApp) — no hay reserva por parte del cliente. `duration_minutes` se copia del servicio al crear el turno (mismo criterio que `sale_items.price` con `services.price`): un cambio futuro en la duración del servicio no debe mover turnos ya agendados. "Cancelar" es soft delete (`deleted_at`), igual que `customers`/`services` — no se borra físicamente. Un mismo empleado no puede tener dos turnos que se solapen (validado en `AppointmentsService`, no a nivel de base de datos).
+
+- id (uuid)
+- tenant_id
+- customer_id
+- service_id
+- employee_id (FK a `users`)
+- start_at
+- duration_minutes
+- created_at
+- updated_at
+- deleted_at (soft delete, nullable)
+
+Índice: `(tenant_id, start_at)`, para las consultas de agenda por día/semana.
