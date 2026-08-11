@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/button";
 import { Card } from "@/components/card";
 import { Chip } from "@/components/chip";
@@ -10,27 +10,61 @@ import { useServices } from "@/hooks/use-services";
 import { cn } from "@/lib/cn";
 import { SERVICE_COLORS, SERVICE_DURATIONS } from "@/mocks/services";
 
-export function NewServiceView() {
+export function ServiceFormView({ serviceId }: { serviceId?: string }) {
   const router = useRouter();
-  const { addService, isAdding } = useServices();
+  const { services, isLoading, addService, isAdding, updateService, isUpdating } = useServices();
+  const isEdit = Boolean(serviceId);
+  const existing = serviceId ? services.find((s) => s.id === serviceId) : undefined;
 
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
-  const [duration, setDuration] = useState(30);
+  const [duration, setDuration] = useState(SERVICE_DURATIONS[0]);
   const [color, setColor] = useState(SERVICE_COLORS[0]);
+  const [hydrated, setHydrated] = useState(!isEdit);
+
+  // El servicio a editar viene del cache de useServices (ya cargado al
+  // entrar desde la lista); si se abre esta URL directamente puede tardar
+  // en llegar, por eso se hidrata el formulario en un efecto en vez de en
+  // el useState inicial.
+  useEffect(() => {
+    if (existing && !hydrated) {
+      setName(existing.name);
+      setPrice(String(existing.price));
+      setDuration(existing.durationMinutes ?? SERVICE_DURATIONS[0]);
+      setColor(existing.color ?? SERVICE_COLORS[0]);
+      setHydrated(true);
+    }
+  }, [existing, hydrated]);
 
   const priceNumber = Number(price);
   const isValid = name.trim().length > 0 && Number.isFinite(priceNumber) && priceNumber >= 0;
+  const isSaving = isAdding || isUpdating;
 
   async function save() {
     if (!isValid) return;
-    await addService({ name: name.trim(), price: priceNumber, durationMinutes: duration, color });
+    const input = { name: name.trim(), price: priceNumber, durationMinutes: duration, color };
+    if (isEdit && serviceId) {
+      await updateService({ id: serviceId, input });
+    } else {
+      await addService(input);
+    }
     router.push("/config/servicios");
+  }
+
+  if (isEdit && !hydrated) {
+    return (
+      <div>
+        <PageHeader title="Editar servicio" backHref="/config/servicios" />
+        <p className="py-10 text-center text-neutral-400">
+          {isLoading ? "Cargando..." : "Servicio no encontrado."}
+        </p>
+      </div>
+    );
   }
 
   return (
     <div>
-      <PageHeader title="Nuevo servicio" backHref="/config/servicios" />
+      <PageHeader title={isEdit ? "Editar servicio" : "Nuevo servicio"} backHref="/config/servicios" />
 
       <Card className="flex flex-col gap-5">
         <div className="grid gap-4 md:grid-cols-[1fr_10rem]">
@@ -95,8 +129,8 @@ export function NewServiceView() {
           </div>
         </div>
 
-        <Button size="lg" fullWidth onClick={save} disabled={!isValid || isAdding} className="md:w-auto">
-          {isAdding ? "Guardando..." : "Guardar servicio"}
+        <Button size="lg" fullWidth onClick={save} disabled={!isValid || isSaving} className="md:w-auto">
+          {isSaving ? "Guardando..." : isEdit ? "Guardar cambios" : "Guardar servicio"}
         </Button>
       </Card>
     </div>

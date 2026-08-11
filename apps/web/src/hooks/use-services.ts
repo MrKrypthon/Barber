@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { CreateServiceInput, Service } from "@barber/types";
+import type { CreateServiceInput, Service, UpdateServiceInput } from "@barber/types";
 import { apiClient } from "@/lib/api-client";
 
 const SERVICES_QUERY_KEY = ["services"] as const;
@@ -23,11 +23,25 @@ export function useServices() {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: ({ id, input }: { id: string; input: UpdateServiceInput }) =>
+      apiClient.services.update(id, input),
+    onSuccess: (service) => {
+      queryClient.setQueryData<Service[]>(SERVICES_QUERY_KEY, (prev) =>
+        (prev ?? [])
+          .map((s) => (s.id === service.id ? service : s))
+          .sort((a, b) => a.name.localeCompare(b.name)),
+      );
+    },
+  });
+
   return {
     services: data ?? [],
     isLoading,
     isError,
     addService: createMutation.mutateAsync,
     isAdding: createMutation.isPending,
+    updateService: updateMutation.mutateAsync,
+    isUpdating: updateMutation.isPending,
   };
 }

@@ -1,5 +1,5 @@
-import { NewServiceView } from "@/modules/settings/new-service-view";
+import { ServiceFormView } from "@/modules/settings/service-form-view";
 
 export default function NewServicePage() {
-  return <NewServiceView />;
+  return <ServiceFormView />;
 }

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Card } from "@/components/card";
 import { PageHeader } from "@/components/page-header";
-import { PlusIcon } from "@/components/icons";
+import { ChevronRightIcon, PlusIcon } from "@/components/icons";
 import { useServices } from "@/hooks/use-services";
 import { formatCurrency } from "@/lib/format";
 
@@ -34,21 +34,24 @@ export function ServicesView() {
         ) : (
           <ul className="grid md:grid-cols-2">
             {services.map((s) => (
-              <li
-                key={s.id}
-                className="flex items-center gap-3 border-b border-neutral-100 px-4 py-3.5 transition-colors duration-150 hover:bg-neutral-50"
-              >
-                <span
-                  className="h-10 w-1.5 rounded-full"
-                  style={{ backgroundColor: s.color ?? "#24406B" }}
-                />
-                <div className="flex-1">
-                  <p className="font-medium">{s.name}</p>
-                  {s.durationMinutes ? (
-                    <p className="text-sm text-neutral-400">{s.durationMinutes} min</p>
-                  ) : null}
-                </div>
-                <span className="font-bold">{formatCurrency(s.price)}</span>
+              <li key={s.id} className="border-b border-neutral-100">
+                <Link
+                  href={`/config/servicios/${s.id}`}
+                  className="flex items-center gap-3 px-4 py-3.5 transition-colors duration-150 hover:bg-neutral-50"
+                >
+                  <span
+                    className="h-10 w-1.5 rounded-full"
+                    style={{ backgroundColor: s.color ?? "#24406B" }}
+                  />
+                  <div className="flex-1">
+                    <p className="font-medium">{s.name}</p>
+                    {s.durationMinutes ? (
+                      <p className="text-sm text-neutral-400">{s.durationMinutes} min</p>
+                    ) : null}
+                  </div>
+                  <span className="font-bold">{formatCurrency(s.price)}</span>
+                  <ChevronRightIcon className="h-5 w-5 text-neutral-300" />
+                </Link>
               </li>
             ))}
           </ul>
