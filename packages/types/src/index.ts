@@ -133,3 +133,25 @@ export type UpdateSettingsInput = Partial<{
   phone: string;
   address: string;
 }>;
+
+export type AppointmentsRange = "today" | "week";
+
+export type Appointment = {
+  id: string;
+  customer: { id: string; name: string };
+  service: { id: string; name: string; color: string | null };
+  employee: { id: string; name: string };
+  startAt: string;
+  durationMinutes: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CreateAppointmentInput = {
+  customerId: string;
+  serviceId: string;
+  employeeId?: string;
+  startAt: string;
+};
+
+export type UpdateAppointmentInput = Partial<CreateAppointmentInput>;
