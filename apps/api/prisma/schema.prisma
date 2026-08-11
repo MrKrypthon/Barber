@@ -7,7 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// BusinessSettings se agrega en una fase posterior, siguiendo docs/DATABASE.md.
 
 enum Role {
   owner
@@ -30,12 +29,13 @@ model Tenant {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  users         User[]
-  customers     Customer[]
-  services      Service[]
-  sales         Sale[]
-  cashMovements CashMovement[]
-  cashClosings  CashClosing[]
+  users            User[]
+  customers        Customer[]
+  services         Service[]
+  sales            Sale[]
+  cashMovements    CashMovement[]
+  cashClosings     CashClosing[]
+  businessSettings BusinessSettings?
 
   @@map("tenants")
 }
@@ -167,4 +167,22 @@ model CashClosing {
   @@unique([tenantId, date])
   @@index([tenantId])
   @@map("cash_closings")
+}
+
+// 1:1 con Tenant. El nombre del negocio vive en Tenant.name (existe desde
+// Fase 1); esta tabla solo agrega lo que docs/DATABASE.md ya documentaba
+// como pendiente (logo, colores, contacto).
+model BusinessSettings {
+  tenantId       String   @id @map("tenant_id")
+  logo           String?
+  primaryColor   String?  @map("primary_color")
+  secondaryColor String?  @map("secondary_color")
+  phone          String?
+  address        String?
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@map("business_settings")
 }

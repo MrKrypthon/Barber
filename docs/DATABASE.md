@@ -113,6 +113,8 @@ Corte de caja: snapshot inmutable del resumen del día al momento de cerrar (`PO
 
 ## business_settings
 
+1:1 con `tenants`, pero no se crea junto con él — `register()` solo crea `tenants` + el usuario owner. La fila se crea (upsert) en la primera vez que se llama a `PUT /api/v1/settings`; antes de eso, `GET /api/v1/settings` devuelve estos campos como `null`. El nombre del negocio vive en `tenants.name`, no aquí.
+
 - tenant_id (uuid, PK/FK a `tenants`)
 - logo
 - primary_color

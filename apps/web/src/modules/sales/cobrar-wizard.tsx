@@ -11,10 +11,10 @@ import { StepIndicator } from "@/components/step-indicator";
 import { useCustomers } from "@/hooks/use-customers";
 import { useSales } from "@/hooks/use-sales";
 import { useServices } from "@/hooks/use-services";
+import { useSettings } from "@/hooks/use-settings";
 import { cn } from "@/lib/cn";
 import { formatCurrency } from "@/lib/format";
 import { buildReceiptMessage, buildWhatsAppUrl } from "@/lib/whatsapp";
-import { mockBusiness } from "@/mocks/business";
 import { PAYMENT_METHOD_LABELS, type PaymentMethod } from "@/mocks/types";
 import type { Customer, Service } from "@barber/types";
 
@@ -25,6 +25,7 @@ export function CobrarWizard() {
   const { services } = useServices();
   const { customers, addCustomer } = useCustomers();
   const { addSale, isAdding } = useSales();
+  const { settings } = useSettings();
 
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [service, setService] = useState<Service | null>(null);
@@ -75,7 +76,7 @@ export function CobrarWizard() {
     service && customer
       ? buildWhatsAppUrl(
           buildReceiptMessage({
-            businessName: mockBusiness.name,
+            businessName: settings?.businessName ?? "",
             customerName,
             serviceName: service.name,
             paymentMethodLabel: PAYMENT_METHOD_LABELS[paymentMethod],

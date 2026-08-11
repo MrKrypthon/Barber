@@ -13,8 +13,10 @@ import type {
   Sale,
   SalesRange,
   Service,
+  Settings,
   UpdateCustomerInput,
   UpdateServiceInput,
+  UpdateSettingsInput,
 } from "@barber/types";
 
 export class ApiError extends Error {
@@ -150,6 +152,11 @@ export function createApiClient(config: ApiClientConfig) {
         }),
       close: () => call<CashClosing>("/cash/close", { method: "POST" }),
     },
+    settings: {
+      get: () => call<Settings>("/settings"),
+      update: (input: UpdateSettingsInput) =>
+        call<Settings>("/settings", { method: "PUT", body: JSON.stringify(input) }),
+    },
   };
 }
 
@@ -168,6 +175,8 @@ export type {
   Sale,
   SalesRange,
   Service,
+  Settings,
   UpdateCustomerInput,
   UpdateServiceInput,
+  UpdateSettingsInput,
 };

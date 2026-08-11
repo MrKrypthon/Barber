@@ -7,6 +7,7 @@ import { HealthController } from "./health/health.controller";
 import { PrismaModule } from "./prisma/prisma.module";
 import { SalesModule } from "./sales/sales.module";
 import { ServicesModule } from "./services/services.module";
+import { SettingsModule } from "./settings/settings.module";
 import { TenantsModule } from "./tenants/tenants.module";
 import { UsersModule } from "./users/users.module";
 
@@ -24,6 +25,7 @@ import { UsersModule } from "./users/users.module";
     ServicesModule,
     SalesModule,
     CashModule,
+    SettingsModule,
   ],
   controllers: [HealthController],
 })

@@ -2,21 +2,21 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { mockBusiness } from "@/mocks/business";
+import { useSettings } from "@/hooks/use-settings";
 import { cn } from "@/lib/cn";
 import { Avatar } from "./avatar";
 import { NAV_ITEMS } from "./nav-items";
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { settings } = useSettings();
+  const businessName = settings?.businessName ?? "";
 
   return (
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col bg-primary md:flex">
       <div className="flex items-center gap-3 px-5 py-6">
-        <Avatar name={mockBusiness.name} className="bg-white/15" />
-        <span className="text-base font-semibold leading-tight text-white">
-          {mockBusiness.name}
-        </span>
+        <Avatar name={businessName} className="bg-white/15" />
+        <span className="text-base font-semibold leading-tight text-white">{businessName}</span>
       </div>
       <nav className="mt-2 flex-1 px-3">
         <ul className="flex flex-col gap-1">
