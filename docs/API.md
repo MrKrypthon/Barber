@@ -93,3 +93,25 @@ GET /api/v1/settings
 PUT /api/v1/settings
 
 &nbsp;&nbsp;Solo `owner`. Body: todos los campos de arriba, opcionales (se actualiza solo lo que se envía). Hace upsert de `business_settings` la primera vez que se edita.
+
+---
+
+## Agenda
+
+Agenda manual (v0.2, `docs/ROADMAP.md`): el empleado registra los turnos recibidos por WhatsApp (`docs/PROJECT.md`, "Segunda etapa"). No hay reserva por parte del cliente, por lo que todas las rutas están disponibles para `owner` y `employee` sin restricción de rol.
+
+GET /api/v1/appointments
+
+&nbsp;&nbsp;Acepta `?date=<ISO date>&range=today|week` (default: hoy). `date` es la fecha de referencia para navegar la agenda a cualquier día/semana, no solo la actual.
+
+POST /api/v1/appointments
+
+&nbsp;&nbsp;Body: `{ customerId, serviceId, employeeId?, startAt }`. Si se omite `employeeId`, el turno queda asignado al usuario autenticado. `durationMinutes` se copia del servicio en el momento de crear el turno (mismo criterio que `sale_items.price` con `services.price`): un cambio futuro en la duración del servicio no mueve turnos ya agendados. Responde 400 si el servicio no tiene duración configurada, y 409 si el empleado ya tiene un turno que se solapa con el horario solicitado.
+
+PUT /api/v1/appointments/{id}
+
+&nbsp;&nbsp;Reagenda o reasigna un turno. Si se envía `serviceId`, `durationMinutes` se recalcula a partir del nuevo servicio. Mismas validaciones de solapamiento y duración configurada que en la creación.
+
+DELETE /api/v1/appointments/{id}
+
+&nbsp;&nbsp;Cancela el turno (soft delete vía `deletedAt`, igual que Clientes/Servicios) — no se borra físicamente.

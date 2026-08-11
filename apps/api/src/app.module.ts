@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
+import { AppointmentsModule } from "./appointments/appointments.module";
 import { AuthModule } from "./auth/auth.module";
 import { CashModule } from "./cash/cash.module";
 import { CustomersModule } from "./customers/customers.module";
@@ -26,6 +27,7 @@ import { UsersModule } from "./users/users.module";
     SalesModule,
     CashModule,
     SettingsModule,
+    AppointmentsModule,
   ],
   controllers: [HealthController],
 })
