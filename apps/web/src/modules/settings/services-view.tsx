@@ -34,7 +34,10 @@ export function ServicesView() {
         ) : (
           <ul className="grid md:grid-cols-2">
             {services.map((s) => (
-              <li key={s.id} className="flex items-center gap-3 border-b border-neutral-100 px-4 py-3.5">
+              <li
+                key={s.id}
+                className="flex items-center gap-3 border-b border-neutral-100 px-4 py-3.5 transition-colors duration-150 hover:bg-neutral-50"
+              >
                 <span
                   className="h-10 w-1.5 rounded-full"
                   style={{ backgroundColor: s.color ?? "#24406B" }}

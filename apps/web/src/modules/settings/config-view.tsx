@@ -10,6 +10,7 @@ import { PageHeader } from "@/components/page-header";
 import { Toggle } from "@/components/toggle";
 import { useAuth } from "@/hooks/use-auth";
 import { useSettings } from "@/hooks/use-settings";
+import { cn } from "@/lib/cn";
 
 const DEFAULT_PRIMARY_COLOR = "#24406B";
 const DEFAULT_SECONDARY_COLOR = "#C0392B";
@@ -26,7 +27,12 @@ function ConfigRow({
   dot?: string;
 }) {
   const content = (
-    <div className="flex items-center gap-3 px-4 py-3.5">
+    <div
+      className={cn(
+        "flex items-center gap-3 px-4 py-3.5",
+        href && "transition-colors duration-150 hover:bg-neutral-50 active:bg-neutral-100",
+      )}
+    >
       {dot ? <span className="h-3 w-3 rounded-full" style={{ backgroundColor: dot }} /> : null}
       <span className="flex-1 font-medium">{label}</span>
       {value ? <span className="text-sm text-neutral-400">{value}</span> : null}

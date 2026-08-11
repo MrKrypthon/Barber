@@ -42,5 +42,9 @@ export function useAgenda() {
   const selectedDay = week[selectedIndex];
   const appointments: Appointment[] = mockWeekAppointments[selectedIndex] ?? [];
 
-  return { week, selectedDay, selectedIndex, setSelectedIndex, appointments };
+  function appointmentsFor(index: number): Appointment[] {
+    return mockWeekAppointments[index] ?? [];
+  }
+
+  return { week, selectedDay, selectedIndex, setSelectedIndex, appointments, appointmentsFor };
 }
