@@ -2,10 +2,13 @@
 import type {
   AuthResult,
   AuthTokens,
-  Customer,
   CreateCustomerInput,
+  CreateSaleInput,
   CreateServiceInput,
+  Customer,
   PublicUser,
+  Sale,
+  SalesRange,
   Service,
   UpdateCustomerInput,
   UpdateServiceInput,
@@ -128,6 +131,12 @@ export function createApiClient(config: ApiClientConfig) {
         call<Service>(`/services/${id}`, { method: "PUT", body: JSON.stringify(input) }),
       remove: (id: string) => call<{ success: boolean }>(`/services/${id}`, { method: "DELETE" }),
     },
+    sales: {
+      list: (range?: SalesRange) =>
+        call<Sale[]>(`/sales${range ? `?range=${range}` : ""}`),
+      create: (input: CreateSaleInput) =>
+        call<Sale>("/sales", { method: "POST", body: JSON.stringify(input) }),
+    },
   };
 }
 
@@ -137,8 +146,11 @@ export type {
   AuthTokens,
   Customer,
   CreateCustomerInput,
+  CreateSaleInput,
   CreateServiceInput,
   PublicUser,
+  Sale,
+  SalesRange,
   Service,
   UpdateCustomerInput,
   UpdateServiceInput,
