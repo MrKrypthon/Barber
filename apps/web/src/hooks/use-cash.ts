@@ -1,36 +1,41 @@
 "use client";
 
-import { useState } from "react";
-import { mockCashMovements, mockCashSummary } from "@/mocks/cash";
-import type { CashMovement } from "@/mocks/types";
-
-// Mismo patrón que use-customers: caché en módulo hasta conectar el API.
-let movementsCache: CashMovement[] = [...mockCashMovements];
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "@/lib/api-client";
 
 export type NewExpense = { description: string; amount: number };
 
 export function useCash() {
-  const [movements, setMovements] = useState<CashMovement[]>(movementsCache);
-  const [isClosed, setIsClosed] = useState(false);
+  const queryClient = useQueryClient();
 
-  function addExpense(data: NewExpense) {
-    const movement: CashMovement = {
-      id: crypto.randomUUID(),
-      type: "expense",
-      amount: data.amount,
-      description: data.description,
-      paymentMethod: "cash",
-      createdAt: new Date().toISOString(),
-    };
-    movementsCache = [...movementsCache, movement];
-    setMovements(movementsCache);
-  }
+  const { data: summary, isLoading, isError } = useQuery({
+    queryKey: ["cash", "today"],
+    queryFn: () => apiClient.cash.getSummary("today"),
+  });
 
-  // El "corte de caja" real se implementa con el módulo Cash del backend;
-  // aquí solo se refleja el estado visual.
-  function closeCash() {
-    setIsClosed(true);
-  }
+  const expenseMutation = useMutation({
+    mutationFn: (input: NewExpense) =>
+      apiClient.cash.registerMovement({
+        type: "expense",
+        amount: input.amount,
+        description: input.description,
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["cash"] }),
+  });
 
-  return { summary: mockCashSummary, movements, isClosed, closeCash, addExpense };
+  const closeMutation = useMutation({
+    mutationFn: () => apiClient.cash.close(),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["cash"] }),
+  });
+
+  return {
+    summary,
+    isLoading,
+    isError,
+    isClosed: Boolean(summary?.closedAt),
+    addExpense: expenseMutation.mutateAsync,
+    isAddingExpense: expenseMutation.isPending,
+    closeCash: closeMutation.mutateAsync,
+    isClosing: closeMutation.isPending,
+  };
 }

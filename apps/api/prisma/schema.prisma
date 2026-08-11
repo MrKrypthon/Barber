@@ -35,6 +35,7 @@ model Tenant {
   services      Service[]
   sales         Sale[]
   cashMovements CashMovement[]
+  cashClosings  CashClosing[]
 
   @@map("tenants")
 }
@@ -55,6 +56,7 @@ model User {
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
   sales  Sale[]
+  cashClosings CashClosing[]
 
   @@index([tenantId])
   @@map("users")
@@ -143,4 +145,26 @@ model CashMovement {
 
   @@index([tenantId, createdAt])
   @@map("cash_movements")
+}
+
+// Corte de caja: snapshot inmutable del resumen del día (docs/ROADMAP.md
+// v0.1). No bloquea nuevos movimientos ni ventas — es un registro de
+// auditoría de "así quedó la caja al cerrar", no un lock. Único por
+// tenant+día: cerrar dos veces el mismo día devuelve 409.
+model CashClosing {
+  id         String   @id @default(uuid())
+  tenantId   String   @map("tenant_id")
+  date       DateTime @db.Date
+  income     Decimal  @db.Decimal(10, 2)
+  expense    Decimal  @db.Decimal(10, 2)
+  balance    Decimal  @db.Decimal(10, 2)
+  closedById String   @map("closed_by_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+  closedBy User   @relation(fields: [closedById], references: [id])
+
+  @@unique([tenantId, date])
+  @@index([tenantId])
+  @@map("cash_closings")
 }

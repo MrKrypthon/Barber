@@ -72,11 +72,15 @@ GET /api/v1/sales/{id}
 
 GET /api/v1/cash
 
-&nbsp;&nbsp;Solo `owner`. Acepta `?range=today|week|month` (default `today`). Devuelve `{ range, income, expense, balance, movements }`, donde `income` = ventas cobradas en efectivo + movimientos manuales de tipo `income`, `expense` = movimientos manuales de tipo `expense`, y `balance = income - expense`. Las ventas por transferencia no afectan la caja física.
+&nbsp;&nbsp;Solo `owner`. Acepta `?range=today|week|month` (default `today`). Devuelve `{ range, income, expense, balance, movements, closedAt }`, donde `income` = ventas cobradas en efectivo + movimientos manuales de tipo `income`, `expense` = movimientos manuales de tipo `expense`, y `balance = income - expense`. Las ventas por transferencia no afectan la caja física. `closedAt` solo se calcula para `range=today` (un corte de caja es por día calendario); en `week`/`month` siempre es `null`.
 
 POST /api/v1/cash/movement
 
 &nbsp;&nbsp;Disponible para `owner` y `employee`. Body: `{ type: "income" | "expense", amount, description? }`.
+
+POST /api/v1/cash/close
+
+&nbsp;&nbsp;Solo `owner`. Corte de caja del día: guarda un snapshot inmutable (`income`, `expense`, `balance` del día al momento de cerrar, quién cerró). No bloquea nuevas ventas ni movimientos — es un registro de auditoría, no un lock. Devuelve 409 si la caja de hoy ya fue cerrada.
 
 ---
 

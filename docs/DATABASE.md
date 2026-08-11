@@ -96,6 +96,21 @@ Movimientos manuales de caja (aportes, gastos). No incluye un registro por cada 
 
 ---
 
+## cash_closings
+
+Corte de caja: snapshot inmutable del resumen del día al momento de cerrar (`POST /api/v1/cash/close`). No bloquea ventas ni movimientos nuevos — es un registro de auditoría, no un lock. Único por `tenant_id` + `date`: cerrar dos veces el mismo día devuelve 409.
+
+- id (uuid)
+- tenant_id
+- date (día calendario cerrado)
+- income
+- expense
+- balance
+- closed_by_id (FK a `users`)
+- created_at
+
+---
+
 ## business_settings
 
 - tenant_id (uuid, PK/FK a `tenants`)
