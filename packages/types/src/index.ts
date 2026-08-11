@@ -115,3 +115,21 @@ export type CashClosing = {
   closedBy: { id: string; name: string };
   closedAt: string;
 };
+
+export type Settings = {
+  businessName: string;
+  logo: string | null;
+  primaryColor: string | null;
+  secondaryColor: string | null;
+  phone: string | null;
+  address: string | null;
+};
+
+export type UpdateSettingsInput = Partial<{
+  businessName: string;
+  logo: string;
+  primaryColor: string;
+  secondaryColor: string;
+  phone: string;
+  address: string;
+}>;
