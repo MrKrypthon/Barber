@@ -1,6 +1,5 @@
 import type { DashboardSummary } from "@/mocks/types";
 
-// Turnos del día — datos mock hasta que exista el módulo Agenda (v0.2).
 export function TodayAppointments({
   appointments,
 }: {
