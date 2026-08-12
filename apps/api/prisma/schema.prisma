@@ -178,11 +178,19 @@ model CashClosing {
 // como pendiente (logo, colores, contacto).
 model BusinessSettings {
   tenantId       String   @id @map("tenant_id")
+  // Data URI (base64) de la foto/logo, ya redimensionada y comprimida en el
+  // cliente antes de subirla — no hay almacenamiento de archivos en el MVP
+  // (docs/DECISIONS.md), se guarda directo en la fila.
   logo           String?
   primaryColor   String?  @map("primary_color")
   secondaryColor String?  @map("secondary_color")
   phone          String?
   address        String?
+  // Horario de atención: días abiertos + un único rango horario para todos
+  // esos días (sin horarios distintos por día — MVP simple, docs/ROADMAP.md).
+  scheduleDays   String[] @default([]) @map("schedule_days")
+  scheduleOpen   String?  @map("schedule_open")
+  scheduleClose  String?  @map("schedule_close")
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 

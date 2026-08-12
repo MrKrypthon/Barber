@@ -54,3 +54,43 @@ export function isSameDay(iso: string, ref: Date): boolean {
 export function isWithinLastDays(iso: string, days: number, ref: Date): boolean {
   return ref.getTime() - new Date(iso).getTime() <= days * 86_400_000;
 }
+
+// Días de la semana para el horario de atención (business_settings.schedule_days).
+export const SCHEDULE_DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
+export const SCHEDULE_DAY_LABELS: Record<(typeof SCHEDULE_DAYS)[number], string> = {
+  mon: "Lun",
+  tue: "Mar",
+  wed: "Mié",
+  thu: "Jue",
+  fri: "Vie",
+  sat: "Sáb",
+  sun: "Dom",
+};
+
+// "Lun-Sáb 9:00-19:00h" — junta días consecutivos en un rango en vez de
+// listarlos todos, igual al criterio del mockup original (docs/Propuesta.pdf).
+export function formatSchedule(days: string[], open: string | null, close: string | null): string | null {
+  if (days.length === 0 || !open || !close) return null;
+
+  const sorted = SCHEDULE_DAYS.filter((d) => days.includes(d));
+  const ranges: string[] = [];
+  let start = sorted[0];
+  let prev = sorted[0];
+
+  for (let i = 1; i <= sorted.length; i++) {
+    const current = sorted[i];
+    const isConsecutive =
+      current !== undefined && SCHEDULE_DAYS.indexOf(current) === SCHEDULE_DAYS.indexOf(prev) + 1;
+    if (!isConsecutive) {
+      ranges.push(
+        start === prev
+          ? SCHEDULE_DAY_LABELS[start]
+          : `${SCHEDULE_DAY_LABELS[start]}-${SCHEDULE_DAY_LABELS[prev]}`,
+      );
+      if (current !== undefined) start = current;
+    }
+    if (current !== undefined) prev = current;
+  }
+
+  return `${ranges.join(", ")} ${open}-${close}h`;
+}

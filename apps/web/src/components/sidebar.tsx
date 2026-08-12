@@ -15,7 +15,7 @@ export function Sidebar() {
   return (
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col bg-primary shadow-sidebar md:flex">
       <div className="flex items-center gap-3 px-5 py-6">
-        <Avatar name={businessName} className="bg-white/15" />
+        <Avatar name={businessName} src={settings?.logo} className="bg-white/15" />
         <span className="text-base font-semibold leading-tight text-white">{businessName}</span>
       </div>
       <nav className="mt-2 flex-1 px-3">

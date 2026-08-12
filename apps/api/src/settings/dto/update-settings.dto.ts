@@ -1,4 +1,7 @@
-import { IsHexColor, IsOptional, IsString, MinLength } from "class-validator";
+import { IsArray, IsHexColor, IsIn, IsOptional, IsString, Matches, MinLength } from "class-validator";
+
+const SCHEDULE_DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
+const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 export class UpdateSettingsDto {
   @IsOptional()
@@ -6,6 +9,8 @@ export class UpdateSettingsDto {
   @MinLength(1)
   businessName?: string;
 
+  // Data URI (base64) ya redimensionada/comprimida en el cliente —
+  // ver ADR-008 (docs/DECISIONS.md).
   @IsOptional()
   @IsString()
   logo?: string;
@@ -25,4 +30,19 @@ export class UpdateSettingsDto {
   @IsOptional()
   @IsString()
   address?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsIn(SCHEDULE_DAYS, { each: true })
+  scheduleDays?: string[];
+
+  @IsOptional()
+  @IsString()
+  @Matches(TIME_PATTERN, { message: "scheduleOpen debe tener formato HH:MM" })
+  scheduleOpen?: string;
+
+  @IsOptional()
+  @IsString()
+  @Matches(TIME_PATTERN, { message: "scheduleClose debe tener formato HH:MM" })
+  scheduleClose?: string;
 }
