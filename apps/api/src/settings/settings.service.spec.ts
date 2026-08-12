@@ -25,6 +25,9 @@ describe("SettingsService", () => {
         logo: null,
         phone: null,
         address: null,
+        scheduleDays: ["mon", "tue"],
+        scheduleOpen: "09:00",
+        scheduleClose: "19:00",
       });
 
       const result = await service.get("t1");
@@ -36,6 +39,9 @@ describe("SettingsService", () => {
         logo: null,
         phone: null,
         address: null,
+        scheduleDays: ["mon", "tue"],
+        scheduleOpen: "09:00",
+        scheduleClose: "19:00",
       });
     });
 
@@ -52,6 +58,9 @@ describe("SettingsService", () => {
         logo: null,
         phone: null,
         address: null,
+        scheduleDays: [],
+        scheduleOpen: null,
+        scheduleClose: null,
       });
     });
   });

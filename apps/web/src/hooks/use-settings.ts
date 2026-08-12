@@ -1,13 +1,29 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { UpdateSettingsInput } from "@barber/types";
 import { apiClient } from "@/lib/api-client";
 
+const SETTINGS_QUERY_KEY = ["settings"] as const;
+
 export function useSettings() {
+  const queryClient = useQueryClient();
+
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["settings"],
+    queryKey: SETTINGS_QUERY_KEY,
     queryFn: () => apiClient.settings.get(),
   });
 
-  return { settings: data, isLoading, isError };
+  const updateMutation = useMutation({
+    mutationFn: (input: UpdateSettingsInput) => apiClient.settings.update(input),
+    onSuccess: (settings) => queryClient.setQueryData(SETTINGS_QUERY_KEY, settings),
+  });
+
+  return {
+    settings: data,
+    isLoading,
+    isError,
+    updateSettings: updateMutation.mutateAsync,
+    isUpdating: updateMutation.isPending,
+  };
 }

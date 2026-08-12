@@ -123,6 +123,9 @@ export type Settings = {
   secondaryColor: string | null;
   phone: string | null;
   address: string | null;
+  scheduleDays: string[];
+  scheduleOpen: string | null;
+  scheduleClose: string | null;
 };
 
 export type UpdateSettingsInput = Partial<{
@@ -132,6 +135,9 @@ export type UpdateSettingsInput = Partial<{
   secondaryColor: string;
   phone: string;
   address: string;
+  scheduleDays: string[];
+  scheduleOpen: string;
+  scheduleClose: string;
 }>;
 
 export type AppointmentsRange = "today" | "week";

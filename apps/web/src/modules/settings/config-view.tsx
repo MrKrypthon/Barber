@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { Avatar } from "@/components/avatar";
 import { Button } from "@/components/button";
 import { Card } from "@/components/card";
 import { ChevronRightIcon } from "@/components/icons";
@@ -11,6 +12,10 @@ import { Toggle } from "@/components/toggle";
 import { useAuth } from "@/hooks/use-auth";
 import { useSettings } from "@/hooks/use-settings";
 import { cn } from "@/lib/cn";
+import { formatSchedule } from "@/lib/format";
+import { resizeImageToDataUrl } from "@/lib/image";
+import { EditBusinessNameModal } from "./edit-business-name-modal";
+import { EditScheduleModal } from "./edit-schedule-modal";
 
 const DEFAULT_PRIMARY_COLOR = "#24406B";
 const DEFAULT_SECONDARY_COLOR = "#C0392B";
@@ -19,42 +24,74 @@ function ConfigRow({
   label,
   value,
   href,
+  onClick,
   dot,
 }: {
   label: string;
   value?: string;
   href?: string;
+  onClick?: () => void;
   dot?: string;
 }) {
   const content = (
     <div
       className={cn(
         "flex items-center gap-3 px-4 py-3.5",
-        href && "transition-colors duration-150 hover:bg-neutral-50 active:bg-neutral-100",
+        (href || onClick) && "transition-colors duration-150 hover:bg-neutral-50 active:bg-neutral-100",
       )}
     >
       {dot ? <span className="h-3 w-3 rounded-full" style={{ backgroundColor: dot }} /> : null}
       <span className="flex-1 font-medium">{label}</span>
       {value ? <span className="text-sm text-neutral-400">{value}</span> : null}
-      {href ? <ChevronRightIcon className="h-5 w-5 text-neutral-300" /> : null}
+      {href || onClick ? <ChevronRightIcon className="h-5 w-5 text-neutral-300" /> : null}
     </div>
   );
-  return href ? <Link href={href}>{content}</Link> : content;
+  if (href) return <Link href={href}>{content}</Link>;
+  if (onClick)
+    return (
+      <button type="button" onClick={onClick} className="block w-full text-left">
+        {content}
+      </button>
+    );
+  return content;
 }
 
 export function ConfigView() {
   const [reminderEnabled, setReminderEnabled] = useState(true);
-  const { logout } = useAuth();
-  const { settings, isLoading, isError } = useSettings();
+  const { user, logout } = useAuth();
+  const canEdit = user?.role === "owner";
+  const { settings, isLoading, isError, updateSettings, isUpdating } = useSettings();
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [editingName, setEditingName] = useState(false);
+  const [editingSchedule, setEditingSchedule] = useState(false);
+  const [photoError, setPhotoError] = useState<string | null>(null);
 
   async function handleLogout() {
     await logout();
     router.replace("/login");
   }
 
+  async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setPhotoError(null);
+    try {
+      const dataUrl = await resizeImageToDataUrl(file);
+      await updateSettings({ logo: dataUrl });
+    } catch {
+      setPhotoError("No se pudo actualizar la foto. Probá con otra imagen.");
+    }
+  }
+
   const primaryColor = settings?.primaryColor ?? DEFAULT_PRIMARY_COLOR;
   const secondaryColor = settings?.secondaryColor ?? DEFAULT_SECONDARY_COLOR;
+  const scheduleLabel = settings
+    ? formatSchedule(settings.scheduleDays, settings.scheduleOpen, settings.scheduleClose) ??
+      "No configurado"
+    : undefined;
 
   return (
     <div className="flex flex-col gap-4">
@@ -70,11 +107,44 @@ export function ConfigView() {
         </Card>
       ) : (
         <>
+          <Card className="flex flex-col items-center gap-3 py-6">
+            <Avatar
+              name={settings?.businessName ?? ""}
+              src={settings?.logo}
+              className="h-24 w-24 text-2xl"
+            />
+            {canEdit ? (
+              <>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handlePhotoChange}
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUpdating}
+                >
+                  {isUpdating ? "Subiendo..." : "Cambiar foto"}
+                </Button>
+                {photoError ? <p className="text-sm text-secondary">{photoError}</p> : null}
+              </>
+            ) : null}
+          </Card>
+
           <Card className="divide-y divide-neutral-100 p-0">
-            <ConfigRow label="Nombre del negocio" value={settings?.businessName} />
-            {/* Sin campo en el backend todavía (docs/DATABASE.md solo define
-                logo/colores/contacto para business_settings). */}
-            <ConfigRow label="Horario de atención" value="No configurado" />
+            <ConfigRow
+              label="Nombre del negocio"
+              value={settings?.businessName}
+              onClick={canEdit ? () => setEditingName(true) : undefined}
+            />
+            <ConfigRow
+              label="Horario de atención"
+              value={scheduleLabel}
+              onClick={canEdit ? () => setEditingSchedule(true) : undefined}
+            />
             <ConfigRow label="Servicios y precios" href="/config/servicios" dot={secondaryColor} />
             {/* Vista exclusiva del owner (mockup pág. 9); el gate por rol llega con auth. */}
             <ConfigRow label="Panel del administrador" href="/panel" dot={primaryColor} />
@@ -110,6 +180,32 @@ export function ConfigView() {
       <Button variant="danger-soft" fullWidth onClick={handleLogout}>
         Cerrar sesión
       </Button>
+
+      {editingName && settings ? (
+        <EditBusinessNameModal
+          currentName={settings.businessName}
+          onClose={() => setEditingName(false)}
+          isSaving={isUpdating}
+          onSave={async (businessName) => {
+            await updateSettings({ businessName });
+            setEditingName(false);
+          }}
+        />
+      ) : null}
+
+      {editingSchedule && settings ? (
+        <EditScheduleModal
+          currentDays={settings.scheduleDays}
+          currentOpen={settings.scheduleOpen}
+          currentClose={settings.scheduleClose}
+          onClose={() => setEditingSchedule(false)}
+          isSaving={isUpdating}
+          onSave={async (input) => {
+            await updateSettings(input);
+            setEditingSchedule(false);
+          }}
+        />
+      ) : null}
     </div>
   );
 }

@@ -10,6 +10,9 @@ export type SettingsResponse = {
   secondaryColor: string | null;
   phone: string | null;
   address: string | null;
+  scheduleDays: string[];
+  scheduleOpen: string | null;
+  scheduleClose: string | null;
 };
 
 function toSettingsResponse(tenant: Tenant, settings: BusinessSettings | null): SettingsResponse {
@@ -20,6 +23,9 @@ function toSettingsResponse(tenant: Tenant, settings: BusinessSettings | null): 
     secondaryColor: settings?.secondaryColor ?? null,
     phone: settings?.phone ?? null,
     address: settings?.address ?? null,
+    scheduleDays: settings?.scheduleDays ?? [],
+    scheduleOpen: settings?.scheduleOpen ?? null,
+    scheduleClose: settings?.scheduleClose ?? null,
   };
 }
 

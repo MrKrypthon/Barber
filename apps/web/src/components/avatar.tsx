@@ -1,6 +1,26 @@
 import { cn } from "@/lib/cn";
 
-export function Avatar({ name, className }: { name: string; className?: string }) {
+export function Avatar({
+  name,
+  src,
+  className,
+}: {
+  name: string;
+  src?: string | null;
+  className?: string;
+}) {
+  if (src) {
+    // object-cover: la imagen ya viene recortada a cuadrado (resizeImageToDataUrl),
+    // pero cover evita deformarla si algún logo viejo no lo está.
+    return (
+      <img
+        src={src}
+        alt={name}
+        className={cn("h-10 w-10 shrink-0 rounded-full object-cover", className)}
+      />
+    );
+  }
+
   const initials = name
     .split(" ")
     .filter(Boolean)
