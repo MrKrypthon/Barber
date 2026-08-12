@@ -25,7 +25,7 @@ export function DashboardView() {
           <h1 className="text-lg font-bold">{businessName}</h1>
           <p className="text-sm text-neutral-500">{formatLongDate(now)}</p>
         </div>
-        <Avatar name={businessName} />
+        <Avatar name={businessName} src={settings?.logo} />
       </header>
       <header className="hidden items-center justify-between md:flex">
         <div>
