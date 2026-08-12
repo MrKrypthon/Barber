@@ -49,9 +49,12 @@ export type CashMovement = {
 };
 
 export type DashboardSummary = {
+  // Ventas/Caja son "solo owner" en el backend (docs/API.md) — cuando es
+  // false, los campos financieros de abajo quedan en 0 y la vista no los
+  // pide/muestra (nunca llega a pedir un 403).
+  canViewFinancials: boolean;
   todaySalesTotal: number;
   todaySalesCount: number;
-  // Los turnos dependen del módulo Agenda (v0.2, docs/ROADMAP.md) — datos mock.
   appointmentsToday: number;
   nextAppointmentTime: string | null;
   cashTotal: number;
