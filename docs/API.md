@@ -102,7 +102,7 @@ Agenda manual (v0.2, `docs/ROADMAP.md`): el empleado registra los turnos recibid
 
 GET /api/v1/appointments
 
-&nbsp;&nbsp;Acepta `?date=<ISO date>&range=today|week` (default: hoy). `date` es la fecha de referencia para navegar la agenda a cualquier día/semana, no solo la actual.
+&nbsp;&nbsp;Acepta `?date=<ISO date>&range=today|week`; sin `range` devuelve todos los turnos del tenant (mismo criterio que `/sales` y `/customers`). `date` es la fecha de referencia para navegar la agenda a cualquier día/semana, no solo la actual.
 
 POST /api/v1/appointments
 

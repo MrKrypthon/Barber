@@ -8,8 +8,9 @@ import { formatCompactCurrency } from "@/lib/format";
 
 export function AdminPanelView() {
   const { summary } = useAdminSummary();
-  const maxRevenue = Math.max(...summary.weeklyRevenue.map((w) => w.value));
-  const maxCount = Math.max(...summary.topServices.map((s) => s.count));
+  // || 1 evita división por cero cuando el negocio todavía no tiene ventas.
+  const maxRevenue = Math.max(...summary.weeklyRevenue.map((w) => w.value)) || 1;
+  const maxCount = Math.max(...summary.topServices.map((s) => s.count)) || 1;
   const averagePct = Math.min(100, (summary.weeklyRevenueAverage / maxRevenue) * 100);
 
   return (
