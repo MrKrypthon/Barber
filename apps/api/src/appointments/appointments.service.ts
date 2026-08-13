@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { Appointment, Prisma } from "@prisma/client";
-import { getDateRangeBounds } from "../common/utils/date-range.util";
+import { DateRange, getDateRangeBounds } from "../common/utils/date-range.util";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateAppointmentDto } from "./dto/create-appointment.dto";
 import { UpdateAppointmentDto } from "./dto/update-appointment.dto";
@@ -52,12 +52,14 @@ function toAppointmentResponse(appointment: AppointmentWithRelations): Appointme
 export class AppointmentsService {
   constructor(private readonly prisma: PrismaService) {}
 
+  // Sin range, devuelve todos los turnos del tenant (igual que sales/customers
+  // cuando no se pasa filtro), en vez de asumir "today" implícitamente.
   async findAll(
     tenantId: string,
-    range?: "today" | "week",
+    range?: DateRange,
     date?: string,
   ): Promise<AppointmentResponse[]> {
-    const bounds = getDateRangeBounds(range ?? "today", date ? new Date(date) : undefined);
+    const bounds = getDateRangeBounds(range, date ? new Date(date) : undefined);
     const appointments = await this.prisma.appointment.findMany({
       where: {
         tenantId,
