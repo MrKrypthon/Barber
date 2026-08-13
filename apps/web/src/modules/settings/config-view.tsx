@@ -15,6 +15,7 @@ import { cn } from "@/lib/cn";
 import { formatSchedule } from "@/lib/format";
 import { resizeImageToDataUrl } from "@/lib/image";
 import { EditBusinessNameModal } from "./edit-business-name-modal";
+import { EditColorsModal } from "./edit-colors-modal";
 import { EditScheduleModal } from "./edit-schedule-modal";
 
 const DEFAULT_PRIMARY_COLOR = "#24406B";
@@ -66,6 +67,7 @@ export function ConfigView() {
 
   const [editingName, setEditingName] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState(false);
+  const [editingColors, setEditingColors] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
 
   async function handleLogout() {
@@ -151,8 +153,18 @@ export function ConfigView() {
           </Card>
 
           <Card className="divide-y divide-neutral-100 p-0">
-            <ConfigRow label="Color primario" value={primaryColor} dot={primaryColor} />
-            <ConfigRow label="Color secundario" value={secondaryColor} dot={secondaryColor} />
+            <ConfigRow
+              label="Color primario"
+              value={primaryColor}
+              dot={primaryColor}
+              onClick={canEdit ? () => setEditingColors(true) : undefined}
+            />
+            <ConfigRow
+              label="Color secundario"
+              value={secondaryColor}
+              dot={secondaryColor}
+              onClick={canEdit ? () => setEditingColors(true) : undefined}
+            />
             {/* Integración de WhatsApp es v0.4 (docs/ROADMAP.md) — todavía no existe. */}
             <div className="flex items-center gap-3 px-4 py-3.5">
               <span className="h-3 w-3 rounded-full bg-neutral-300" />
@@ -203,6 +215,19 @@ export function ConfigView() {
           onSave={async (input) => {
             await updateSettings(input);
             setEditingSchedule(false);
+          }}
+        />
+      ) : null}
+
+      {editingColors ? (
+        <EditColorsModal
+          currentPrimary={primaryColor}
+          currentSecondary={secondaryColor}
+          onClose={() => setEditingColors(false)}
+          isSaving={isUpdating}
+          onSave={async (input) => {
+            await updateSettings(input);
+            setEditingColors(false);
           }}
         />
       ) : null}
