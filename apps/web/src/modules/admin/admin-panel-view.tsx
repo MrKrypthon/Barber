@@ -18,7 +18,7 @@ export function AdminPanelView() {
       <PageHeader
         title="Panel del administrador"
         action={
-          <span className="rounded-full border border-neutral-200 bg-white px-3.5 py-1.5 text-sm text-neutral-500">
+          <span className="rounded-full border border-neutral-200 bg-white px-3.5 py-1.5 text-sm text-neutral-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-400">
             {summary.periodLabel}
           </span>
         }
@@ -28,7 +28,7 @@ export function AdminPanelView() {
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {summary.kpis.map((kpi) => (
           <Card key={kpi.label} className="flex flex-col gap-1">
-            <span className="text-sm text-neutral-500">{kpi.label}</span>
+            <span className="text-sm text-neutral-500 dark:text-neutral-400">{kpi.label}</span>
             <span className="text-2xl font-bold">{kpi.value}</span>
             <span
               className={cn(
@@ -47,13 +47,13 @@ export function AdminPanelView() {
         <Card>
           <div className="mb-4 flex items-baseline justify-between">
             <h2 className="font-semibold">Ingresos — últimas 6 semanas</h2>
-            <span className="text-xs text-neutral-400">
+            <span className="text-xs text-neutral-400 dark:text-neutral-500">
               Prom. {formatCompactCurrency(summary.weeklyRevenueAverage)}
             </span>
           </div>
           <div className="relative">
             <div
-              className="absolute inset-x-0 border-t border-dashed border-neutral-300"
+              className="absolute inset-x-0 border-t border-dashed border-neutral-300 dark:border-neutral-700"
               style={{ bottom: `${averagePct}%` }}
             />
             <div className="flex h-44 items-end justify-between gap-3">
@@ -61,14 +61,16 @@ export function AdminPanelView() {
                 const isLast = i === summary.weeklyRevenue.length - 1;
                 return (
                   <div key={w.label} className="flex h-full flex-1 flex-col items-center justify-end gap-1.5">
-                    <span className="text-xs text-neutral-400">
+                    <span className="text-xs text-neutral-400 dark:text-neutral-500">
                       {formatCompactCurrency(w.value)}
                     </span>
                     <div
                       className={cn("w-full max-w-12 rounded-t-lg", isLast ? "bg-primary" : "bg-primary/25")}
                       style={{ height: `${(w.value / maxRevenue) * 100}%` }}
                     />
-                    <span className={cn("text-xs", isLast ? "font-bold" : "text-neutral-400")}>
+                    <span
+                      className={cn("text-xs", isLast ? "font-bold" : "text-neutral-400 dark:text-neutral-500")}
+                    >
                       {w.label}
                     </span>
                   </div>
@@ -86,9 +88,9 @@ export function AdminPanelView() {
               <li key={s.name}>
                 <div className="mb-1 flex items-baseline justify-between">
                   <span className="text-sm font-medium">{s.name}</span>
-                  <span className="text-sm text-neutral-400">{s.count}</span>
+                  <span className="text-sm text-neutral-400 dark:text-neutral-500">{s.count}</span>
                 </div>
-                <div className="h-2 w-full rounded-full bg-neutral-100">
+                <div className="h-2 w-full rounded-full bg-neutral-100 dark:bg-neutral-800">
                   <div
                     className="h-2 rounded-full"
                     style={{ width: `${(s.count / maxCount) * 100}%`, backgroundColor: s.color }}

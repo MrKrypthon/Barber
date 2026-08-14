@@ -27,7 +27,7 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="w-full max-w-md origin-center animate-sheet-in rounded-2xl bg-white p-6 shadow-card-hover"
+        className="w-full max-w-md origin-center animate-sheet-in rounded-2xl bg-white p-6 shadow-card-hover dark:bg-neutral-900 dark:ring-1 dark:ring-neutral-800"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between gap-3">
@@ -36,7 +36,7 @@ export function Modal({
             type="button"
             onClick={onClose}
             aria-label="Cerrar"
-            className="-mr-1.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600"
+            className="-mr-1.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
           >
             <CloseIcon className="h-5 w-5" />
           </button>

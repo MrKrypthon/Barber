@@ -75,7 +75,7 @@ export function HourGutter() {
       {HOURS.map((h, i) => (
         <span
           key={h}
-          className="absolute right-1.5 -translate-y-1/2 text-xs text-neutral-400"
+          className="absolute right-1.5 -translate-y-1/2 text-xs text-neutral-400 dark:text-neutral-500"
           style={{ top: i * PX_PER_HOUR }}
         >
           {String(h).padStart(2, "0")}
@@ -95,7 +95,7 @@ export function HourLines() {
       {HOURS.map((h, i) => (
         <div
           key={h}
-          className="pointer-events-none absolute inset-x-0 border-t border-dashed border-neutral-300"
+          className="pointer-events-none absolute inset-x-0 border-t border-dashed border-neutral-300 dark:border-neutral-700"
           style={{ top: i * PX_PER_HOUR }}
         />
       ))}
@@ -199,7 +199,7 @@ export function DayTimeline({
         ? HOURS.map((h, i) => (
             <div
               key={h}
-              className="absolute inset-x-0 border-t border-neutral-100"
+              className="absolute inset-x-0 border-t border-neutral-100 dark:border-neutral-800"
               style={{ top: i * PX_PER_HOUR }}
             />
           ))

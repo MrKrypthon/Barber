@@ -20,14 +20,14 @@ export function PageHeader({
           <Link
             href={backHref}
             aria-label="Volver"
-            className="-ml-2 flex h-10 w-10 items-center justify-center rounded-full text-neutral-600 active:bg-neutral-200"
+            className="-ml-2 flex h-10 w-10 items-center justify-center rounded-full text-neutral-600 active:bg-neutral-200 dark:text-neutral-300 dark:active:bg-neutral-800"
           >
             <ChevronLeftIcon className="h-6 w-6" />
           </Link>
         ) : null}
         <div>
           <h1 className="text-xl font-bold md:text-2xl">{title}</h1>
-          {subtitle ? <p className="text-sm text-neutral-500">{subtitle}</p> : null}
+          {subtitle ? <p className="text-sm text-neutral-500 dark:text-neutral-400">{subtitle}</p> : null}
         </div>
       </div>
       {action}

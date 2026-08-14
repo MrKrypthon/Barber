@@ -47,34 +47,34 @@ export function CustomersView() {
         }
       />
 
-      <label className="mb-4 flex items-center gap-2 rounded-xl bg-white px-4 shadow-card">
-        <SearchIcon className="h-5 w-5 text-neutral-400" />
+      <label className="mb-4 flex items-center gap-2 rounded-xl bg-white px-4 shadow-card dark:bg-neutral-900 dark:ring-1 dark:ring-neutral-800">
+        <SearchIcon className="h-5 w-5 text-neutral-400 dark:text-neutral-500" />
         <input
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Buscar cliente..."
-          className="h-12 w-full bg-transparent outline-none placeholder:text-neutral-400"
+          className="h-12 w-full bg-transparent outline-none placeholder:text-neutral-400 dark:text-neutral-100 dark:placeholder:text-neutral-500"
         />
       </label>
 
       <Card className="p-0">
         {isLoading ? (
-          <p className="py-6 text-center text-neutral-400">Cargando clientes...</p>
+          <p className="py-6 text-center text-neutral-400 dark:text-neutral-500">Cargando clientes...</p>
         ) : isError ? (
           <p className="py-6 text-center text-secondary">No se pudieron cargar los clientes.</p>
         ) : (
           <>
-            <ul className="grid divide-y divide-neutral-100 md:grid-cols-2 md:divide-y-0">
+            <ul className="grid divide-y divide-neutral-100 dark:divide-neutral-800 md:grid-cols-2 md:divide-y-0">
               {filtered.map((c) => (
                 <li
                   key={c.id}
-                  className="flex items-center gap-3 px-4 py-3.5 transition-colors duration-150 hover:bg-neutral-50 md:border-b md:border-neutral-100"
+                  className="flex items-center gap-3 px-4 py-3.5 transition-colors duration-150 hover:bg-neutral-50 dark:hover:bg-neutral-800 md:border-b md:border-neutral-100 dark:md:border-neutral-800"
                 >
                   <Avatar name={c.name} />
                   <div className="flex-1">
                     <p className="font-medium">{c.name}</p>
-                    <p className="text-sm text-neutral-400">{formatRelativeVisit(null)}</p>
+                    <p className="text-sm text-neutral-400 dark:text-neutral-500">{formatRelativeVisit(null)}</p>
                   </div>
                   <span className="h-3 w-3 rounded-full bg-success/30 ring-4 ring-success/10">
                     <span className="sr-only">Activo</span>
@@ -83,7 +83,7 @@ export function CustomersView() {
               ))}
             </ul>
             {filtered.length === 0 ? (
-              <p className="py-6 text-center text-neutral-400">Sin resultados.</p>
+              <p className="py-6 text-center text-neutral-400 dark:text-neutral-500">Sin resultados.</p>
             ) : null}
           </>
         )}
@@ -96,20 +96,20 @@ export function CustomersView() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Nombre"
-            className="h-12 rounded-xl border border-neutral-200 px-4 outline-none focus:border-primary"
+            className="h-12 rounded-xl border border-neutral-200 bg-white px-4 outline-none focus:border-primary dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
           />
           <input
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="Teléfono (opcional)"
             inputMode="tel"
-            className="h-12 rounded-xl border border-neutral-200 px-4 outline-none focus:border-primary"
+            className="h-12 rounded-xl border border-neutral-200 bg-white px-4 outline-none focus:border-primary dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
           />
           <input
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Notas (opcional)"
-            className="h-12 rounded-xl border border-neutral-200 px-4 outline-none focus:border-primary"
+            className="h-12 rounded-xl border border-neutral-200 bg-white px-4 outline-none focus:border-primary dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
           />
           <Button fullWidth onClick={save} disabled={!name.trim() || isAdding}>
             {isAdding ? "Guardando..." : "Guardar cliente"}

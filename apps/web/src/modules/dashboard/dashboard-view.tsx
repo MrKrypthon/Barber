@@ -23,14 +23,14 @@ export function DashboardView() {
       <header className="flex items-center justify-between md:hidden">
         <div>
           <h1 className="text-lg font-bold">{businessName}</h1>
-          <p className="text-sm text-neutral-500">{formatLongDate(now)}</p>
+          <p className="text-sm text-neutral-500 dark:text-neutral-400">{formatLongDate(now)}</p>
         </div>
         <Avatar name={businessName} />
       </header>
       <header className="hidden items-center justify-between md:flex">
         <div>
           <h1 className="text-2xl font-bold">{greeting(now)}</h1>
-          <p className="text-sm text-neutral-500">{formatLongDate(now)}</p>
+          <p className="text-sm text-neutral-500 dark:text-neutral-400">{formatLongDate(now)}</p>
         </div>
         <Link href="/cobrar">
           <Button size="lg">Cobrar</Button>
@@ -58,7 +58,7 @@ export function DashboardView() {
         </Link>
         {summary.canViewFinancials ? (
           <StatCard label="Caja" value={`Efec. ${formatCurrency(summary.cashTotal)}`}>
-            <span className="text-xs text-neutral-400">
+            <span className="text-xs text-neutral-400 dark:text-neutral-500">
               Transf. {formatCurrency(summary.transferTotal)}
             </span>
           </StatCard>

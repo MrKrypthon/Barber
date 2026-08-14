@@ -41,7 +41,7 @@ export function EditScheduleModal({
     <Modal open onClose={onClose} title="Horario de atención">
       <div className="flex flex-col gap-5">
         <div>
-          <span className="text-xs font-semibold uppercase tracking-wide text-neutral-400">
+          <span className="text-xs font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
             Días abiertos
           </span>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -55,25 +55,25 @@ export function EditScheduleModal({
 
         <div className="grid grid-cols-2 gap-4">
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-semibold uppercase tracking-wide text-neutral-400">
+            <span className="text-xs font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
               Abre
             </span>
             <input
               type="time"
               value={open}
               onChange={(e) => setOpen(e.target.value)}
-              className="h-12 rounded-xl border border-neutral-200 px-4 outline-none focus:border-primary"
+              className="h-12 rounded-xl border border-neutral-200 bg-white px-4 outline-none focus:border-primary dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
             />
           </label>
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-semibold uppercase tracking-wide text-neutral-400">
+            <span className="text-xs font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
               Cierra
             </span>
             <input
               type="time"
               value={close}
               onChange={(e) => setClose(e.target.value)}
-              className="h-12 rounded-xl border border-neutral-200 px-4 outline-none focus:border-primary"
+              className="h-12 rounded-xl border border-neutral-200 bg-white px-4 outline-none focus:border-primary dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
             />
           </label>
         </div>

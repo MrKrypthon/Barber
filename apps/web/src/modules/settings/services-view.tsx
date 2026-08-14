@@ -28,16 +28,16 @@ export function ServicesView() {
 
       <Card className="p-0">
         {isLoading ? (
-          <p className="py-6 text-center text-neutral-400">Cargando servicios...</p>
+          <p className="py-6 text-center text-neutral-400 dark:text-neutral-500">Cargando servicios...</p>
         ) : isError ? (
           <p className="py-6 text-center text-secondary">No se pudieron cargar los servicios.</p>
         ) : (
           <ul className="grid md:grid-cols-2">
             {services.map((s) => (
-              <li key={s.id} className="border-b border-neutral-100">
+              <li key={s.id} className="border-b border-neutral-100 dark:border-neutral-800">
                 <Link
                   href={`/config/servicios/${s.id}`}
-                  className="flex items-center gap-3 px-4 py-3.5 transition-colors duration-150 hover:bg-neutral-50"
+                  className="flex items-center gap-3 px-4 py-3.5 transition-colors duration-150 hover:bg-neutral-50 dark:hover:bg-neutral-800"
                 >
                   <span
                     className="h-10 w-1.5 rounded-full"
@@ -46,11 +46,11 @@ export function ServicesView() {
                   <div className="flex-1">
                     <p className="font-medium">{s.name}</p>
                     {s.durationMinutes ? (
-                      <p className="text-sm text-neutral-400">{s.durationMinutes} min</p>
+                      <p className="text-sm text-neutral-400 dark:text-neutral-500">{s.durationMinutes} min</p>
                     ) : null}
                   </div>
                   <span className="font-bold">{formatCurrency(s.price)}</span>
-                  <ChevronRightIcon className="h-5 w-5 text-neutral-300" />
+                  <ChevronRightIcon className="h-5 w-5 text-neutral-300 dark:text-neutral-600" />
                 </Link>
               </li>
             ))}

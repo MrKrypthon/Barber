@@ -20,7 +20,7 @@ export function Toggle({
       onClick={() => onChange(!checked)}
       className={cn(
         "relative h-7 w-12 shrink-0 rounded-full transition-colors",
-        checked ? "bg-success" : "bg-neutral-300",
+        checked ? "bg-success" : "bg-neutral-300 dark:bg-neutral-700",
       )}
     >
       <span

@@ -86,7 +86,7 @@ export function AgendaView() {
                 type="button"
                 onClick={goToPreviousDay}
                 aria-label="Día anterior"
-                className="flex h-10 w-10 items-center justify-center rounded-full text-neutral-500 active:bg-neutral-200"
+                className="flex h-10 w-10 items-center justify-center rounded-full text-neutral-500 active:bg-neutral-200 dark:text-neutral-400 dark:active:bg-neutral-800"
               >
                 <ChevronLeftIcon className="h-5 w-5" />
               </button>
@@ -99,7 +99,7 @@ export function AgendaView() {
                 type="button"
                 onClick={goToNextDay}
                 aria-label="Día siguiente"
-                className="flex h-10 w-10 items-center justify-center rounded-full text-neutral-500 active:bg-neutral-200"
+                className="flex h-10 w-10 items-center justify-center rounded-full text-neutral-500 active:bg-neutral-200 dark:text-neutral-400 dark:active:bg-neutral-800"
               >
                 <ChevronRightIcon className="h-5 w-5" />
               </button>
@@ -110,7 +110,7 @@ export function AgendaView() {
                 type="button"
                 onClick={goToPreviousWeek}
                 aria-label="Semana anterior"
-                className="flex h-10 w-10 items-center justify-center rounded-full text-neutral-500 hover:bg-neutral-100"
+                className="flex h-10 w-10 items-center justify-center rounded-full text-neutral-500 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
               >
                 <ChevronLeftIcon className="h-5 w-5" />
               </button>
@@ -123,7 +123,7 @@ export function AgendaView() {
                 type="button"
                 onClick={goToNextWeek}
                 aria-label="Semana siguiente"
-                className="flex h-10 w-10 items-center justify-center rounded-full text-neutral-500 hover:bg-neutral-100"
+                className="flex h-10 w-10 items-center justify-center rounded-full text-neutral-500 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
               >
                 <ChevronRightIcon className="h-5 w-5" />
               </button>
@@ -156,7 +156,7 @@ export function AgendaView() {
             aria-pressed={selectedIndex === d.index}
             className="flex flex-col items-center gap-1.5 rounded-xl px-2 py-1.5"
           >
-            <span className="text-xs text-neutral-400">{d.dayLabel}</span>
+            <span className="text-xs text-neutral-400 dark:text-neutral-500">{d.dayLabel}</span>
             <span
               className={cn(
                 "flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold transition-colors duration-150",
@@ -164,7 +164,7 @@ export function AgendaView() {
                   ? "bg-primary text-white"
                   : d.isToday
                     ? "text-primary"
-                    : "text-neutral-600",
+                    : "text-neutral-600 dark:text-neutral-400",
               )}
             >
               {d.dayNumber}
@@ -180,11 +180,11 @@ export function AgendaView() {
         onPointerUp={handleSwipeEnd}
       >
         {isLoading ? (
-          <p className="py-10 text-center text-neutral-400">Cargando agenda...</p>
+          <p className="py-10 text-center text-neutral-400 dark:text-neutral-500">Cargando agenda...</p>
         ) : isError ? (
           <p className="py-10 text-center text-secondary">No se pudo cargar la agenda.</p>
         ) : appointments.length === 0 ? (
-          <p className="py-10 text-center text-neutral-400">Sin turnos para este día.</p>
+          <p className="py-10 text-center text-neutral-400 dark:text-neutral-500">Sin turnos para este día.</p>
         ) : (
           <div className="flex">
             <HourGutter />
@@ -205,17 +205,17 @@ export function AgendaView() {
       {/* Desktop: semana completa, estilo Google Calendar. */}
       <Card className="hidden overflow-x-auto p-0 md:block">
         <div className="flex min-w-[720px]">
-          <div className="w-10 shrink-0 border-b border-neutral-100 py-3" />
+          <div className="w-10 shrink-0 border-b border-neutral-100 py-3 dark:border-neutral-800" />
           {week.map((d) => (
             <div
               key={d.index}
-              className="flex flex-1 flex-col items-center gap-1 border-b border-l border-neutral-100 py-3"
+              className="flex flex-1 flex-col items-center gap-1 border-b border-l border-neutral-100 py-3 dark:border-neutral-800"
             >
-              <span className="text-xs text-neutral-400">{d.dayLabel}</span>
+              <span className="text-xs text-neutral-400 dark:text-neutral-500">{d.dayLabel}</span>
               <span
                 className={cn(
                   "flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold",
-                  d.isToday ? "bg-primary text-white" : "text-neutral-700",
+                  d.isToday ? "bg-primary text-white" : "text-neutral-700 dark:text-neutral-300",
                 )}
               >
                 {d.dayNumber}
@@ -224,7 +224,7 @@ export function AgendaView() {
           ))}
         </div>
         {isLoading ? (
-          <p className="py-10 text-center text-neutral-400">Cargando agenda...</p>
+          <p className="py-10 text-center text-neutral-400 dark:text-neutral-500">Cargando agenda...</p>
         ) : isError ? (
           <p className="py-10 text-center text-secondary">No se pudo cargar la agenda.</p>
         ) : (
@@ -236,7 +236,7 @@ export function AgendaView() {
             <HourLines />
             <HourGutter />
             {week.map((d) => (
-              <div key={d.index} className="flex-1 border-l border-neutral-100">
+              <div key={d.index} className="flex-1 border-l border-neutral-100 dark:border-neutral-800">
                 <DayTimeline
                   date={d.date}
                   appointments={appointmentsFor(d.index)}

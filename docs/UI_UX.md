@@ -34,6 +34,12 @@ Se aplican en tiempo real como variables CSS (`ThemeVars`, `apps/web/src/compone
 
 ---
 
+## Modo oscuro
+
+Preferencia por dispositivo (no por negocio): Claro / Oscuro / Sistema, elegible desde Configuración → Apariencia. "Sistema" sigue `prefers-color-scheme` del sistema operativo. Los colores de marca (primario/secundario) se mantienen iguales en ambos modos; lo que cambia son las superficies (fondo, tarjetas) y el texto neutro.
+
+---
+
 ## Diseño
 
 Minimalista.

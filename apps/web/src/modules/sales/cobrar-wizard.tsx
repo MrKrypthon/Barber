@@ -93,7 +93,7 @@ export function CobrarWizard() {
           type="button"
           onClick={goBack}
           aria-label="Volver"
-          className="-ml-2 flex h-10 w-10 items-center justify-center rounded-full text-neutral-600 active:bg-neutral-200"
+          className="-ml-2 flex h-10 w-10 items-center justify-center rounded-full text-neutral-600 active:bg-neutral-200 dark:text-neutral-300 dark:active:bg-neutral-800"
         >
           <ChevronLeftIcon className="h-6 w-6" />
         </button>
@@ -105,7 +105,7 @@ export function CobrarWizard() {
       {/* Paso 1 — Elegí el servicio */}
       {step === 1 ? (
         <section>
-          <p className="mb-3 text-sm text-neutral-500">1. Elegí el servicio</p>
+          <p className="mb-3 text-sm text-neutral-500 dark:text-neutral-400">1. Elegí el servicio</p>
           <div className="grid grid-cols-2 gap-3">
             {services
               .filter((s) => s.active)
@@ -114,7 +114,7 @@ export function CobrarWizard() {
                   key={s.id}
                   type="button"
                   onClick={() => pickService(s)}
-                  className="rounded-2xl bg-white p-5 text-left shadow-card transition duration-150 hover:shadow-card-hover active:scale-[0.98]"
+                  className="rounded-2xl bg-white p-5 text-left shadow-card transition duration-150 hover:shadow-card-hover active:scale-[0.98] dark:bg-neutral-900 dark:ring-1 dark:ring-neutral-800"
                 >
                   <p className="font-semibold">{s.name}</p>
                   <p className="mt-1 text-lg font-bold">{formatCurrency(s.price)}</p>
@@ -133,14 +133,14 @@ export function CobrarWizard() {
             </Chip>
           </div>
 
-          <label className="flex items-center gap-2 rounded-xl bg-white px-4 shadow-card">
-            <SearchIcon className="h-5 w-5 text-neutral-400" />
+          <label className="flex items-center gap-2 rounded-xl bg-white px-4 shadow-card dark:bg-neutral-900 dark:ring-1 dark:ring-neutral-800">
+            <SearchIcon className="h-5 w-5 text-neutral-400 dark:text-neutral-500" />
             <input
               type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar cliente..."
-              className="h-12 w-full bg-transparent outline-none placeholder:text-neutral-400"
+              className="h-12 w-full bg-transparent outline-none placeholder:text-neutral-400 dark:text-neutral-100 dark:placeholder:text-neutral-500"
             />
           </label>
 
@@ -152,7 +152,7 @@ export function CobrarWizard() {
                 onChange={(e) => setNewCustomerName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && saveNewCustomer()}
                 placeholder="Nombre del cliente"
-                className="h-12 flex-1 rounded-xl border border-secondary bg-white px-4 outline-none"
+                className="h-12 flex-1 rounded-xl border border-secondary bg-white px-4 outline-none dark:bg-neutral-900 dark:text-neutral-100"
               />
               <Button variant="secondary" onClick={saveNewCustomer} disabled={!newCustomerName.trim()}>
                 Guardar
@@ -165,29 +165,29 @@ export function CobrarWizard() {
           )}
 
           <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-400">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
               Recientes
             </p>
-            <Card className="divide-y divide-neutral-100 p-0">
+            <Card className="divide-y divide-neutral-100 p-0 dark:divide-neutral-800">
               <button
                 type="button"
                 onClick={() => pickCustomer(OCCASIONAL)}
-                className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors duration-150 hover:bg-neutral-50 active:bg-neutral-100"
+                className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors duration-150 hover:bg-neutral-50 active:bg-neutral-100 dark:hover:bg-neutral-800 dark:active:bg-neutral-700"
               >
                 <Avatar name="CO" className="bg-neutral-400" />
                 <span className="flex-1 font-medium">Cliente ocasional</span>
-                <ChevronRightIcon className="h-5 w-5 text-neutral-300" />
+                <ChevronRightIcon className="h-5 w-5 text-neutral-300 dark:text-neutral-600" />
               </button>
               {filteredCustomers.map((c) => (
                 <button
                   key={c.id}
                   type="button"
                   onClick={() => pickCustomer(c)}
-                  className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors duration-150 hover:bg-neutral-50 active:bg-neutral-100"
+                  className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors duration-150 hover:bg-neutral-50 active:bg-neutral-100 dark:hover:bg-neutral-800 dark:active:bg-neutral-700"
                 >
                   <Avatar name={c.name} />
                   <span className="flex-1 font-medium">{c.name}</span>
-                  <ChevronRightIcon className="h-5 w-5 text-neutral-300" />
+                  <ChevronRightIcon className="h-5 w-5 text-neutral-300 dark:text-neutral-600" />
                 </button>
               ))}
             </Card>
@@ -201,22 +201,22 @@ export function CobrarWizard() {
           <Card>
             <dl className="flex flex-col gap-2">
               <div className="flex justify-between">
-                <dt className="text-neutral-500">Cliente</dt>
+                <dt className="text-neutral-500 dark:text-neutral-400">Cliente</dt>
                 <dd className="font-semibold">{customerName}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-neutral-500">Servicio</dt>
+                <dt className="text-neutral-500 dark:text-neutral-400">Servicio</dt>
                 <dd className="font-semibold">{service.name}</dd>
               </div>
-              <div className="mt-2 flex items-baseline justify-between border-t border-neutral-100 pt-3">
-                <dt className="text-neutral-500">Total</dt>
+              <div className="mt-2 flex items-baseline justify-between border-t border-neutral-100 pt-3 dark:border-neutral-800">
+                <dt className="text-neutral-500 dark:text-neutral-400">Total</dt>
                 <dd className="text-3xl font-bold">{formatCurrency(service.price)}</dd>
               </div>
             </dl>
           </Card>
 
           <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-400">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
               Método de pago
             </p>
             <div className="flex gap-3">
@@ -247,7 +247,7 @@ export function CobrarWizard() {
           </div>
           <div>
             <h2 className="text-2xl font-bold">¡Cobrado!</h2>
-            <p className="mt-1 text-neutral-500">
+            <p className="mt-1 text-neutral-500 dark:text-neutral-400">
               {formatCurrency(service.price)} · {PAYMENT_METHOD_LABELS[paymentMethod]}
             </p>
           </div>

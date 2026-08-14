@@ -61,7 +61,7 @@ export function CashView() {
 
       {isLoading ? (
         <Card className="mb-4">
-          <p className="py-6 text-center text-neutral-400">Cargando caja...</p>
+          <p className="py-6 text-center text-neutral-400 dark:text-neutral-500">Cargando caja...</p>
         </Card>
       ) : isError || !summary ? (
         <Card className="mb-4">
@@ -71,17 +71,17 @@ export function CashView() {
         <>
           {/* Móvil: balance con desglose (mockup). Desktop: 3 stat cards. */}
           <Card className="mb-4 md:hidden">
-            <span className="text-sm text-neutral-500">Balance del día</span>
+            <span className="text-sm text-neutral-500 dark:text-neutral-400">Balance del día</span>
             <p className="mt-1 text-3xl font-bold">{formatCurrency(summary.balance)}</p>
-            <dl className="mt-3 flex flex-col gap-2 border-t border-neutral-100 pt-3">
+            <dl className="mt-3 flex flex-col gap-2 border-t border-neutral-100 pt-3 dark:border-neutral-800">
               <div className="flex items-center justify-between">
-                <dt className="flex items-center gap-2 text-neutral-600">
+                <dt className="flex items-center gap-2 text-neutral-600 dark:text-neutral-300">
                   <span className="h-2.5 w-2.5 rounded-full bg-primary" /> Ingresos
                 </dt>
                 <dd className="font-semibold">{formatCurrency(summary.income)}</dd>
               </div>
               <div className="flex items-center justify-between">
-                <dt className="flex items-center gap-2 text-neutral-600">
+                <dt className="flex items-center gap-2 text-neutral-600 dark:text-neutral-300">
                   <span className="h-2.5 w-2.5 rounded-full bg-secondary" /> Gastos
                 </dt>
                 <dd className="font-semibold">{formatCurrency(summary.expense)}</dd>
@@ -95,7 +95,7 @@ export function CashView() {
           </div>
 
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-xs font-semibold uppercase tracking-wide text-neutral-400">
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
               Movimientos de hoy
             </h2>
             <button
@@ -107,14 +107,16 @@ export function CashView() {
             </button>
           </div>
 
-          <Card className="divide-y divide-neutral-100 p-0">
+          <Card className="divide-y divide-neutral-100 p-0 dark:divide-neutral-800">
             {summary.movements.length === 0 ? (
-              <p className="py-6 text-center text-neutral-400">Sin movimientos manuales hoy.</p>
+              <p className="py-6 text-center text-neutral-400 dark:text-neutral-500">
+                Sin movimientos manuales hoy.
+              </p>
             ) : (
               summary.movements.map((m) => (
                 <div
                   key={m.id}
-                  className="flex items-center gap-4 px-4 py-3.5 transition-colors duration-150 hover:bg-neutral-50"
+                  className="flex items-center gap-4 px-4 py-3.5 transition-colors duration-150 hover:bg-neutral-50 dark:hover:bg-neutral-800"
                 >
                   <span className="w-12 text-sm font-semibold text-secondary">
                     {formatTime(m.createdAt)}
@@ -140,7 +142,7 @@ export function CashView() {
         title="Cerrar caja"
       >
         {summary ? (
-          <p className="mb-4 text-neutral-600">
+          <p className="mb-4 text-neutral-600 dark:text-neutral-300">
             Balance del día: <strong>{formatCurrency(summary.balance)}</strong> (Ingresos{" "}
             {formatCurrency(summary.income)} · Gastos {formatCurrency(summary.expense)}). Esta acción
             queda registrada y no se puede deshacer.
@@ -171,14 +173,14 @@ export function CashView() {
             value={expenseDescription}
             onChange={(e) => setExpenseDescription(e.target.value)}
             placeholder="Descripción"
-            className="h-12 rounded-xl border border-neutral-200 px-4 outline-none focus:border-primary"
+            className="h-12 rounded-xl border border-neutral-200 bg-white px-4 outline-none focus:border-primary dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
           />
           <input
             value={expenseAmount}
             onChange={(e) => setExpenseAmount(e.target.value)}
             placeholder="Monto"
             inputMode="numeric"
-            className="h-12 rounded-xl border border-neutral-200 px-4 outline-none focus:border-primary"
+            className="h-12 rounded-xl border border-neutral-200 bg-white px-4 outline-none focus:border-primary dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
           />
           <Button
             fullWidth

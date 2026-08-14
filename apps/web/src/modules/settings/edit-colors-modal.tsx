@@ -19,19 +19,21 @@ function ColorField({
 
   return (
     <label className="flex flex-col gap-1.5">
-      <span className="text-xs font-semibold uppercase tracking-wide text-neutral-400">{label}</span>
+      <span className="text-xs font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
+        {label}
+      </span>
       <div className="flex items-center gap-3">
         <input
           type="color"
           value={isValid ? value : "#000000"}
           onChange={(e) => onChange(e.target.value)}
-          className="h-12 w-12 shrink-0 cursor-pointer rounded-xl border border-neutral-200"
+          className="h-12 w-12 shrink-0 cursor-pointer rounded-xl border border-neutral-200 dark:border-neutral-700"
         />
         <input
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="#RRGGBB"
-          className="h-12 flex-1 rounded-xl border border-neutral-200 px-4 uppercase outline-none focus:border-primary"
+          className="h-12 flex-1 rounded-xl border border-neutral-200 bg-white px-4 uppercase outline-none focus:border-primary dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
         />
       </div>
     </label>

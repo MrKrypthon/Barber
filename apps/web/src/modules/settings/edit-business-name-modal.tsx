@@ -26,7 +26,7 @@ export function EditBusinessNameModal({
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Nombre del negocio"
-          className="h-12 rounded-xl border border-neutral-200 px-4 outline-none focus:border-primary"
+          className="h-12 rounded-xl border border-neutral-200 bg-white px-4 outline-none focus:border-primary dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
         />
         <div className="flex flex-col gap-3">
           {hasChanged ? (
