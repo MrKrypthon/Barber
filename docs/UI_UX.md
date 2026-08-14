@@ -28,6 +28,9 @@ Cada negocio podrá modificar:
 
 - Primario
 - Secundario
+- Fondo
+
+Se aplican en tiempo real como variables CSS (`ThemeVars`, `apps/web/src/components/theme-vars.tsx`) — cambiar un color en Configuración se refleja al instante en toda la app (sidebar, botones, fondo), sin recargar la página.
 
 ---
 

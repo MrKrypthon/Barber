@@ -20,6 +20,7 @@ import { EditScheduleModal } from "./edit-schedule-modal";
 
 const DEFAULT_PRIMARY_COLOR = "#24406B";
 const DEFAULT_SECONDARY_COLOR = "#C0392B";
+const DEFAULT_BACKGROUND_COLOR = "#F5F1E8";
 
 function ConfigRow({
   label,
@@ -41,7 +42,9 @@ function ConfigRow({
         (href || onClick) && "transition-colors duration-150 hover:bg-neutral-50 active:bg-neutral-100",
       )}
     >
-      {dot ? <span className="h-3 w-3 rounded-full" style={{ backgroundColor: dot }} /> : null}
+      {dot ? (
+        <span className="h-3 w-3 rounded-full border border-neutral-200" style={{ backgroundColor: dot }} />
+      ) : null}
       <span className="flex-1 font-medium">{label}</span>
       {value ? <span className="text-sm text-neutral-400">{value}</span> : null}
       {href || onClick ? <ChevronRightIcon className="h-5 w-5 text-neutral-300" /> : null}
@@ -90,6 +93,7 @@ export function ConfigView() {
 
   const primaryColor = settings?.primaryColor ?? DEFAULT_PRIMARY_COLOR;
   const secondaryColor = settings?.secondaryColor ?? DEFAULT_SECONDARY_COLOR;
+  const backgroundColor = settings?.backgroundColor ?? DEFAULT_BACKGROUND_COLOR;
   const scheduleLabel = settings
     ? formatSchedule(settings.scheduleDays, settings.scheduleOpen, settings.scheduleClose) ??
       "No configurado"
@@ -165,6 +169,12 @@ export function ConfigView() {
               dot={secondaryColor}
               onClick={canEdit ? () => setEditingColors(true) : undefined}
             />
+            <ConfigRow
+              label="Color de fondo"
+              value={backgroundColor}
+              dot={backgroundColor}
+              onClick={canEdit ? () => setEditingColors(true) : undefined}
+            />
             {/* Integración de WhatsApp es v0.4 (docs/ROADMAP.md) — todavía no existe. */}
             <div className="flex items-center gap-3 px-4 py-3.5">
               <span className="h-3 w-3 rounded-full bg-neutral-300" />
@@ -223,6 +233,7 @@ export function ConfigView() {
         <EditColorsModal
           currentPrimary={primaryColor}
           currentSecondary={secondaryColor}
+          currentBackground={backgroundColor}
           onClose={() => setEditingColors(false)}
           isSaving={isUpdating}
           onSave={async (input) => {

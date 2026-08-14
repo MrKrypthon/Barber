@@ -119,6 +119,7 @@ Corte de caja: snapshot inmutable del resumen del día al momento de cerrar (`PO
 - logo
 - primary_color
 - secondary_color
+- background_color
 - phone
 - address
 - created_at
