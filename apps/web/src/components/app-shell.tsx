@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { AppointmentNotifications } from "./appointment-notifications";
 import { BottomNav } from "./bottom-nav";
 import { Sidebar } from "./sidebar";
+import { WalkInFab } from "./walk-in-fab";
 
 // Layout compartido de las vistas internas: bottom nav en móvil,
 // sidebar en tablet/desktop (ver mockups en docs/Propuesta.pdf).
@@ -16,6 +17,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </main>
       </div>
       <BottomNav />
+      <WalkInFab />
     </div>
   );
 }
