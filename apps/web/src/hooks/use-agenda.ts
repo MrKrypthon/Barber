@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { Appointment as ApiAppointment } from "@barber/types";
+import type { Appointment as ApiAppointment, CreateAppointmentInput } from "@barber/types";
 import { apiClient } from "@/lib/api-client";
 import type { Appointment } from "@/mocks/types";
 
@@ -140,5 +140,21 @@ export function useAgenda() {
     changeService: changeServiceMutation.mutateAsync,
     isChangingService: changeServiceMutation.isPending,
     reschedule: rescheduleMutation.mutateAsync,
+  };
+}
+
+// Hook liviano para el flujo de "Nuevo turno" (apps/web/src/app/(app)/agenda/nuevo),
+// que no necesita el estado de navegación semanal de useAgenda.
+export function useCreateAppointment() {
+  const queryClient = useQueryClient();
+
+  const createMutation = useMutation({
+    mutationFn: (input: CreateAppointmentInput) => apiClient.appointments.create(input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["appointments"] }),
+  });
+
+  return {
+    createAppointment: createMutation.mutateAsync,
+    isCreating: createMutation.isPending,
   };
 }

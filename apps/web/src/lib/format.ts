@@ -42,6 +42,14 @@ export function formatRelativeVisit(iso: string | null): string {
   return weeks === 1 ? "Hace 1 semana" : `Hace ${weeks} semanas`;
 }
 
+// Combina una fecha (día) con un horario "HH:MM" en un único Date local.
+export function withTime(date: Date, time: string): Date {
+  const [h, m] = time.split(":").map(Number);
+  const result = new Date(date);
+  result.setHours(h, m, 0, 0);
+  return result;
+}
+
 export function isSameDay(iso: string, ref: Date): boolean {
   const d = new Date(iso);
   return (

@@ -1,12 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useRef, useState } from "react";
 import { Card } from "@/components/card";
-import { ChevronLeftIcon, ChevronRightIcon } from "@/components/icons";
+import { ChevronLeftIcon, ChevronRightIcon, PlusIcon } from "@/components/icons";
 import { PageHeader } from "@/components/page-header";
 import { useAgenda } from "@/hooks/use-agenda";
 import { cn } from "@/lib/cn";
-import { formatLongDate } from "@/lib/format";
+import { formatLongDate, withTime } from "@/lib/format";
 import type { Appointment } from "@/mocks/types";
 import { ChangeServiceModal } from "./change-service-modal";
 import { DayTimeline, HourGutter, useNow } from "./day-timeline";
@@ -16,13 +17,6 @@ const RESCHEDULE_CONFLICT_MESSAGE =
 // Swipe horizontal sobre el área del día (no solo los botones ‹ ›) para
 // cambiar de día en móvil, estilo Google Calendar.
 const SWIPE_THRESHOLD_PX = 60;
-
-function withTime(date: Date, time: string): Date {
-  const [h, m] = time.split(":").map(Number);
-  const result = new Date(date);
-  result.setHours(h, m, 0, 0);
-  return result;
-}
 
 export function AgendaView() {
   const {
@@ -134,6 +128,13 @@ export function AgendaView() {
                 <ChevronRightIcon className="h-5 w-5" />
               </button>
             </div>
+            <Link
+              href="/agenda/nuevo"
+              aria-label="Nuevo turno"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-white active:scale-95"
+            >
+              <PlusIcon className="h-5 w-5" />
+            </Link>
           </div>
         }
       />
