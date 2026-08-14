@@ -85,6 +85,24 @@ export function HourGutter() {
   );
 }
 
+// Una sola línea punteada por hora que atraviesa todo el ancho del
+// contenedor (las 7 columnas de la grilla semanal de escritorio), en vez de
+// que cada columna dibuje la suya por separado — así se ve como una única
+// línea continua en lugar de 7 segmentos con el punteado desalineado entre sí.
+export function HourLines() {
+  return (
+    <>
+      {HOURS.map((h, i) => (
+        <div
+          key={h}
+          className="pointer-events-none absolute inset-x-0 border-t border-dashed border-neutral-300"
+          style={{ top: i * PX_PER_HOUR }}
+        />
+      ))}
+    </>
+  );
+}
+
 // Estilo Google Calendar: líneas de grilla por hora, línea roja de "ahora"
 // (solo si el día mostrado es hoy), turnos como chips sólidos con el color
 // del servicio. Un tap/click corto abre el modal; mantener presionado activa
@@ -95,6 +113,7 @@ export function DayTimeline({
   appointments,
   now,
   showNowLine,
+  showHourLines = true,
   minWidth,
   onAppointmentClick,
   onAppointmentReschedule,
@@ -103,6 +122,10 @@ export function DayTimeline({
   appointments: Appointment[];
   now: Date | null;
   showNowLine: boolean;
+  // La grilla semanal de escritorio dibuja una única línea de hora que
+  // atraviesa las 7 columnas (ver HourLines en agenda-view.tsx), así que ahí
+  // se apaga la línea propia de cada columna para no duplicarla.
+  showHourLines?: boolean;
   minWidth?: number;
   onAppointmentClick?: (appointment: Appointment) => void;
   onAppointmentReschedule?: (appointment: Appointment, newStartTime: string) => void;
@@ -172,13 +195,15 @@ export function DayTimeline({
 
   return (
     <div className="relative min-w-0 flex-1" style={{ height: TIMELINE_HEIGHT, minWidth }}>
-      {HOURS.map((h, i) => (
-        <div
-          key={h}
-          className="absolute inset-x-0 border-t border-neutral-100"
-          style={{ top: i * PX_PER_HOUR }}
-        />
-      ))}
+      {showHourLines
+        ? HOURS.map((h, i) => (
+            <div
+              key={h}
+              className="absolute inset-x-0 border-t border-neutral-100"
+              style={{ top: i * PX_PER_HOUR }}
+            />
+          ))
+        : null}
 
       {currentOffset !== null ? (
         <div className="absolute inset-x-0 z-10 flex items-center gap-1" style={{ top: currentOffset }}>

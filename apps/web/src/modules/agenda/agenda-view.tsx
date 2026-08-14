@@ -10,7 +10,7 @@ import { cn } from "@/lib/cn";
 import { formatLongDate, withTime } from "@/lib/format";
 import type { Appointment } from "@/mocks/types";
 import { ChangeServiceModal } from "./change-service-modal";
-import { DayTimeline, HourGutter, useNow } from "./day-timeline";
+import { DayTimeline, HourGutter, HourLines, useNow } from "./day-timeline";
 
 const RESCHEDULE_CONFLICT_MESSAGE =
   "No se pudo mover el turno: el empleado ya tiene otro turno en ese horario.";
@@ -228,7 +228,12 @@ export function AgendaView() {
         ) : isError ? (
           <p className="py-10 text-center text-secondary">No se pudo cargar la agenda.</p>
         ) : (
-          <div className="flex min-w-[720px] px-0 pb-4 pt-2">
+          // padding-top/bottom serían el "containing block" de <HourLines />
+          // (absolute inset-0 se mide contra el padding-box), así que la
+          // separación visual va como margin en vez de padding para que las
+          // líneas queden alineadas exacto con el contenido de cada columna.
+          <div className="relative mb-4 mt-2 flex min-w-[720px]">
+            <HourLines />
             <HourGutter />
             {week.map((d) => (
               <div key={d.index} className="flex-1 border-l border-neutral-100">
@@ -237,6 +242,7 @@ export function AgendaView() {
                   appointments={appointmentsFor(d.index)}
                   now={now}
                   showNowLine={d.isToday}
+                  showHourLines={false}
                   onAppointmentClick={setSelectedAppointment}
                   onAppointmentReschedule={(appointment, newStartTime) =>
                     handleReschedule(d.date, appointment, newStartTime)
