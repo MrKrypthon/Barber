@@ -14,12 +14,22 @@ export type CreateUserInput = {
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
+  // findFirst (no findUnique) porque se combina con deletedAt: null — un
+  // empleado dado de baja no debe poder loguearse ni refrescar su sesión.
   findByEmail(email: string): Promise<User | null> {
-    return this.prisma.user.findUnique({ where: { email } });
+    return this.prisma.user.findFirst({ where: { email, deletedAt: null } });
   }
 
   findById(id: string): Promise<User | null> {
-    return this.prisma.user.findUnique({ where: { id } });
+    return this.prisma.user.findFirst({ where: { id, deletedAt: null } });
+  }
+
+  // El email es único a nivel de base de datos sin importar deletedAt (no se
+  // libera al dar de baja a un empleado), por eso este chequeo de
+  // disponibilidad no filtra por deletedAt como sí hacen findByEmail/findById.
+  async emailIsTaken(email: string): Promise<boolean> {
+    const user = await this.prisma.user.findUnique({ where: { email }, select: { id: true } });
+    return user !== null;
   }
 
   create(

@@ -35,6 +35,23 @@ export type CreateCustomerInput = {
 
 export type UpdateCustomerInput = Partial<CreateCustomerInput>;
 
+export type Employee = {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CreateEmployeeInput = {
+  name: string;
+  email: string;
+  password: string;
+};
+
+// password es opcional: el dueño solo la manda cuando quiere resetearla.
+export type UpdateEmployeeInput = Partial<CreateEmployeeInput>;
+
 export type Service = {
   id: string;
   name: string;

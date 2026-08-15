@@ -38,6 +38,28 @@ DELETE /api/v1/customers/{id}
 
 ---
 
+## Empleados
+
+Todas las rutas exclusivas de `owner` (`docs/PROJECT.md` — el rol `employee` no tiene esta capacidad). No hay envío de invitación por correo: el dueño define nombre, correo y contraseña inicial del empleado directamente.
+
+GET /api/v1/employees
+
+&nbsp;&nbsp;Lista solo usuarios con `role = employee` del tenant (no incluye al propio owner).
+
+POST /api/v1/employees
+
+&nbsp;&nbsp;Body: `{ name, email, password }`. Crea un usuario con `role = employee`. 409 si el correo ya existe (el email es único a nivel global, sin importar si la cuenta existente está dada de baja).
+
+PUT /api/v1/employees/{id}
+
+&nbsp;&nbsp;Body: `{ name?, email?, password? }`. `password` es opcional — se manda solo cuando el dueño quiere resetearla.
+
+DELETE /api/v1/employees/{id}
+
+&nbsp;&nbsp;Baja lógica (`deleted_at`, igual que `customers`/`services`/`appointments`): el empleado deja de poder loguearse o refrescar su sesión, pero sus ventas y turnos históricos no se tocan. También invalida cualquier refresh token ya emitido (mismo mecanismo que logout).
+
+---
+
 ## Servicios
 
 Mismo esquema de permisos que Clientes: GET para ambos roles, POST/PUT/DELETE solo `owner`.

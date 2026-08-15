@@ -10,10 +10,10 @@ import { LoginDto } from "./dto/login.dto";
 import { RefreshDto } from "./dto/refresh.dto";
 import { RegisterDto } from "./dto/register.dto";
 import { RefreshTokenPayload } from "./types/jwt-payload.type";
+import { hashPassword, SALT_ROUNDS } from "./password.util";
 
 const ACCESS_TOKEN_TTL = "15m";
 const REFRESH_TOKEN_TTL = "30d";
-const SALT_ROUNDS = 10;
 
 // Hash de una contraseña que nunca se usa para autenticar a nadie. Se compara
 // contra ella cuando el email no existe, para que login() tarde lo mismo con
@@ -47,12 +47,11 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto): Promise<AuthResult> {
-    const existing = await this.usersService.findByEmail(dto.email);
-    if (existing) {
+    if (await this.usersService.emailIsTaken(dto.email)) {
       throw new ConflictException("Ya existe una cuenta con este correo");
     }
 
-    const passwordHash = await bcrypt.hash(dto.password, SALT_ROUNDS);
+    const passwordHash = await hashPassword(dto.password);
 
     const user = await this.prisma.$transaction(async (tx) => {
       const tenant = await this.tenantsService.create(dto.businessName, tx);

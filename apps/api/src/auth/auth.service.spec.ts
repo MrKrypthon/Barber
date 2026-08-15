@@ -13,6 +13,7 @@ describe("AuthService", () => {
   let usersService: {
     findByEmail: jest.Mock;
     findById: jest.Mock;
+    emailIsTaken: jest.Mock;
     create: jest.Mock;
     incrementTokenVersion: jest.Mock;
   };
@@ -37,6 +38,7 @@ describe("AuthService", () => {
     usersService = {
       findByEmail: jest.fn(),
       findById: jest.fn(),
+      emailIsTaken: jest.fn(),
       create: jest.fn(),
       incrementTokenVersion: jest.fn(),
     };
@@ -59,7 +61,7 @@ describe("AuthService", () => {
 
   describe("register", () => {
     it("crea tenant + owner y devuelve tokens", async () => {
-      usersService.findByEmail.mockResolvedValue(null);
+      usersService.emailIsTaken.mockResolvedValue(false);
       tenantsService.create.mockResolvedValue({ id: "tenant-1", name: "Mi Barbería" });
       usersService.create.mockResolvedValue(baseUser);
 
@@ -82,7 +84,7 @@ describe("AuthService", () => {
     });
 
     it("rechaza si el correo ya existe", async () => {
-      usersService.findByEmail.mockResolvedValue(baseUser);
+      usersService.emailIsTaken.mockResolvedValue(true);
 
       await expect(
         authService.register({
