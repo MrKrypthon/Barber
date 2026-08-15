@@ -88,7 +88,7 @@ POST /api/v1/cash/close
 
 GET /api/v1/settings
 
-&nbsp;&nbsp;Disponible para `owner` y `employee` (lo usa el sidebar de toda la app). Devuelve `{ businessName, logo, primaryColor, secondaryColor, phone, address }`. `businessName` viene de `tenants.name` (existe desde Fase 1); el resto de `business_settings`, que es 1:1 con el tenant pero no se crea automáticamente al registrarse — antes de la primera edición, todos esos campos son `null`.
+&nbsp;&nbsp;Disponible para `owner` y `employee` (lo usa el sidebar de toda la app). Devuelve `{ businessName, logo, primaryColor, secondaryColor, backgroundColor, phone, address }`. `businessName` viene de `tenants.name` (existe desde Fase 1); el resto de `business_settings`, que es 1:1 con el tenant pero no se crea automáticamente al registrarse — antes de la primera edición, todos esos campos son `null`. El frontend aplica `primaryColor`/`secondaryColor`/`backgroundColor` como variables CSS en tiempo real (`ThemeVars`, `apps/web/src/components/theme-vars.tsx`); si son `null` usa los valores por defecto de `globals.css`.
 
 PUT /api/v1/settings
 

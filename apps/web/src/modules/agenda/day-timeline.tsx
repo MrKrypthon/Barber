@@ -75,13 +75,31 @@ export function HourGutter() {
       {HOURS.map((h, i) => (
         <span
           key={h}
-          className="absolute right-1.5 -translate-y-1/2 text-xs text-neutral-400"
+          className="absolute right-1.5 -translate-y-1/2 text-xs text-neutral-400 dark:text-neutral-500"
           style={{ top: i * PX_PER_HOUR }}
         >
           {String(h).padStart(2, "0")}
         </span>
       ))}
     </div>
+  );
+}
+
+// Una sola línea punteada por hora que atraviesa todo el ancho del
+// contenedor (las 7 columnas de la grilla semanal de escritorio), en vez de
+// que cada columna dibuje la suya por separado — así se ve como una única
+// línea continua en lugar de 7 segmentos con el punteado desalineado entre sí.
+export function HourLines() {
+  return (
+    <>
+      {HOURS.map((h, i) => (
+        <div
+          key={h}
+          className="pointer-events-none absolute inset-x-0 border-t border-dashed border-neutral-300 dark:border-neutral-700"
+          style={{ top: i * PX_PER_HOUR }}
+        />
+      ))}
+    </>
   );
 }
 
@@ -95,6 +113,7 @@ export function DayTimeline({
   appointments,
   now,
   showNowLine,
+  showHourLines = true,
   minWidth,
   onAppointmentClick,
   onAppointmentReschedule,
@@ -103,6 +122,10 @@ export function DayTimeline({
   appointments: Appointment[];
   now: Date | null;
   showNowLine: boolean;
+  // La grilla semanal de escritorio dibuja una única línea de hora que
+  // atraviesa las 7 columnas (ver HourLines en agenda-view.tsx), así que ahí
+  // se apaga la línea propia de cada columna para no duplicarla.
+  showHourLines?: boolean;
   minWidth?: number;
   onAppointmentClick?: (appointment: Appointment) => void;
   onAppointmentReschedule?: (appointment: Appointment, newStartTime: string) => void;
@@ -172,13 +195,15 @@ export function DayTimeline({
 
   return (
     <div className="relative min-w-0 flex-1" style={{ height: TIMELINE_HEIGHT, minWidth }}>
-      {HOURS.map((h, i) => (
-        <div
-          key={h}
-          className="absolute inset-x-0 border-t border-neutral-100"
-          style={{ top: i * PX_PER_HOUR }}
-        />
-      ))}
+      {showHourLines
+        ? HOURS.map((h, i) => (
+            <div
+              key={h}
+              className="absolute inset-x-0 border-t border-neutral-100 dark:border-neutral-800"
+              style={{ top: i * PX_PER_HOUR }}
+            />
+          ))
+        : null}
 
       {currentOffset !== null ? (
         <div className="absolute inset-x-0 z-10 flex items-center gap-1" style={{ top: currentOffset }}>

@@ -25,12 +25,12 @@ export function WeekChart({ week, average }: { week: DashboardSummary["week"]; a
   return (
     <div>
       <div className="mb-3 flex items-baseline justify-between">
-        <span className="text-sm text-neutral-500">Ventas de la semana</span>
+        <span className="text-sm text-neutral-500 dark:text-neutral-400">Ventas de la semana</span>
         <span className="text-lg font-bold">{formatCurrency(weekTotal)}</span>
       </div>
       <div className="relative">
         <div
-          className="absolute inset-x-0 border-t border-dashed border-neutral-300"
+          className="absolute inset-x-0 border-t border-dashed border-neutral-300 dark:border-neutral-700"
           style={{ bottom: `${averagePct}%` }}
         />
         <div className="flex h-36 items-end justify-between gap-2">
@@ -42,7 +42,7 @@ export function WeekChart({ week, average }: { week: DashboardSummary["week"]; a
               <div key={i} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
                 <span
                   className={cn(
-                    "text-[10px] font-semibold text-neutral-400 transition-opacity duration-300",
+                    "text-[10px] font-semibold text-neutral-400 transition-opacity duration-300 dark:text-neutral-500",
                     mounted ? "opacity-100" : "opacity-0",
                     isPeak && "text-primary",
                   )}
@@ -71,7 +71,11 @@ export function WeekChart({ week, average }: { week: DashboardSummary["week"]; a
                 <span
                   className={cn(
                     "text-xs",
-                    isPeak ? "font-bold text-primary" : i === week.length - 1 ? "font-bold" : "text-neutral-400",
+                    isPeak
+                      ? "font-bold text-primary"
+                      : i === week.length - 1
+                        ? "font-bold"
+                        : "text-neutral-400 dark:text-neutral-500",
                   )}
                 >
                   {d.dayLabel}
@@ -81,7 +85,7 @@ export function WeekChart({ week, average }: { week: DashboardSummary["week"]; a
           })}
         </div>
       </div>
-      <div className="mt-3 flex items-center justify-between text-xs text-neutral-500">
+      <div className="mt-3 flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400">
         <div className="flex gap-4">
           <span className="flex items-center gap-1.5">
             <span className="h-2.5 w-2.5 rounded-sm bg-primary" /> Efectivo

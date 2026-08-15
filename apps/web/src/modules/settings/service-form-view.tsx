@@ -55,7 +55,7 @@ export function ServiceFormView({ serviceId }: { serviceId?: string }) {
     return (
       <div>
         <PageHeader title="Editar servicio" backHref="/config/servicios" />
-        <p className="py-10 text-center text-neutral-400">
+        <p className="py-10 text-center text-neutral-400 dark:text-neutral-500">
           {isLoading ? "Cargando..." : "Servicio no encontrado."}
         </p>
       </div>
@@ -69,7 +69,7 @@ export function ServiceFormView({ serviceId }: { serviceId?: string }) {
       <Card className="flex flex-col gap-5">
         <div className="grid gap-4 md:grid-cols-[1fr_10rem]">
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-semibold uppercase tracking-wide text-neutral-400">
+            <span className="text-xs font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
               Nombre
             </span>
             <input
@@ -77,11 +77,11 @@ export function ServiceFormView({ serviceId }: { serviceId?: string }) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Corte + Diseño"
-              className="h-12 rounded-xl border border-neutral-200 px-4 outline-none focus:border-primary"
+              className="h-12 rounded-xl border border-neutral-200 bg-white px-4 outline-none focus:border-primary dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
             />
           </label>
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-semibold uppercase tracking-wide text-neutral-400">
+            <span className="text-xs font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
               Precio
             </span>
             <input
@@ -89,13 +89,13 @@ export function ServiceFormView({ serviceId }: { serviceId?: string }) {
               onChange={(e) => setPrice(e.target.value)}
               placeholder="$9.500"
               inputMode="numeric"
-              className="h-12 rounded-xl border border-neutral-200 px-4 outline-none focus:border-primary"
+              className="h-12 rounded-xl border border-neutral-200 bg-white px-4 outline-none focus:border-primary dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
             />
           </label>
         </div>
 
         <div>
-          <span className="text-xs font-semibold uppercase tracking-wide text-neutral-400">
+          <span className="text-xs font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
             Duración
           </span>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -108,7 +108,7 @@ export function ServiceFormView({ serviceId }: { serviceId?: string }) {
         </div>
 
         <div>
-          <span className="text-xs font-semibold uppercase tracking-wide text-neutral-400">
+          <span className="text-xs font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
             Color
           </span>
           <div className="mt-2 flex gap-3">
@@ -121,7 +121,7 @@ export function ServiceFormView({ serviceId }: { serviceId?: string }) {
                 onClick={() => setColor(c)}
                 className={cn(
                   "h-10 w-10 rounded-full transition",
-                  color === c && "ring-2 ring-offset-2 ring-neutral-800",
+                  color === c && "ring-2 ring-offset-2 ring-neutral-800 dark:ring-offset-neutral-900",
                 )}
                 style={{ backgroundColor: c }}
               />

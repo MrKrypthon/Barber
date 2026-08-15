@@ -9,7 +9,7 @@ export function StepIndicator({ step, total = 3 }: { step: number; total?: numbe
           key={i}
           className={cn(
             "h-1.5 w-8 rounded-full",
-            i < step ? "bg-secondary" : "bg-neutral-300",
+            i < step ? "bg-secondary" : "bg-neutral-300 dark:bg-neutral-700",
           )}
         />
       ))}

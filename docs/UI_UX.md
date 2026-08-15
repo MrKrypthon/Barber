@@ -28,6 +28,15 @@ Cada negocio podrá modificar:
 
 - Primario
 - Secundario
+- Fondo
+
+Se aplican en tiempo real como variables CSS (`ThemeVars`, `apps/web/src/components/theme-vars.tsx`) — cambiar un color en Configuración se refleja al instante en toda la app (sidebar, botones, fondo), sin recargar la página.
+
+---
+
+## Modo oscuro
+
+Preferencia por dispositivo (no por negocio): Claro / Oscuro / Sistema, elegible desde Configuración → Apariencia. "Sistema" sigue `prefers-color-scheme` del sistema operativo. Los colores de marca (primario/secundario) se mantienen iguales en ambos modos; lo que cambia son las superficies (fondo, tarjetas) y el texto neutro.
 
 ---
 

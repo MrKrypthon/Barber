@@ -21,7 +21,7 @@ export function Chip({
         "min-h-11 rounded-xl px-4 text-sm font-semibold transition",
         selected
           ? "bg-primary text-white"
-          : "border border-neutral-200 bg-white text-neutral-600",
+          : "border border-neutral-200 bg-white text-neutral-600 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300",
         className,
       )}
     >

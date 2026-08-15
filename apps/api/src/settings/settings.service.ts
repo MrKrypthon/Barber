@@ -8,6 +8,7 @@ export type SettingsResponse = {
   logo: string | null;
   primaryColor: string | null;
   secondaryColor: string | null;
+  backgroundColor: string | null;
   phone: string | null;
   address: string | null;
   scheduleDays: string[];
@@ -21,6 +22,7 @@ function toSettingsResponse(tenant: Tenant, settings: BusinessSettings | null): 
     logo: settings?.logo ?? null,
     primaryColor: settings?.primaryColor ?? null,
     secondaryColor: settings?.secondaryColor ?? null,
+    backgroundColor: settings?.backgroundColor ?? null,
     phone: settings?.phone ?? null,
     address: settings?.address ?? null,
     scheduleDays: settings?.scheduleDays ?? [],

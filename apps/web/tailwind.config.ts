@@ -5,6 +5,7 @@ import type { Config } from "tailwindcss";
 // business_settings en docs/DATABASE.md). Tailwind los expone como clases
 // (bg-primary, text-secondary, ...) con soporte de opacidad via <alpha-value>.
 const config: Config = {
+  darkMode: "class",
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     extend: {

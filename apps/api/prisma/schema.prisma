@@ -7,7 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 enum Role {
   owner
   employee
@@ -42,21 +41,21 @@ model Tenant {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  tenantId  String   @map("tenant_id")
-  name      String
-  email     String   @unique
-  password  String
-  role      Role
+  id           String   @id @default(uuid())
+  tenantId     String   @map("tenant_id")
+  name         String
+  email        String   @unique
+  password     String
+  role         Role
   // Incrementado en logout para invalidar refresh tokens ya emitidos.
   // No forma parte del modelo documentado en docs/DATABASE.md porque es un
   // detalle de implementación del flujo de auth, no un campo de negocio.
-  tokenVersion Int   @default(0) @map("token_version")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  tokenVersion Int      @default(0) @map("token_version")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
-  tenant Tenant @relation(fields: [tenantId], references: [id])
-  sales  Sale[]
+  tenant       Tenant        @relation(fields: [tenantId], references: [id])
+  sales        Sale[]
   cashClosings CashClosing[]
   appointments Appointment[]
 
@@ -74,8 +73,8 @@ model Customer {
   updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
-  tenant Tenant @relation(fields: [tenantId], references: [id])
-  sales  Sale[]
+  tenant       Tenant        @relation(fields: [tenantId], references: [id])
+  sales        Sale[]
   appointments Appointment[]
 
   @@index([tenantId])
@@ -95,8 +94,8 @@ model Service {
   updatedAt       DateTime  @updatedAt @map("updated_at")
   deletedAt       DateTime? @map("deleted_at")
 
-  tenant Tenant @relation(fields: [tenantId], references: [id])
-  saleItems SaleItem[]
+  tenant       Tenant        @relation(fields: [tenantId], references: [id])
+  saleItems    SaleItem[]
   appointments Appointment[]
 
   @@index([tenantId])
@@ -138,12 +137,12 @@ model SaleItem {
 }
 
 model CashMovement {
-  id          String            @id @default(uuid())
-  tenantId    String            @map("tenant_id")
+  id          String           @id @default(uuid())
+  tenantId    String           @map("tenant_id")
   type        CashMovementType
-  amount      Decimal           @db.Decimal(10, 2)
+  amount      Decimal          @db.Decimal(10, 2)
   description String?
-  createdAt   DateTime          @default(now()) @map("created_at")
+  createdAt   DateTime         @default(now()) @map("created_at")
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
 
@@ -177,22 +176,23 @@ model CashClosing {
 // Fase 1); esta tabla solo agrega lo que docs/DATABASE.md ya documentaba
 // como pendiente (logo, colores, contacto).
 model BusinessSettings {
-  tenantId       String   @id @map("tenant_id")
+  tenantId        String   @id @map("tenant_id")
   // Data URI (base64) de la foto/logo, ya redimensionada y comprimida en el
   // cliente antes de subirla — no hay almacenamiento de archivos en el MVP
   // (docs/DECISIONS.md), se guarda directo en la fila.
-  logo           String?
-  primaryColor   String?  @map("primary_color")
-  secondaryColor String?  @map("secondary_color")
-  phone          String?
-  address        String?
+  logo            String?
+  primaryColor    String?  @map("primary_color")
+  secondaryColor  String?  @map("secondary_color")
+  backgroundColor String?  @map("background_color")
+  phone           String?
+  address         String?
   // Horario de atención: días abiertos + un único rango horario para todos
   // esos días (sin horarios distintos por día — MVP simple, docs/ROADMAP.md).
-  scheduleDays   String[] @default([]) @map("schedule_days")
-  scheduleOpen   String?  @map("schedule_open")
-  scheduleClose  String?  @map("schedule_close")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  scheduleDays    String[] @default([]) @map("schedule_days")
+  scheduleOpen    String?  @map("schedule_open")
+  scheduleClose   String?  @map("schedule_close")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
 

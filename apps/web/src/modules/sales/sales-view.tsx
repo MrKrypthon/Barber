@@ -31,7 +31,7 @@ export function SalesView() {
 
       {isLoading ? (
         <Card>
-          <p className="py-6 text-center text-neutral-400">Cargando ventas...</p>
+          <p className="py-6 text-center text-neutral-400 dark:text-neutral-500">Cargando ventas...</p>
         </Card>
       ) : isError ? (
         <Card>
@@ -39,21 +39,23 @@ export function SalesView() {
         </Card>
       ) : sales.length === 0 ? (
         <Card>
-          <p className="py-6 text-center text-neutral-400">No hay ventas en este período.</p>
+          <p className="py-6 text-center text-neutral-400 dark:text-neutral-500">
+            No hay ventas en este período.
+          </p>
         </Card>
       ) : (
-        <Card className="divide-y divide-neutral-100 p-0">
+        <Card className="divide-y divide-neutral-100 p-0 dark:divide-neutral-800">
           {sales.map((sale) => (
             <div
               key={sale.id}
-              className="flex items-center gap-4 px-4 py-3.5 transition-colors duration-150 hover:bg-neutral-50"
+              className="flex items-center gap-4 px-4 py-3.5 transition-colors duration-150 hover:bg-neutral-50 dark:hover:bg-neutral-800"
             >
               <span className="w-12 text-sm font-semibold text-secondary">
                 {formatTime(sale.createdAt)}
               </span>
               <div className="flex-1">
                 <p className="font-medium">{sale.customer?.name ?? "Cliente ocasional"}</p>
-                <p className="text-sm text-neutral-400">
+                <p className="text-sm text-neutral-400 dark:text-neutral-500">
                   {sale.items.map((item) => item.serviceName).join(" + ")}
                 </p>
               </div>

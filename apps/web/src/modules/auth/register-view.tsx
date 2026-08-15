@@ -42,7 +42,7 @@ export function RegisterView() {
     <div className="flex min-h-screen items-center justify-center px-4">
       <Card className="w-full max-w-sm">
         <h1 className="mb-1 text-xl font-semibold">Crea tu negocio</h1>
-        <p className="mb-6 text-sm text-neutral-400">Configura tu cuenta como propietario.</p>
+        <p className="mb-6 text-sm text-neutral-400 dark:text-neutral-500">Configura tu cuenta como propietario.</p>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <input
@@ -51,14 +51,14 @@ export function RegisterView() {
             value={businessName}
             onChange={(e) => setBusinessName(e.target.value)}
             placeholder="Nombre del negocio"
-            className="h-12 rounded-xl border border-neutral-200 px-4 outline-none focus:border-primary"
+            className="h-12 rounded-xl border border-neutral-200 bg-white px-4 outline-none focus:border-primary dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
           />
           <input
             required
             value={ownerName}
             onChange={(e) => setOwnerName(e.target.value)}
             placeholder="Tu nombre"
-            className="h-12 rounded-xl border border-neutral-200 px-4 outline-none focus:border-primary"
+            className="h-12 rounded-xl border border-neutral-200 bg-white px-4 outline-none focus:border-primary dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
           />
           <input
             type="email"
@@ -66,7 +66,7 @@ export function RegisterView() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Correo"
-            className="h-12 rounded-xl border border-neutral-200 px-4 outline-none focus:border-primary"
+            className="h-12 rounded-xl border border-neutral-200 bg-white px-4 outline-none focus:border-primary dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
           />
           <input
             type="password"
@@ -75,7 +75,7 @@ export function RegisterView() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Contraseña (mínimo 8 caracteres)"
-            className="h-12 rounded-xl border border-neutral-200 px-4 outline-none focus:border-primary"
+            className="h-12 rounded-xl border border-neutral-200 bg-white px-4 outline-none focus:border-primary dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
           />
           {error ? <p className="text-sm text-secondary">{error}</p> : null}
           <Button type="submit" fullWidth disabled={submitting}>
@@ -83,7 +83,7 @@ export function RegisterView() {
           </Button>
         </form>
 
-        <p className="mt-4 text-center text-sm text-neutral-400">
+        <p className="mt-4 text-center text-sm text-neutral-400 dark:text-neutral-500">
           ¿Ya tienes cuenta?{" "}
           <Link href="/login" className="font-medium text-primary">
             Inicia sesión

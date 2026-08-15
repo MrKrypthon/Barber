@@ -10,10 +10,10 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 const VARIANTS: Record<NonNullable<ButtonProps["variant"]>, string> = {
   primary: "bg-primary text-white shadow-button hover:brightness-110",
   secondary: "bg-secondary text-white shadow-button-secondary hover:brightness-110",
-  outline: "bg-white text-neutral-700 border border-neutral-200",
-  "danger-outline": "bg-white text-secondary border border-secondary",
+  outline: "bg-white text-neutral-700 border border-neutral-200 dark:bg-neutral-900 dark:text-neutral-200 dark:border-neutral-700",
+  "danger-outline": "bg-white text-secondary border border-secondary dark:bg-neutral-900",
   success: "bg-success text-white shadow-button hover:brightness-110",
-  dark: "bg-neutral-900 text-white shadow-button hover:brightness-110",
+  dark: "bg-neutral-900 text-white shadow-button hover:brightness-110 dark:bg-neutral-700",
   "danger-soft": "bg-secondary-light text-secondary",
 };
 

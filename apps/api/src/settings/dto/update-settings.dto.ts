@@ -24,6 +24,10 @@ export class UpdateSettingsDto {
   secondaryColor?: string;
 
   @IsOptional()
+  @IsHexColor()
+  backgroundColor?: string;
+
+  @IsOptional()
   @IsString()
   phone?: string;
 

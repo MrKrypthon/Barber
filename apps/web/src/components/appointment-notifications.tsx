@@ -53,7 +53,7 @@ function AppointmentToast({
     <Link
       href="/agenda"
       className={cn(
-        "pointer-events-auto flex w-full max-w-sm items-center gap-3 rounded-2xl bg-white p-4 shadow-card-hover transition-all duration-200 md:w-96",
+        "pointer-events-auto flex w-full max-w-sm items-center gap-3 rounded-2xl bg-white p-4 shadow-card-hover transition-all duration-200 dark:bg-neutral-900 dark:ring-1 dark:ring-neutral-800 md:w-96",
         leaving ? "-translate-y-2 opacity-0" : "animate-sheet-in opacity-100",
       )}
     >
@@ -64,7 +64,7 @@ function AppointmentToast({
         <p className="truncate text-sm font-semibold">
           Turno con {notification.customerName} en {notification.minutesUntil} min
         </p>
-        <p className="truncate text-xs text-neutral-500">{notification.serviceName}</p>
+        <p className="truncate text-xs text-neutral-500 dark:text-neutral-400">{notification.serviceName}</p>
       </div>
       <button
         type="button"
@@ -74,7 +74,7 @@ function AppointmentToast({
           setLeaving(true);
         }}
         aria-label="Cerrar aviso"
-        className="shrink-0 text-neutral-300 transition-colors hover:text-neutral-500"
+        className="shrink-0 text-neutral-300 transition-colors hover:text-neutral-500 dark:text-neutral-600 dark:hover:text-neutral-400"
       >
         <PlusIcon className="h-5 w-5 rotate-45" />
       </button>

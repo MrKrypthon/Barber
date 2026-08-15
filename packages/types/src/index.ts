@@ -121,6 +121,7 @@ export type Settings = {
   logo: string | null;
   primaryColor: string | null;
   secondaryColor: string | null;
+  backgroundColor: string | null;
   phone: string | null;
   address: string | null;
   scheduleDays: string[];
@@ -133,6 +134,7 @@ export type UpdateSettingsInput = Partial<{
   logo: string;
   primaryColor: string;
   secondaryColor: string;
+  backgroundColor: string;
   phone: string;
   address: string;
   scheduleDays: string[];
