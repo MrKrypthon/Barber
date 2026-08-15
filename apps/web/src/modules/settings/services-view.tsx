@@ -45,8 +45,15 @@ export function ServicesView() {
                   />
                   <div className="flex-1">
                     <p className="font-medium">{s.name}</p>
-                    {s.durationMinutes ? (
-                      <p className="text-sm text-neutral-400 dark:text-neutral-500">{s.durationMinutes} min</p>
+                    {s.durationMinutes || s.commissionPercent ? (
+                      <p className="text-sm text-neutral-400 dark:text-neutral-500">
+                        {[
+                          s.durationMinutes ? `${s.durationMinutes} min` : null,
+                          s.commissionPercent ? `${s.commissionPercent}% comisión` : null,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </p>
                     ) : null}
                   </div>
                   <span className="font-bold">{formatCurrency(s.price)}</span>

@@ -11,6 +11,7 @@ export type ServiceResponse = {
   active: boolean;
   durationMinutes: number | null;
   color: string | null;
+  commissionPercent: number | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -23,6 +24,8 @@ function toServiceResponse(service: Service): ServiceResponse {
     active: service.active,
     durationMinutes: service.durationMinutes,
     color: service.color,
+    commissionPercent:
+      service.commissionPercent === null ? null : Number(service.commissionPercent),
     createdAt: service.createdAt,
     updatedAt: service.updatedAt,
   };
@@ -49,6 +52,7 @@ export class ServicesService {
         active: dto.active ?? true,
         durationMinutes: dto.durationMinutes,
         color: dto.color,
+        commissionPercent: dto.commissionPercent,
       },
     });
     return toServiceResponse(service);

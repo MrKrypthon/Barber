@@ -72,7 +72,11 @@ GET /api/v1/services
 
 POST /api/v1/services
 
+&nbsp;&nbsp;`commissionPercent` (0-100, opcional) define qué % se lleva de comisión quien realice el servicio; sin configurar, el servicio no genera comisión. Se usa en el Panel del administrador para calcular comisiones por empleado sobre sus ventas del mes.
+
 PUT /api/v1/services/{id}
+
+&nbsp;&nbsp;`commissionPercent: null` borra una comisión ya configurada (distinto de omitir el campo, que deja el valor actual sin tocar).
 
 DELETE /api/v1/services/{id}
 

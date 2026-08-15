@@ -67,6 +67,9 @@ export type Service = {
   active: boolean;
   durationMinutes: number | null;
   color: string | null;
+  // % (0-100) de comisión para quien realice este servicio. null = sin
+  // comisión configurada.
+  commissionPercent: number | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -77,6 +80,8 @@ export type CreateServiceInput = {
   active?: boolean;
   durationMinutes?: number;
   color?: string;
+  // null sirve para borrar una comisión ya puesta al editar (Partial abajo).
+  commissionPercent?: number | null;
 };
 
 export type UpdateServiceInput = Partial<CreateServiceInput>;

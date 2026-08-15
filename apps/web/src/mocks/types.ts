@@ -92,4 +92,6 @@ export type AdminSummary = {
   weeklyRevenueAverage: number;
   topServices: { name: string; count: number; color: string }[];
   suggestion: string;
+  // Solo servicios con commissionPercent configurado aportan acá.
+  commissions: { employeeId: string; employeeName: string; amount: number }[];
 };
