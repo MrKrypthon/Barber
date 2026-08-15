@@ -9,9 +9,11 @@ import type {
   CreateAppointmentInput,
   CreateCashMovementInput,
   CreateCustomerInput,
+  CreateEmployeeInput,
   CreateSaleInput,
   CreateServiceInput,
   Customer,
+  Employee,
   PublicUser,
   Sale,
   SalesRange,
@@ -19,6 +21,7 @@ import type {
   Settings,
   UpdateAppointmentInput,
   UpdateCustomerInput,
+  UpdateEmployeeInput,
   UpdateServiceInput,
   UpdateSettingsInput,
 } from "@barber/types";
@@ -132,6 +135,14 @@ export function createApiClient(config: ApiClientConfig) {
         call<Customer>(`/customers/${id}`, { method: "PUT", body: JSON.stringify(input) }),
       remove: (id: string) => call<{ success: boolean }>(`/customers/${id}`, { method: "DELETE" }),
     },
+    employees: {
+      list: () => call<Employee[]>("/employees"),
+      create: (input: CreateEmployeeInput) =>
+        call<Employee>("/employees", { method: "POST", body: JSON.stringify(input) }),
+      update: (id: string, input: UpdateEmployeeInput) =>
+        call<Employee>(`/employees/${id}`, { method: "PUT", body: JSON.stringify(input) }),
+      remove: (id: string) => call<{ success: boolean }>(`/employees/${id}`, { method: "DELETE" }),
+    },
     services: {
       list: () => call<Service[]>("/services"),
       create: (input: CreateServiceInput) =>
@@ -191,8 +202,10 @@ export type {
   CreateCashMovementInput,
   Customer,
   CreateCustomerInput,
+  CreateEmployeeInput,
   CreateSaleInput,
   CreateServiceInput,
+  Employee,
   PublicUser,
   Sale,
   SalesRange,
@@ -200,6 +213,7 @@ export type {
   Settings,
   UpdateAppointmentInput,
   UpdateCustomerInput,
+  UpdateEmployeeInput,
   UpdateServiceInput,
   UpdateSettingsInput,
 };

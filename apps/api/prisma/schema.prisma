@@ -41,18 +41,22 @@ model Tenant {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  tenantId     String   @map("tenant_id")
+  id           String    @id @default(uuid())
+  tenantId     String    @map("tenant_id")
   name         String
-  email        String   @unique
+  email        String    @unique
   password     String
   role         Role
   // Incrementado en logout para invalidar refresh tokens ya emitidos.
   // No forma parte del modelo documentado en docs/DATABASE.md porque es un
   // detalle de implementación del flujo de auth, no un campo de negocio.
-  tokenVersion Int      @default(0) @map("token_version")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  tokenVersion Int       @default(0) @map("token_version")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  // "Dar de baja" un empleado (docs/DATABASE.md): soft delete, igual que
+  // customers/services/appointments — puede estar referenciado por ventas o
+  // turnos históricos y no debe desaparecer físicamente ni poder loguearse.
+  deletedAt    DateTime? @map("deleted_at")
 
   tenant       Tenant        @relation(fields: [tenantId], references: [id])
   sales        Sale[]

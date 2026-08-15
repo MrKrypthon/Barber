@@ -6,7 +6,7 @@ Convenciones generales (ver `CLAUDE.md` §15):
 - `created_at` existe en toda tabla.
 - `updated_at` existe en toda tabla cuyos registros se puedan editar después de creados.
 - `sales`, `sale_items` y `cash_movements` son registros de auditoría/financieros: no se editan una vez creados, por lo que no llevan `updated_at`. Correcciones se hacen mediante nuevos movimientos, nunca sobrescribiendo.
-- `deleted_at` (soft delete) se usa en `customers`, `services` y `appointments`, porque pueden estar referenciados por ventas o turnos históricos y no deben desaparecer físicamente de la base de datos.
+- `deleted_at` (soft delete) se usa en `customers`, `services`, `appointments` y `users`, porque pueden estar referenciados por ventas o turnos históricos y no deben desaparecer físicamente de la base de datos.
 
 ---
 
@@ -30,6 +30,7 @@ Convenciones generales (ver `CLAUDE.md` §15):
 - token_version (entero, default 0 — se incrementa en logout para invalidar refresh tokens ya emitidos; detalle de implementación del flujo de auth, no un campo de negocio)
 - created_at
 - updated_at
+- deleted_at (soft delete, nullable — "dar de baja" a un empleado; el owner no se da de baja a sí mismo)
 
 ---
 

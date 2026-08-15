@@ -167,6 +167,11 @@ export function ConfigView() {
               onClick={canEdit ? () => setEditingSchedule(true) : undefined}
             />
             <ConfigRow label="Servicios y precios" href="/config/servicios" dot={secondaryColor} />
+            {/* Gestión de empleados es exclusiva del owner (docs/PROJECT.md) — a
+                diferencia de "Panel del administrador", ni siquiera se muestra. */}
+            {canEdit ? (
+              <ConfigRow label="Empleados" href="/config/empleados" dot={primaryColor} />
+            ) : null}
             {/* Vista exclusiva del owner (mockup pág. 9); el gate por rol llega con auth. */}
             <ConfigRow label="Panel del administrador" href="/panel" dot={primaryColor} />
           </Card>

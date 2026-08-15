@@ -4,6 +4,7 @@ import { AppointmentsModule } from "./appointments/appointments.module";
 import { AuthModule } from "./auth/auth.module";
 import { CashModule } from "./cash/cash.module";
 import { CustomersModule } from "./customers/customers.module";
+import { EmployeesModule } from "./employees/employees.module";
 import { HealthController } from "./health/health.controller";
 import { PrismaModule } from "./prisma/prisma.module";
 import { SalesModule } from "./sales/sales.module";
@@ -23,6 +24,7 @@ import { UsersModule } from "./users/users.module";
     UsersModule,
     AuthModule,
     CustomersModule,
+    EmployeesModule,
     ServicesModule,
     SalesModule,
     CashModule,
