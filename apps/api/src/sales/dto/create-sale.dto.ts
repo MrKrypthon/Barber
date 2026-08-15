@@ -13,4 +13,10 @@ export class CreateSaleDto {
 
   @IsEnum(PaymentMethod)
   paymentMethod!: PaymentMethod;
+
+  // Si se omite, la venta queda a nombre de quien la registra. Solo el owner
+  // puede asignarla a otro empleado (SalesService lo valida).
+  @IsOptional()
+  @IsUUID()
+  employeeId?: string;
 }

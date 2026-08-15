@@ -7,7 +7,9 @@ import { Button } from "@/components/button";
 import { Card } from "@/components/card";
 import { Chip } from "@/components/chip";
 import { CheckIcon, ChevronLeftIcon, ChevronRightIcon, PlusIcon, SearchIcon, WhatsAppIcon } from "@/components/icons";
+import { StaffPicker } from "@/components/staff-picker";
 import { StepIndicator } from "@/components/step-indicator";
+import { useAuth } from "@/hooks/use-auth";
 import { useCustomers } from "@/hooks/use-customers";
 import { useSales } from "@/hooks/use-sales";
 import { useServices } from "@/hooks/use-services";
@@ -22,6 +24,7 @@ const OCCASIONAL = "occasional" as const;
 
 export function CobrarWizard() {
   const router = useRouter();
+  const { user } = useAuth();
   const { services } = useServices();
   const { customers, addCustomer } = useCustomers();
   const { addSale, isAdding } = useSales();
@@ -34,6 +37,7 @@ export function CobrarWizard() {
   const [search, setSearch] = useState("");
   const [addingCustomer, setAddingCustomer] = useState(false);
   const [newCustomerName, setNewCustomerName] = useState("");
+  const [employeeId, setEmployeeId] = useState(() => user?.id ?? "");
 
   const customerName = customer === OCCASIONAL ? "Cliente ocasional" : customer?.name ?? "";
   const filteredCustomers = customers.filter((c) =>
@@ -68,6 +72,7 @@ export function CobrarWizard() {
       customerId: customer === OCCASIONAL ? undefined : customer.id,
       serviceIds: [service.id],
       paymentMethod,
+      employeeId: employeeId || undefined,
     });
     setStep(4);
   }
@@ -233,6 +238,13 @@ export function CobrarWizard() {
             </div>
           </div>
 
+          {/* Elegir a nombre de quién queda la venta es exclusivo del owner
+              (docs/PROJECT.md); un empleado solo puede cobrar a su propio
+              nombre, por eso el picker ni se muestra para ese rol. */}
+          {user?.role === "owner" ? (
+            <StaffPicker value={employeeId} onChange={setEmployeeId} label="¿Quién cobró?" />
+          ) : null}
+
           <Button size="lg" fullWidth onClick={confirmSale} disabled={isAdding}>
             {isAdding ? "Cobrando..." : `Cobrar ${formatCurrency(service.price)}`}
           </Button>
@@ -272,6 +284,7 @@ export function CobrarWizard() {
                 setSearch("");
                 setAddingCustomer(false);
                 setNewCustomerName("");
+                setEmployeeId(user?.id ?? "");
               }}
               className={cn("text-sm font-medium text-primary")}
             >

@@ -58,6 +58,21 @@ describe("EmployeesService", () => {
     });
   });
 
+  describe("findAssignable", () => {
+    it("incluye a cualquier usuario del tenant (no solo role=employee)", async () => {
+      prisma.user.findMany.mockResolvedValue([{ id: "owner-1", name: "Ada" }, { id: "emp-1", name: "Carla" }]);
+
+      const result = await service.findAssignable("tenant-1");
+
+      expect(prisma.user.findMany).toHaveBeenCalledWith({
+        where: { tenantId: "tenant-1", deletedAt: null },
+        select: { id: true, name: true },
+        orderBy: { name: "asc" },
+      });
+      expect(result).toEqual([{ id: "owner-1", name: "Ada" }, { id: "emp-1", name: "Carla" }]);
+    });
+  });
+
   describe("create", () => {
     it("rechaza si el correo ya existe (activo o dado de baja)", async () => {
       usersService.emailIsTaken.mockResolvedValue(true);

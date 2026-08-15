@@ -2,6 +2,7 @@
 import type {
   Appointment,
   AppointmentsRange,
+  AssignableStaff,
   AuthResult,
   AuthTokens,
   CashClosing,
@@ -137,6 +138,7 @@ export function createApiClient(config: ApiClientConfig) {
     },
     employees: {
       list: () => call<Employee[]>("/employees"),
+      assignable: () => call<AssignableStaff[]>("/employees/assignable"),
       create: (input: CreateEmployeeInput) =>
         call<Employee>("/employees", { method: "POST", body: JSON.stringify(input) }),
       update: (id: string, input: UpdateEmployeeInput) =>
@@ -194,6 +196,7 @@ export type ApiClient = ReturnType<typeof createApiClient>;
 export type {
   Appointment,
   AppointmentsRange,
+  AssignableStaff,
   AuthResult,
   AuthTokens,
   CashClosing,

@@ -17,7 +17,7 @@ export class SalesController {
   // Owner y Employee pueden registrar ventas (docs/TECHNOLOGIES.md §17).
   @Post()
   create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateSaleDto) {
-    return this.salesService.create(user.tenantId, user.userId, dto);
+    return this.salesService.create(user.tenantId, { userId: user.userId, role: user.role }, dto);
   }
 
   // Solo Owner puede consultar el historial (docs/TECHNOLOGIES.md §17:

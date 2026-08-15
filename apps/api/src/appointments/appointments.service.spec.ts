@@ -109,7 +109,7 @@ describe("AppointmentsService", () => {
       });
 
       expect(prisma.user.findFirst).toHaveBeenCalledWith({
-        where: { id: "user-1", tenantId: "tenant-1" },
+        where: { id: "user-1", tenantId: "tenant-1", deletedAt: null },
       });
     });
 
