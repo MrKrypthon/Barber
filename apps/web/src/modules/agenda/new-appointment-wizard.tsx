@@ -8,8 +8,10 @@ import { Avatar } from "@/components/avatar";
 import { Button } from "@/components/button";
 import { Card } from "@/components/card";
 import { CheckIcon, ChevronLeftIcon, ChevronRightIcon, PlusIcon, SearchIcon } from "@/components/icons";
+import { StaffPicker } from "@/components/staff-picker";
 import { StepIndicator } from "@/components/step-indicator";
 import { useCreateAppointment } from "@/hooks/use-agenda";
+import { useAuth } from "@/hooks/use-auth";
 import { useCustomers } from "@/hooks/use-customers";
 import { useServices } from "@/hooks/use-services";
 import { useSettings } from "@/hooks/use-settings";
@@ -23,6 +25,7 @@ function todayIsoDate(): string {
 
 export function NewAppointmentWizard() {
   const router = useRouter();
+  const { user } = useAuth();
   const { services } = useServices();
   const { customers, addCustomer, isAdding: isAddingCustomer } = useCustomers();
   const { settings } = useSettings();
@@ -36,6 +39,7 @@ export function NewAppointmentWizard() {
   const [newCustomerName, setNewCustomerName] = useState("");
   const [date, setDate] = useState(todayIsoDate);
   const [time, setTime] = useState("");
+  const [employeeId, setEmployeeId] = useState(() => user?.id ?? "");
   const [error, setError] = useState<string | null>(null);
 
   const filteredCustomers = customers.filter((c) =>
@@ -71,6 +75,7 @@ export function NewAppointmentWizard() {
       await createAppointment({
         customerId: customer.id,
         serviceId: service.id,
+        employeeId: employeeId || undefined,
         startAt: withTime(new Date(`${date}T00:00:00`), time).toISOString(),
       });
       setStep(4);
@@ -224,6 +229,8 @@ export function NewAppointmentWizard() {
             </label>
           </div>
 
+          <StaffPicker value={employeeId} onChange={setEmployeeId} />
+
           {error ? <p className="text-sm text-secondary">{error}</p> : null}
 
           <Button size="lg" fullWidth onClick={confirmAppointment} disabled={!time || isCreating}>
@@ -259,6 +266,7 @@ export function NewAppointmentWizard() {
                 setNewCustomerName("");
                 setDate(todayIsoDate());
                 setTime("");
+                setEmployeeId(user?.id ?? "");
                 setError(null);
               }}
               className="text-sm font-medium text-primary"

@@ -23,6 +23,15 @@ export class EmployeesController {
     return this.employeesService.findAll(user.tenantId);
   }
 
+  // Override del @Roles(owner) de la clase: cualquier usuario autenticado
+  // necesita esta lista para elegir "quién atendió esto" al agendar un
+  // turno o cobrar una venta (ambos roles pueden hacer ambas cosas).
+  @Roles(Role.owner, Role.employee)
+  @Get("assignable")
+  findAssignable(@CurrentUser() user: AuthenticatedUser) {
+    return this.employeesService.findAssignable(user.tenantId);
+  }
+
   @Post()
   create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateEmployeeDto) {
     return this.employeesService.create(user.tenantId, dto);

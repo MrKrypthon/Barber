@@ -96,7 +96,7 @@ export class AppointmentsService {
 
     const employeeId = dto.employeeId ?? requestingUserId;
     const employee = await this.prisma.user.findFirst({
-      where: { id: employeeId, tenantId },
+      where: { id: employeeId, tenantId, deletedAt: null },
     });
     if (!employee) {
       throw new NotFoundException("Empleado no encontrado");
@@ -154,7 +154,7 @@ export class AppointmentsService {
 
     if (dto.employeeId) {
       const employee = await this.prisma.user.findFirst({
-        where: { id: dto.employeeId, tenantId },
+        where: { id: dto.employeeId, tenantId, deletedAt: null },
       });
       if (!employee) {
         throw new NotFoundException("Empleado no encontrado");

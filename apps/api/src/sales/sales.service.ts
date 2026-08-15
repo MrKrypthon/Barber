@@ -1,8 +1,13 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { Prisma } from "@prisma/client";
+import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import { Prisma, Role } from "@prisma/client";
 import { DateRange, getDateRangeBounds } from "../common/utils/date-range.util";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateSaleDto } from "./dto/create-sale.dto";
+
+export type RequestingUser = {
+  userId: string;
+  role: Role;
+};
 
 const SALE_INCLUDE = {
   customer: true,
@@ -42,7 +47,13 @@ function toSaleResponse(sale: SaleWithRelations): SaleResponse {
 export class SalesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(tenantId: string, employeeId: string, dto: CreateSaleDto): Promise<SaleResponse> {
+  async create(
+    tenantId: string,
+    requestingUser: RequestingUser,
+    dto: CreateSaleDto,
+  ): Promise<SaleResponse> {
+    const employeeId = await this.resolveEmployeeId(tenantId, requestingUser, dto.employeeId);
+
     if (dto.customerId) {
       const customer = await this.prisma.customer.findFirst({
         where: { id: dto.customerId, tenantId, deletedAt: null },
@@ -117,5 +128,32 @@ export class SalesService {
       throw new NotFoundException("Venta no encontrada");
     }
     return toSaleResponse(sale);
+  }
+
+  // Sin employeeId en el body, la venta queda a nombre de quien la registra.
+  // Asignarla a otro empleado (para el caso del dueño que también es
+  // barbero/estilista, docs/PROJECT.md) es exclusivo del owner — un empleado
+  // no puede atribuirle una venta a otro compañero.
+  private async resolveEmployeeId(
+    tenantId: string,
+    requestingUser: RequestingUser,
+    requestedEmployeeId: string | undefined,
+  ): Promise<string> {
+    if (!requestedEmployeeId || requestedEmployeeId === requestingUser.userId) {
+      return requestingUser.userId;
+    }
+
+    if (requestingUser.role !== Role.owner) {
+      throw new ForbiddenException("Solo el dueño puede registrar una venta a nombre de otro empleado");
+    }
+
+    const employee = await this.prisma.user.findFirst({
+      where: { id: requestedEmployeeId, tenantId, deletedAt: null },
+    });
+    if (!employee) {
+      throw new NotFoundException("Empleado no encontrado");
+    }
+
+    return employee.id;
   }
 }

@@ -52,6 +52,14 @@ export type CreateEmployeeInput = {
 // password es opcional: el dueño solo la manda cuando quiere resetearla.
 export type UpdateEmployeeInput = Partial<CreateEmployeeInput>;
 
+// Owner + empleados activos del tenant, para elegir "quién atendió esto" al
+// agendar un turno o cobrar una venta. A diferencia de Employee, incluye al
+// owner y no expone el email.
+export type AssignableStaff = {
+  id: string;
+  name: string;
+};
+
 export type Service = {
   id: string;
   name: string;
@@ -95,6 +103,9 @@ export type CreateSaleInput = {
   customerId?: string;
   serviceIds: string[];
   paymentMethod: PaymentMethod;
+  // Si se omite, la venta queda a nombre de quien la registra. Asignarla a
+  // otro empleado es exclusivo del owner (el backend lo valida).
+  employeeId?: string;
 };
 
 export type SalesRange = "today" | "week" | "month";

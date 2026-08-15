@@ -1,4 +1,5 @@
-import { NotFoundException } from "@nestjs/common";
+import { ForbiddenException, NotFoundException } from "@nestjs/common";
+import { Role } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 import { SalesService } from "./sales.service";
 
@@ -8,9 +9,11 @@ describe("SalesService", () => {
     customer: { findFirst: jest.Mock };
     service: { findMany: jest.Mock };
     sale: { create: jest.Mock; findMany: jest.Mock; findFirst: jest.Mock };
+    user: { findFirst: jest.Mock };
   };
 
   const employee = { id: "user-1", name: "Ada" };
+  const owner = { userId: "user-1", role: Role.owner };
   const customer = { id: "cust-1", name: "Juan" };
   const serviceA = { id: "svc-1", tenantId: "tenant-1", name: "Corte", price: 100 };
   const serviceB = { id: "svc-2", tenantId: "tenant-1", name: "Barba", price: 50 };
@@ -39,6 +42,7 @@ describe("SalesService", () => {
       customer: { findFirst: jest.fn() },
       service: { findMany: jest.fn() },
       sale: { create: jest.fn(), findMany: jest.fn(), findFirst: jest.fn() },
+      user: { findFirst: jest.fn() },
     };
     service = new SalesService(prisma as unknown as PrismaService);
   });
@@ -49,7 +53,7 @@ describe("SalesService", () => {
       prisma.service.findMany.mockResolvedValue([serviceA, serviceB]);
       prisma.sale.create.mockResolvedValue(saleFixture());
 
-      await service.create("tenant-1", employee.id, {
+      await service.create("tenant-1", owner, {
         customerId: customer.id,
         serviceIds: [serviceA.id, serviceB.id],
         paymentMethod: "cash",
@@ -75,7 +79,7 @@ describe("SalesService", () => {
       prisma.customer.findFirst.mockResolvedValue(null);
 
       await expect(
-        service.create("tenant-1", employee.id, {
+        service.create("tenant-1", owner, {
           customerId: "cust-de-otro-tenant",
           serviceIds: [serviceA.id],
           paymentMethod: "cash",
@@ -89,7 +93,7 @@ describe("SalesService", () => {
       prisma.service.findMany.mockResolvedValue([serviceA]);
 
       await expect(
-        service.create("tenant-1", employee.id, {
+        service.create("tenant-1", owner, {
           serviceIds: [serviceA.id, "svc-de-otro-tenant"],
           paymentMethod: "cash",
         } as never),
@@ -102,7 +106,7 @@ describe("SalesService", () => {
       prisma.service.findMany.mockResolvedValue([serviceA]);
       prisma.sale.create.mockResolvedValue(saleFixture({ total: 200 }));
 
-      await service.create("tenant-1", employee.id, {
+      await service.create("tenant-1", owner, {
         serviceIds: [serviceA.id, serviceA.id],
         paymentMethod: "cash",
       } as never);
@@ -119,6 +123,60 @@ describe("SalesService", () => {
         }),
         include: expect.anything(),
       });
+    });
+  });
+
+  describe("asignar la venta a otro empleado", () => {
+    const otherEmployee = { id: "user-2", name: "Beto" };
+
+    it("el owner puede asignar la venta a otro empleado del tenant", async () => {
+      prisma.service.findMany.mockResolvedValue([serviceA]);
+      prisma.user.findFirst.mockResolvedValue(otherEmployee);
+      prisma.sale.create.mockResolvedValue(saleFixture({ employeeId: otherEmployee.id }));
+
+      await service.create("tenant-1", owner, {
+        serviceIds: [serviceA.id],
+        paymentMethod: "cash",
+        employeeId: otherEmployee.id,
+      } as never);
+
+      expect(prisma.user.findFirst).toHaveBeenCalledWith({
+        where: { id: otherEmployee.id, tenantId: "tenant-1", deletedAt: null },
+      });
+      expect(prisma.sale.create).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ employeeId: otherEmployee.id }) }),
+      );
+    });
+
+    it("un empleado no puede asignar la venta a otro empleado", async () => {
+      prisma.service.findMany.mockResolvedValue([serviceA]);
+
+      await expect(
+        service.create(
+          "tenant-1",
+          { userId: employee.id, role: Role.employee },
+          {
+            serviceIds: [serviceA.id],
+            paymentMethod: "cash",
+            employeeId: otherEmployee.id,
+          } as never,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(prisma.sale.create).not.toHaveBeenCalled();
+    });
+
+    it("rechaza si el empleado asignado no pertenece al tenant (o está dado de baja)", async () => {
+      prisma.service.findMany.mockResolvedValue([serviceA]);
+      prisma.user.findFirst.mockResolvedValue(null);
+
+      await expect(
+        service.create("tenant-1", owner, {
+          serviceIds: [serviceA.id],
+          paymentMethod: "cash",
+          employeeId: "emp-de-otro-tenant",
+        } as never),
+      ).rejects.toBeInstanceOf(NotFoundException);
+      expect(prisma.sale.create).not.toHaveBeenCalled();
     });
   });
 

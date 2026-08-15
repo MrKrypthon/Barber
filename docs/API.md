@@ -46,6 +46,10 @@ GET /api/v1/employees
 
 &nbsp;&nbsp;Lista solo usuarios con `role = employee` del tenant (no incluye al propio owner).
 
+GET /api/v1/employees/assignable
+
+&nbsp;&nbsp;Excepción a "todas las rutas exclusivas de owner": disponible para `owner` y `employee`. Devuelve `{ id, name }[]` del owner + empleados activos del tenant (a diferencia de `GET /employees`, sí incluye al owner), para el selector "¿quién atendió esto?" al agendar un turno o cobrar una venta.
+
 POST /api/v1/employees
 
 &nbsp;&nbsp;Body: `{ name, email, password }`. Crea un usuario con `role = employee`. 409 si el correo ya existe (el email es único a nivel global, sin importar si la cuenta existente está dada de baja).
@@ -78,7 +82,7 @@ DELETE /api/v1/services/{id}
 
 POST /api/v1/sales
 
-&nbsp;&nbsp;Disponible para `owner` y `employee` (es el flujo "Registrar venta" del día a día). Body: `{ customerId?, serviceIds: string[], paymentMethod: "cash" | "transfer" }`. El `total` y el precio de cada item se calculan en el servidor a partir del precio actual de cada servicio — nunca se acepta un total enviado por el cliente.
+&nbsp;&nbsp;Disponible para `owner` y `employee` (es el flujo "Registrar venta" del día a día). Body: `{ customerId?, serviceIds: string[], paymentMethod: "cash" | "transfer", employeeId? }`. El `total` y el precio de cada item se calculan en el servidor a partir del precio actual de cada servicio — nunca se acepta un total enviado por el cliente. Si se omite `employeeId`, la venta queda a nombre de quien la registra; asignarla a otro empleado (para el caso del dueño que también es barbero/estilista) es exclusivo del `owner` — un `employee` que lo intente recibe 403.
 
 GET /api/v1/sales
 

@@ -4,12 +4,14 @@ import { ApiError } from "@barber/api-client";
 import type { Service } from "@barber/types";
 import { useState } from "react";
 import { useCreateAppointment } from "@/hooks/use-agenda";
+import { useAuth } from "@/hooks/use-auth";
 import { useCustomers } from "@/hooks/use-customers";
 import { useServices } from "@/hooks/use-services";
 import { cn } from "@/lib/cn";
 import { formatCurrency } from "@/lib/format";
 import { Button } from "./button";
 import { Modal } from "./modal";
+import { StaffPicker } from "./staff-picker";
 
 const CUSTOMERS_DATALIST_ID = "walk-in-customers";
 
@@ -19,6 +21,7 @@ const CUSTOMERS_DATALIST_ID = "walk-in-customers";
 // se crea con el nombre y teléfono cargados acá, para no fragmentar su
 // historial de visitas/recordatorios en registros duplicados.
 export function WalkInModal({ onClose }: { onClose: () => void }) {
+  const { user } = useAuth();
   const { services } = useServices();
   const { customers, addCustomer } = useCustomers();
   const { createAppointment, isCreating } = useCreateAppointment();
@@ -26,6 +29,7 @@ export function WalkInModal({ onClose }: { onClose: () => void }) {
   const [service, setService] = useState<Service | null>(null);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [employeeId, setEmployeeId] = useState(() => user?.id ?? "");
   const [error, setError] = useState<string | null>(null);
 
   const trimmedName = name.trim();
@@ -46,6 +50,7 @@ export function WalkInModal({ onClose }: { onClose: () => void }) {
       await createAppointment({
         customerId,
         serviceId: service.id,
+        employeeId: employeeId || undefined,
         startAt: new Date().toISOString(),
       });
       onClose();
@@ -133,6 +138,8 @@ export function WalkInModal({ onClose }: { onClose: () => void }) {
             />
           </label>
         )}
+
+        <StaffPicker value={employeeId} onChange={setEmployeeId} />
 
         {error ? <p className="text-sm text-secondary">{error}</p> : null}
 

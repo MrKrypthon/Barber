@@ -14,6 +14,11 @@ export type EmployeeResponse = {
   updatedAt: Date;
 };
 
+export type AssignableStaffResponse = {
+  id: string;
+  name: string;
+};
+
 function toEmployeeResponse(user: User): EmployeeResponse {
   return {
     id: user.id,
@@ -39,6 +44,18 @@ export class EmployeesService {
       orderBy: { name: "asc" },
     });
     return employees.map(toEmployeeResponse);
+  }
+
+  // A diferencia de findAll, incluye al owner (también puede atender turnos
+  // y ventas, docs/PROJECT.md) y es accesible para ambos roles — se usa para
+  // el selector "¿quién atendió esto?" al agendar un turno o cobrar una venta.
+  async findAssignable(tenantId: string): Promise<AssignableStaffResponse[]> {
+    const staff = await this.prisma.user.findMany({
+      where: { tenantId, deletedAt: null },
+      select: { id: true, name: true },
+      orderBy: { name: "asc" },
+    });
+    return staff;
   }
 
   async create(tenantId: string, dto: CreateEmployeeDto): Promise<EmployeeResponse> {
