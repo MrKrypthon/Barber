@@ -1,16 +1,18 @@
 "use client";
 
+import { Avatar } from "@/components/avatar";
 import { Card } from "@/components/card";
 import { PageHeader } from "@/components/page-header";
 import { useAdminSummary } from "@/hooks/use-admin";
 import { cn } from "@/lib/cn";
-import { formatCompactCurrency } from "@/lib/format";
+import { formatCompactCurrency, formatCurrency } from "@/lib/format";
 
 export function AdminPanelView() {
   const { summary } = useAdminSummary();
   // || 1 evita división por cero cuando el negocio todavía no tiene ventas.
   const maxRevenue = Math.max(...summary.weeklyRevenue.map((w) => w.value)) || 1;
   const maxCount = Math.max(...summary.topServices.map((s) => s.count)) || 1;
+  const maxCommission = Math.max(...summary.commissions.map((c) => c.amount)) || 1;
   const averagePct = Math.min(100, (summary.weeklyRevenueAverage / maxRevenue) * 100);
 
   return (
@@ -101,6 +103,36 @@ export function AdminPanelView() {
           </ul>
         </Card>
       </div>
+
+      {/* Comisiones — solo suma servicios con % de comisión configurado
+          (Configuración → Servicios). */}
+      <Card>
+        <h2 className="mb-4 font-semibold">Comisiones — este mes</h2>
+        {summary.commissions.length === 0 ? (
+          <p className="text-sm text-neutral-400 dark:text-neutral-500">
+            Todavía no hay comisiones este mes. Configurá un % de comisión en algún servicio para
+            que empiece a calcularse acá.
+          </p>
+        ) : (
+          <ul className="flex flex-col gap-4">
+            {summary.commissions.map((c) => (
+              <li key={c.employeeId}>
+                <div className="mb-1 flex items-center gap-3">
+                  <Avatar name={c.employeeName} className="h-8 w-8 shrink-0 text-xs" />
+                  <span className="flex-1 text-sm font-medium">{c.employeeName}</span>
+                  <span className="text-sm font-semibold">{formatCurrency(c.amount)}</span>
+                </div>
+                <div className="h-2 w-full rounded-full bg-neutral-100 dark:bg-neutral-800">
+                  <div
+                    className="h-2 rounded-full bg-primary"
+                    style={{ width: `${(c.amount / maxCommission) * 100}%` }}
+                  />
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
 
       {/* Banner de sugerencia */}
       <div className="flex items-start gap-3 rounded-2xl bg-secondary-light p-4">

@@ -105,6 +105,32 @@ function buildTopServices(
   return [...byService.values()].sort((a, b) => b.count - a.count).slice(0, 4);
 }
 
+// Solo suman los items de servicios con commissionPercent configurado (null
+// u omitido = ese servicio no genera comisión, se ignora).
+function buildCommissions(salesThisMonth: Sale[], services: Service[]): AdminSummary["commissions"] {
+  const commissionPercentByServiceId = new Map(services.map((s) => [s.id, s.commissionPercent]));
+  const byEmployee = new Map<string, { employeeName: string; amount: number }>();
+
+  for (const sale of salesThisMonth) {
+    for (const item of sale.items) {
+      const percent = commissionPercentByServiceId.get(item.serviceId);
+      if (!percent) continue;
+
+      const amount = item.price * (percent / 100);
+      const existing = byEmployee.get(sale.employee.id);
+      if (existing) {
+        existing.amount += amount;
+      } else {
+        byEmployee.set(sale.employee.id, { employeeName: sale.employee.name, amount });
+      }
+    }
+  }
+
+  return [...byEmployee.entries()]
+    .map(([employeeId, v]) => ({ employeeId, employeeName: v.employeeName, amount: v.amount }))
+    .sort((a, b) => b.amount - a.amount);
+}
+
 // Detecta el día de la semana con menos ventas respecto al resto, para
 // replicar la sugerencia del mockup ("los martes tienen 40% menos turnos...").
 function buildSuggestion(salesThisMonth: Sale[]): string {
@@ -228,6 +254,7 @@ export function useAdminSummary() {
     weeklyRevenueAverage,
     topServices: buildTopServices(salesThisMonth, services ?? []),
     suggestion: buildSuggestion(salesThisMonth),
+    commissions: buildCommissions(salesThisMonth, services ?? []),
   };
 
   return { summary };

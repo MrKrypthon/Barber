@@ -19,6 +19,7 @@ describe("ServicesService", () => {
     name: "Corte clásico",
     price: 150,
     active: true,
+    commissionPercent: null,
     createdAt: new Date(),
     updatedAt: new Date(),
     deletedAt: null,
@@ -59,6 +60,25 @@ describe("ServicesService", () => {
       expect(prisma.service.create).toHaveBeenCalledWith({
         data: { tenantId: "tenant-1", name: "Corte clásico", price: 150, active: true },
       });
+    });
+
+    it("convierte commissionPercent de Decimal a number; null si no se configuró", async () => {
+      prisma.service.create.mockResolvedValue({ ...baseService, commissionPercent: "40.50" as never });
+
+      const result = await service.create("tenant-1", {
+        name: "Corte clásico",
+        price: 150,
+        commissionPercent: 40.5,
+      });
+
+      expect(prisma.service.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({ commissionPercent: 40.5 }),
+      });
+      expect(result.commissionPercent).toBe(40.5);
+
+      prisma.service.create.mockResolvedValue(baseService);
+      const withoutCommission = await service.create("tenant-1", { name: "Barba", price: 50 });
+      expect(withoutCommission.commissionPercent).toBeNull();
     });
   });
 

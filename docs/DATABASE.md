@@ -56,6 +56,7 @@ Convenciones generales (ver `CLAUDE.md` §15):
 - active
 - duration_minutes (nullable — usado en agenda; los servicios existentes antes de esta fase no lo tienen)
 - color (hex, nullable — distingue servicios en agenda/listas)
+- commission_percent (0-100, nullable — % de comisión para quien realice el servicio; sin configurar no genera comisión, docs/ROADMAP.md v0.2)
 - created_at
 - updated_at
 - deleted_at (soft delete, nullable)

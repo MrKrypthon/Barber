@@ -20,6 +20,7 @@ export function ServiceFormView({ serviceId }: { serviceId?: string }) {
   const [price, setPrice] = useState("");
   const [duration, setDuration] = useState(SERVICE_DURATIONS[0]);
   const [color, setColor] = useState(SERVICE_COLORS[0]);
+  const [commissionPercent, setCommissionPercent] = useState("");
   const [hydrated, setHydrated] = useState(!isEdit);
 
   // El servicio a editar viene del cache de useServices (ya cargado al
@@ -32,17 +33,29 @@ export function ServiceFormView({ serviceId }: { serviceId?: string }) {
       setPrice(String(existing.price));
       setDuration(existing.durationMinutes ?? SERVICE_DURATIONS[0]);
       setColor(existing.color ?? SERVICE_COLORS[0]);
+      setCommissionPercent(existing.commissionPercent === null ? "" : String(existing.commissionPercent));
       setHydrated(true);
     }
   }, [existing, hydrated]);
 
   const priceNumber = Number(price);
-  const isValid = name.trim().length > 0 && Number.isFinite(priceNumber) && priceNumber >= 0;
+  const commissionNumber = commissionPercent.trim() ? Number(commissionPercent) : null;
+  const isValid =
+    name.trim().length > 0 &&
+    Number.isFinite(priceNumber) &&
+    priceNumber >= 0 &&
+    (commissionNumber === null || (Number.isFinite(commissionNumber) && commissionNumber >= 0 && commissionNumber <= 100));
   const isSaving = isAdding || isUpdating;
 
   async function save() {
     if (!isValid) return;
-    const input = { name: name.trim(), price: priceNumber, durationMinutes: duration, color };
+    const input = {
+      name: name.trim(),
+      price: priceNumber,
+      durationMinutes: duration,
+      color,
+      commissionPercent: commissionNumber,
+    };
     if (isEdit && serviceId) {
       await updateService({ id: serviceId, input });
     } else {
@@ -128,6 +141,22 @@ export function ServiceFormView({ serviceId }: { serviceId?: string }) {
             ))}
           </div>
         </div>
+
+        <label className="flex max-w-[10rem] flex-col gap-1.5">
+          <span className="text-xs font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
+            Comisión (opcional)
+          </span>
+          <div className="flex items-center gap-2">
+            <input
+              value={commissionPercent}
+              onChange={(e) => setCommissionPercent(e.target.value)}
+              placeholder="Sin comisión"
+              inputMode="numeric"
+              className="h-12 w-full rounded-xl border border-neutral-200 bg-white px-4 outline-none focus:border-primary dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+            />
+            <span className="text-neutral-400 dark:text-neutral-500">%</span>
+          </div>
+        </label>
 
         <Button size="lg" fullWidth onClick={save} disabled={!isValid || isSaving} className="md:w-auto">
           {isSaving ? "Guardando..." : isEdit ? "Guardar cambios" : "Guardar servicio"}
