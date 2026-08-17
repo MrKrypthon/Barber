@@ -251,6 +251,10 @@ model Product {
   id        String    @id @default(uuid())
   tenantId  String    @map("tenant_id")
   name      String
+  // Data URI (base64) ya redimensionada/comprimida en el cliente, mismo
+  // criterio que BusinessSettings.logo (ADR-008, docs/DECISIONS.md) — sin
+  // almacenamiento de archivos en el MVP.
+  photo     String?
   stock     Int       @default(0)
   // Debajo de este número se marca "stock bajo" en la UI. Opcional: sin
   // configurar, el producto nunca se marca.

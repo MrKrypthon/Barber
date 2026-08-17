@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { Product } from "@barber/types";
 import { Button } from "@/components/button";
 import { Modal } from "@/components/modal";
+import { resizeImageToDataUrl } from "@/lib/image";
+import { ProductPhoto } from "./product-photo";
 
 export function ProductFormModal({
   product,
@@ -12,14 +14,17 @@ export function ProductFormModal({
   isSaving,
 }: {
   // Sin producto = alta (permite cargar stock inicial). Con producto =
-  // edición (name/minStock nada más, el stock ya no se toca acá).
+  // edición (name/photo/minStock nada más, el stock ya no se toca acá).
   product?: Product;
   onClose: () => void;
-  onSave: (input: { name: string; stock?: number; minStock: number | null }) => void;
+  onSave: (input: { name: string; photo?: string; stock?: number; minStock: number | null }) => void;
   isSaving: boolean;
 }) {
   const isEdit = Boolean(product);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState(product?.name ?? "");
+  const [photo, setPhoto] = useState(product?.photo ?? undefined);
+  const [photoError, setPhotoError] = useState<string | null>(null);
   const [stock, setStock] = useState(product ? "" : "0");
   const [minStock, setMinStock] = useState(product?.minStock != null ? String(product.minStock) : "");
 
@@ -33,14 +38,57 @@ export function ProductFormModal({
     stockNumber >= 0 &&
     (minStockNumber === null || (Number.isInteger(minStockNumber) && minStockNumber >= 0));
 
+  async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setPhotoError(null);
+    try {
+      setPhoto(await resizeImageToDataUrl(file));
+    } catch {
+      setPhotoError("No se pudo cargar la foto. Probá con otra imagen.");
+    }
+  }
+
   function save() {
     if (!isValid) return;
-    onSave({ name: name.trim(), stock: isEdit ? undefined : stockNumber, minStock: minStockNumber });
+    onSave({
+      name: name.trim(),
+      photo,
+      stock: isEdit ? undefined : stockNumber,
+      minStock: minStockNumber,
+    });
   }
 
   return (
     <Modal open onClose={onClose} title={isEdit ? "Editar producto" : "Nuevo producto"}>
       <div className="flex flex-col gap-4">
+        <div className="flex flex-col items-center gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handlePhotoChange}
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            aria-label="Elegir foto del producto"
+            className="h-24 w-24 overflow-hidden rounded-2xl ring-1 ring-neutral-200 dark:ring-neutral-700"
+          >
+            <ProductPhoto name={name || "?"} src={photo} className="h-full w-full" />
+          </button>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="text-sm font-semibold text-primary"
+          >
+            {photo ? "Cambiar foto" : "Agregar foto"}
+          </button>
+          {photoError ? <p className="text-sm text-secondary">{photoError}</p> : null}
+        </div>
+
         <label className="flex flex-col gap-1.5">
           <span className="text-xs font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
             Nombre

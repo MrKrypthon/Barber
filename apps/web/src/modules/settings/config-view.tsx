@@ -167,7 +167,6 @@ export function ConfigView() {
               onClick={canEdit ? () => setEditingSchedule(true) : undefined}
             />
             <ConfigRow label="Servicios y precios" href="/config/servicios" dot={secondaryColor} />
-            <ConfigRow label="Inventario" href="/config/inventario" dot={secondaryColor} />
             {/* Gestión de empleados es exclusiva del owner (docs/PROJECT.md) — a
                 diferencia de "Panel del administrador", ni siquiera se muestra. */}
             {canEdit ? (

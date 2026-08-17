@@ -68,6 +68,16 @@ export function AgendaIcon(props: IconProps) {
   );
 }
 
+export function InventoryIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="m3 8 9-5 9 5-9 5-9-5Z" />
+      <path d="M3 8v9l9 5 9-5V8" />
+      <path d="M12 13v9" />
+    </Svg>
+  );
+}
+
 export function ConfigIcon(props: IconProps) {
   return (
     <Svg {...props}>

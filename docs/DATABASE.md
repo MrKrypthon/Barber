@@ -155,6 +155,7 @@ Inventario v0.3 (`docs/ROADMAP.md`): solo productos de reventa (pomada, shampoo,
 - id (uuid)
 - tenant_id
 - name
+- photo (data URI base64, nullable — mismo criterio que `business_settings.logo`)
 - stock (entero, arranca en 0)
 - min_stock (entero, nullable — debajo de este número se marca "stock bajo" en la UI; sin configurar, nunca se marca)
 - created_at

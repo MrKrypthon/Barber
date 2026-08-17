@@ -5,6 +5,12 @@ export class CreateProductDto {
   @MinLength(1)
   name!: string;
 
+  // Data URI (base64) ya redimensionada/comprimida en el cliente, mismo
+  // criterio que Settings.logo (ADR-008, docs/DECISIONS.md).
+  @IsOptional()
+  @IsString()
+  photo?: string;
+
   // Stock inicial al dar de alta el producto. Sin enviarlo arranca en 0 y se
   // carga con un movimiento de entrada después.
   @IsOptional()

@@ -8,6 +8,7 @@ import { UpdateProductDto } from "./dto/update-product.dto";
 export type ProductResponse = {
   id: string;
   name: string;
+  photo: string | null;
   stock: number;
   minStock: number | null;
   createdAt: Date;
@@ -26,6 +27,7 @@ function toProductResponse(product: Product): ProductResponse {
   return {
     id: product.id,
     name: product.name,
+    photo: product.photo,
     stock: product.stock,
     minStock: product.minStock,
     createdAt: product.createdAt,
@@ -60,6 +62,7 @@ export class ProductsService {
       data: {
         tenantId,
         name: dto.name,
+        photo: dto.photo,
         stock: dto.stock ?? 0,
         minStock: dto.minStock,
       },
@@ -74,7 +77,7 @@ export class ProductsService {
     await this.findOwned(tenantId, id);
     const product = await this.prisma.product.update({
       where: { id },
-      data: { name: dto.name, minStock: dto.minStock },
+      data: { name: dto.name, photo: dto.photo, minStock: dto.minStock },
     });
     return toProductResponse(product);
   }

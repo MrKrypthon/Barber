@@ -120,13 +120,15 @@ Inventario v0.3 (`docs/ROADMAP.md`): solo productos de reventa, sin vínculo aut
 
 GET /api/v1/products
 
+&nbsp;&nbsp;No existe un `GET /products/{id}`: el detalle de un producto se resuelve en el frontend a partir de esta misma lista (mismo criterio que Servicios).
+
 POST /api/v1/products
 
-&nbsp;&nbsp;Body: `{ name, stock?, minStock? }`. `stock` es el stock inicial (default 0); a partir de ahí solo cambia vía `POST /products/{id}/movements`.
+&nbsp;&nbsp;Body: `{ name, photo?, stock?, minStock? }`. `photo` es un data URI (base64) ya redimensionado en el cliente, mismo criterio que `settings.logo` (ADR-008, `docs/DECISIONS.md`). `stock` es el stock inicial (default 0); a partir de ahí solo cambia vía `POST /products/{id}/movements`.
 
 PUT /api/v1/products/{id}
 
-&nbsp;&nbsp;Body: `{ name?, minStock? }`. No acepta `stock` (ver arriba). `minStock: null` borra un mínimo ya configurado (distinto de omitir el campo, que deja el valor actual sin tocar — mismo criterio que `services.commissionPercent`).
+&nbsp;&nbsp;Body: `{ name?, photo?, minStock? }`. No acepta `stock` (ver arriba). `minStock: null` borra un mínimo ya configurado (distinto de omitir el campo, que deja el valor actual sin tocar — mismo criterio que `services.commissionPercent`).
 
 DELETE /api/v1/products/{id}
 
@@ -138,7 +140,7 @@ GET /api/v1/products/{id}/movements
 
 POST /api/v1/products/{id}/movements
 
-&nbsp;&nbsp;Body: `{ type: "entry" | "exit", quantity, description? }`. Actualiza `products.stock` en la misma transacción que crea el movimiento. Devuelve 400 si una salida dejaría el stock en negativo.
+&nbsp;&nbsp;Body: `{ type: "entry" | "exit", quantity, description? }`. Actualiza `products.stock` en la misma transacción que crea el movimiento. Devuelve 400 si una salida dejaría el stock en negativo. El stepper +/- del grid de Inventario en el frontend llama a esta misma ruta con `quantity: 1` — no hay un endpoint separado para ajustes rápidos.
 
 ---
 

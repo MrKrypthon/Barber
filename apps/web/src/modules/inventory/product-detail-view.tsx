@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useProductMovements, useProducts } from "@/hooks/use-products";
 import { formatLongDate } from "@/lib/format";
 import { ProductFormModal } from "./product-form-modal";
+import { ProductPhoto } from "./product-photo";
 import { RegisterMovementModal } from "./register-movement-modal";
 
 export function ProductDetailView({ productId }: { productId: string }) {
@@ -24,7 +25,7 @@ export function ProductDetailView({ productId }: { productId: string }) {
   if (!product) {
     return (
       <div>
-        <PageHeader title="Producto" backHref="/config/inventario" />
+        <PageHeader title="Producto" backHref="/inventario" />
         <p className="py-10 text-center text-neutral-400 dark:text-neutral-500">
           {isLoading ? "Cargando..." : "Producto no encontrado."}
         </p>
@@ -38,7 +39,7 @@ export function ProductDetailView({ productId }: { productId: string }) {
     <div>
       <PageHeader
         title={product.name}
-        backHref="/config/inventario"
+        backHref="/inventario"
         action={
           canEdit ? (
             <Button variant="outline" onClick={() => setEditing(true)}>
@@ -49,6 +50,11 @@ export function ProductDetailView({ productId }: { productId: string }) {
       />
 
       <Card className="mb-4 flex flex-col items-center gap-1 py-6 text-center">
+        <ProductPhoto
+          name={product.name}
+          src={product.photo}
+          className="mb-3 h-28 w-28 rounded-2xl"
+        />
         <span className="text-sm text-neutral-500 dark:text-neutral-400">Stock actual</span>
         <p className="text-3xl font-bold">{product.stock} u.</p>
         {lowStock ? (
@@ -95,8 +101,8 @@ export function ProductDetailView({ productId }: { productId: string }) {
           product={product}
           onClose={() => setEditing(false)}
           isSaving={isUpdating}
-          onSave={async ({ name, minStock }) => {
-            await updateProduct({ id: product.id, input: { name, minStock } });
+          onSave={async ({ name, photo, minStock }) => {
+            await updateProduct({ id: product.id, input: { name, photo, minStock } });
             setEditing(false);
           }}
         />
