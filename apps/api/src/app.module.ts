@@ -7,6 +7,7 @@ import { CustomersModule } from "./customers/customers.module";
 import { EmployeesModule } from "./employees/employees.module";
 import { HealthController } from "./health/health.controller";
 import { PrismaModule } from "./prisma/prisma.module";
+import { ProductsModule } from "./products/products.module";
 import { SalesModule } from "./sales/sales.module";
 import { ServicesModule } from "./services/services.module";
 import { SettingsModule } from "./settings/settings.module";
@@ -28,6 +29,7 @@ import { UsersModule } from "./users/users.module";
     ServicesModule,
     SalesModule,
     CashModule,
+    ProductsModule,
     SettingsModule,
     AppointmentsModule,
   ],

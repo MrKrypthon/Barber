@@ -11,10 +11,14 @@ import type {
   CreateCashMovementInput,
   CreateCustomerInput,
   CreateEmployeeInput,
+  CreateProductInput,
+  CreateProductMovementInput,
   CreateSaleInput,
   CreateServiceInput,
   Customer,
   Employee,
+  Product,
+  ProductMovement,
   PublicUser,
   Sale,
   SalesRange,
@@ -23,6 +27,7 @@ import type {
   UpdateAppointmentInput,
   UpdateCustomerInput,
   UpdateEmployeeInput,
+  UpdateProductInput,
   UpdateServiceInput,
   UpdateSettingsInput,
 } from "@barber/types";
@@ -169,6 +174,20 @@ export function createApiClient(config: ApiClientConfig) {
         }),
       close: () => call<CashClosing>("/cash/close", { method: "POST" }),
     },
+    products: {
+      list: () => call<Product[]>("/products"),
+      create: (input: CreateProductInput) =>
+        call<Product>("/products", { method: "POST", body: JSON.stringify(input) }),
+      update: (id: string, input: UpdateProductInput) =>
+        call<Product>(`/products/${id}`, { method: "PUT", body: JSON.stringify(input) }),
+      remove: (id: string) => call<{ success: boolean }>(`/products/${id}`, { method: "DELETE" }),
+      listMovements: (id: string) => call<ProductMovement[]>(`/products/${id}/movements`),
+      registerMovement: (id: string, input: CreateProductMovementInput) =>
+        call<ProductMovement>(`/products/${id}/movements`, {
+          method: "POST",
+          body: JSON.stringify(input),
+        }),
+    },
     settings: {
       get: () => call<Settings>("/settings"),
       update: (input: UpdateSettingsInput) =>
@@ -206,9 +225,13 @@ export type {
   Customer,
   CreateCustomerInput,
   CreateEmployeeInput,
+  CreateProductInput,
+  CreateProductMovementInput,
   CreateSaleInput,
   CreateServiceInput,
   Employee,
+  Product,
+  ProductMovement,
   PublicUser,
   Sale,
   SalesRange,
@@ -217,6 +240,7 @@ export type {
   UpdateAppointmentInput,
   UpdateCustomerInput,
   UpdateEmployeeInput,
+  UpdateProductInput,
   UpdateServiceInput,
   UpdateSettingsInput,
 };

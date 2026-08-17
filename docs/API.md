@@ -114,6 +114,34 @@ POST /api/v1/cash/close
 
 ---
 
+## Inventario
+
+Inventario v0.3 (`docs/ROADMAP.md`): solo productos de reventa, sin vínculo automático con Ventas ni Servicios — el stock se mueve exclusivamente a mano. Mismo esquema de permisos que Servicios para el catálogo (GET para ambos roles, POST/PUT/DELETE solo `owner`) y que Caja para los movimientos (POST disponible para `owner` y `employee`).
+
+GET /api/v1/products
+
+POST /api/v1/products
+
+&nbsp;&nbsp;Body: `{ name, stock?, minStock? }`. `stock` es el stock inicial (default 0); a partir de ahí solo cambia vía `POST /products/{id}/movements`.
+
+PUT /api/v1/products/{id}
+
+&nbsp;&nbsp;Body: `{ name?, minStock? }`. No acepta `stock` (ver arriba). `minStock: null` borra un mínimo ya configurado (distinto de omitir el campo, que deja el valor actual sin tocar — mismo criterio que `services.commissionPercent`).
+
+DELETE /api/v1/products/{id}
+
+&nbsp;&nbsp;Baja lógica (`deletedAt`, igual que Clientes/Servicios).
+
+GET /api/v1/products/{id}/movements
+
+&nbsp;&nbsp;Historial de movimientos del producto, del más reciente al más viejo.
+
+POST /api/v1/products/{id}/movements
+
+&nbsp;&nbsp;Body: `{ type: "entry" | "exit", quantity, description? }`. Actualiza `products.stock` en la misma transacción que crea el movimiento. Devuelve 400 si una salida dejaría el stock en negativo.
+
+---
+
 ## Configuración
 
 GET /api/v1/settings

@@ -175,6 +175,47 @@ export type UpdateSettingsInput = Partial<{
   scheduleClose: string;
 }>;
 
+export type ProductMovementType = "entry" | "exit";
+
+export type Product = {
+  id: string;
+  name: string;
+  stock: number;
+  // Debajo de este número se marca "stock bajo" en la UI. null = sin
+  // configurar, nunca se marca.
+  minStock: number | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CreateProductInput = {
+  name: string;
+  stock?: number;
+  minStock?: number | null;
+};
+
+// El stock no forma parte de esto: solo se edita name/minStock, el stock
+// cambia únicamente vía CreateProductMovementInput. minStock: null borra un
+// mínimo ya configurado (mismo criterio que UpdateServiceInput.commissionPercent).
+export type UpdateProductInput = {
+  name?: string;
+  minStock?: number | null;
+};
+
+export type ProductMovement = {
+  id: string;
+  type: ProductMovementType;
+  quantity: number;
+  description: string | null;
+  createdAt: string;
+};
+
+export type CreateProductMovementInput = {
+  type: ProductMovementType;
+  quantity: number;
+  description?: string;
+};
+
 export type AppointmentsRange = "today" | "week";
 
 export type Appointment = {

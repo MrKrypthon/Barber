@@ -145,3 +145,34 @@ Agenda manual (v0.2, `docs/ROADMAP.md`): el empleado registra los turnos que lle
 - deleted_at (soft delete, nullable)
 
 Índice: `(tenant_id, start_at)`, para las consultas de agenda por día/semana.
+
+---
+
+## products
+
+Inventario v0.3 (`docs/ROADMAP.md`): solo productos de reventa (pomada, shampoo, cera). `stock` es un total corriente, no se recalcula desde `product_movements` en cada consulta — se actualiza en la misma transacción que crea el movimiento (ver `product_movements`). Sin vínculo automático todavía con `sales` ni `services`: nada descuenta stock salvo un movimiento manual.
+
+- id (uuid)
+- tenant_id
+- name
+- stock (entero, arranca en 0)
+- min_stock (entero, nullable — debajo de este número se marca "stock bajo" en la UI; sin configurar, nunca se marca)
+- created_at
+- updated_at
+- deleted_at (soft delete, nullable)
+
+---
+
+## product_movements
+
+Entrada/salida manual de stock (mismo criterio que `cash_movements` con la caja: un registro por cada movimiento, nunca se edita `products.stock` directo). Una salida que dejaría el stock en negativo se rechaza (400).
+
+- id (uuid)
+- tenant_id
+- product_id
+- type (`entry` | `exit`)
+- quantity (entero positivo)
+- description (nullable)
+- created_at
+
+Índice: `(tenant_id, product_id, created_at)`, para el historial de movimientos de un producto.
