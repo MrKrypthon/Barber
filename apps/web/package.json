@@ -10,12 +10,13 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@barber/api-client": "workspace:*",
+    "@barber/types": "workspace:*",
+    "@tanstack/react-query": "^5.62.7",
+    "jspdf": "^4.2.1",
     "next": "^15.1.3",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "@tanstack/react-query": "^5.62.7",
-    "@barber/api-client": "workspace:*",
-    "@barber/types": "workspace:*"
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",

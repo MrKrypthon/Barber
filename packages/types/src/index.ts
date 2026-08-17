@@ -142,11 +142,16 @@ export type CreateCashMovementInput = {
 
 export type CashClosing = {
   id: string;
+  date: string;
   income: number;
   expense: number;
   balance: number;
   closedBy: { id: string; name: string };
   closedAt: string;
+};
+
+export type CashClosingDetail = CashClosing & {
+  movements: CashMovement[];
 };
 
 export type Settings = {

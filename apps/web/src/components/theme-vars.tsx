@@ -2,13 +2,8 @@
 
 import { useEffect } from "react";
 import { useSettings } from "@/hooks/use-settings";
+import { DEFAULT_BACKGROUND_COLOR, DEFAULT_PRIMARY_COLOR, DEFAULT_SECONDARY_COLOR } from "@/lib/brand-defaults";
 import { darken, hexToRgbTriplet, lighten } from "@/lib/color";
-
-// Mismos valores por defecto que globals.css (mockup original, docs/Propuesta.pdf),
-// para cuando el negocio todavía no eligió sus propios colores.
-const DEFAULT_PRIMARY = "#24406B";
-const DEFAULT_SECONDARY = "#C0392B";
-const DEFAULT_BACKGROUND = "#F5F1E8";
 
 // Aplica los colores del negocio (Configuración → Colores) como variables
 // CSS en tiempo de ejecución. tailwind.config.ts ya expone bg-primary,
@@ -20,9 +15,9 @@ export function ThemeVars() {
   const { settings } = useSettings();
 
   useEffect(() => {
-    const primary = settings?.primaryColor ?? DEFAULT_PRIMARY;
-    const secondary = settings?.secondaryColor ?? DEFAULT_SECONDARY;
-    const background = settings?.backgroundColor ?? DEFAULT_BACKGROUND;
+    const primary = settings?.primaryColor ?? DEFAULT_PRIMARY_COLOR;
+    const secondary = settings?.secondaryColor ?? DEFAULT_SECONDARY_COLOR;
+    const background = settings?.backgroundColor ?? DEFAULT_BACKGROUND_COLOR;
 
     const root = document.documentElement.style;
     root.setProperty("--color-primary", hexToRgbTriplet(primary));

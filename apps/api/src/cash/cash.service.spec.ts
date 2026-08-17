@@ -1,3 +1,4 @@
+import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { CashService } from "./cash.service";
 
@@ -6,14 +7,18 @@ describe("CashService", () => {
   let prisma: {
     sale: { aggregate: jest.Mock };
     cashMovement: { findMany: jest.Mock; create: jest.Mock };
-    cashClosing: { findUnique: jest.Mock; create: jest.Mock };
+    cashClosing: { findUnique: jest.Mock; findMany: jest.Mock; create: jest.Mock };
   };
 
   beforeEach(() => {
     prisma = {
       sale: { aggregate: jest.fn() },
       cashMovement: { findMany: jest.fn(), create: jest.fn() },
-      cashClosing: { findUnique: jest.fn().mockResolvedValue(null), create: jest.fn() },
+      cashClosing: {
+        findUnique: jest.fn().mockResolvedValue(null),
+        findMany: jest.fn(),
+        create: jest.fn(),
+      },
     };
     service = new CashService(prisma as unknown as PrismaService);
   });
@@ -146,6 +151,68 @@ describe("CashService", () => {
         "La caja de hoy ya fue cerrada",
       );
       expect(prisma.cashClosing.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("findClosings", () => {
+    it("lista los cortes del tenant ordenados por fecha descendente", async () => {
+      prisma.cashClosing.findMany.mockResolvedValue([
+        {
+          id: "c1",
+          date: new Date("2026-08-15"),
+          income: 300,
+          expense: 50,
+          balance: 250,
+          createdAt: new Date(),
+          closedBy: { id: "user-1", name: "Ana" },
+        },
+      ]);
+
+      const result = await service.findClosings("tenant-1");
+
+      expect(prisma.cashClosing.findMany).toHaveBeenCalledWith({
+        where: { tenantId: "tenant-1" },
+        include: { closedBy: true },
+        orderBy: { date: "desc" },
+      });
+      expect(result).toEqual([expect.objectContaining({ id: "c1", balance: 250 })]);
+    });
+  });
+
+  describe("findClosingByDate", () => {
+    it("rechaza una fecha inválida", async () => {
+      await expect(service.findClosingByDate("tenant-1", "no-es-una-fecha")).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
+    });
+
+    it("lanza NotFoundException si ese día no se cerró la caja", async () => {
+      prisma.cashClosing.findUnique.mockResolvedValue(null);
+      prisma.cashMovement.findMany.mockResolvedValue([]);
+
+      await expect(service.findClosingByDate("tenant-1", "2026-08-10")).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+    });
+
+    it("devuelve el snapshot guardado + los movimientos de ese día", async () => {
+      prisma.cashClosing.findUnique.mockResolvedValue({
+        id: "c1",
+        date: new Date("2026-08-10"),
+        income: 300,
+        expense: 50,
+        balance: 250,
+        createdAt: new Date(),
+        closedBy: { id: "user-1", name: "Ana" },
+      });
+      prisma.cashMovement.findMany.mockResolvedValue([
+        { id: "m1", type: "expense", amount: 50, description: "Insumos", createdAt: new Date() },
+      ]);
+
+      const result = await service.findClosingByDate("tenant-1", "2026-08-10");
+
+      expect(result.balance).toBe(250);
+      expect(result.movements).toHaveLength(1);
     });
   });
 });

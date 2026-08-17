@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from "@nestjs/common";
 import { Role } from "@prisma/client";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Roles } from "../auth/decorators/roles.decorator";
@@ -20,6 +20,20 @@ export class CashController {
   @Get()
   getSummary(@CurrentUser() user: AuthenticatedUser, @Query() query: DateRangeQueryDto) {
     return this.cashService.getSummary(user.tenantId, query.range ?? "today");
+  }
+
+  // Historial de cortes ya hechos, para poder volver a descargar el PDF de
+  // un día anterior (no solo el de hoy recién cerrado).
+  @Roles(Role.owner)
+  @Get("closings")
+  findClosings(@CurrentUser() user: AuthenticatedUser) {
+    return this.cashService.findClosings(user.tenantId);
+  }
+
+  @Roles(Role.owner)
+  @Get("closings/:date")
+  findClosingByDate(@CurrentUser() user: AuthenticatedUser, @Param("date") date: string) {
+    return this.cashService.findClosingByDate(user.tenantId, date);
   }
 
   // Owner y Employee pueden registrar movimientos (docs/PROJECT.md: el
