@@ -140,7 +140,7 @@ GET /api/v1/products/{id}/movements
 
 POST /api/v1/products/{id}/movements
 
-&nbsp;&nbsp;Body: `{ type: "entry" | "exit", quantity, description? }`. Actualiza `products.stock` en la misma transacción que crea el movimiento. Devuelve 400 si una salida dejaría el stock en negativo. El stepper +/- del grid de Inventario en el frontend llama a esta misma ruta con `quantity: 1` — no hay un endpoint separado para ajustes rápidos.
+&nbsp;&nbsp;Body: `{ type: "entry" | "exit", quantity, description? }`. Actualiza `products.stock` en la misma transacción que crea el movimiento. Devuelve 400 si una salida dejaría el stock en negativo. El stepper +/- del grid de Inventario en el frontend abre el mismo modal "Registrar movimiento" que el detalle del producto (precargado con cantidad 1 y el tipo sugerido por el botón), en vez de llamar a esta ruta directo — no hay un endpoint separado para ajustes rápidos.
 
 ---
 

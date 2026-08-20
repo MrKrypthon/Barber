@@ -55,12 +55,7 @@ export function ProductsView() {
             <ProductCard
               key={p.id}
               product={p}
-              onAdjust={(delta) =>
-                registerMovement({
-                  id: p.id,
-                  input: { type: delta === 1 ? "entry" : "exit", quantity: 1 },
-                })
-              }
+              onRegisterMovement={(input) => registerMovement({ id: p.id, input })}
             />
           ))}
         </div>

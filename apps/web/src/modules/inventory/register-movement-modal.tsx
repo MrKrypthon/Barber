@@ -8,17 +8,24 @@ import { Modal } from "@/components/modal";
 
 export function RegisterMovementModal({
   currentStock,
+  defaultType = "entry",
+  defaultQuantity = "",
   onClose,
   onSave,
   isSaving,
 }: {
   currentStock: number;
+  // El stepper +/- del grid abre este mismo modal con el tipo y la cantidad
+  // ya sugeridos (docs/API.md, Inventario) en vez de registrar el
+  // movimiento directo, para que siempre quede un motivo asociado.
+  defaultType?: ProductMovementType;
+  defaultQuantity?: string;
   onClose: () => void;
   onSave: (input: { type: ProductMovementType; quantity: number; description?: string }) => void;
   isSaving: boolean;
 }) {
-  const [type, setType] = useState<ProductMovementType>("entry");
-  const [quantity, setQuantity] = useState("");
+  const [type, setType] = useState<ProductMovementType>(defaultType);
+  const [quantity, setQuantity] = useState(defaultQuantity);
   const [description, setDescription] = useState("");
 
   const quantityNumber = Number(quantity);
