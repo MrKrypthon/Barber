@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { ApiError } from "@barber/api-client";
 import { Button } from "@/components/button";
@@ -7,10 +8,16 @@ import { Card } from "@/components/card";
 import { Modal } from "@/components/modal";
 import { PageHeader } from "@/components/page-header";
 import { StatCard } from "@/components/stat-card";
+import { useAuth } from "@/hooks/use-auth";
 import { useCash } from "@/hooks/use-cash";
+import { useSettings } from "@/hooks/use-settings";
+import { DEFAULT_PRIMARY_COLOR, DEFAULT_SECONDARY_COLOR } from "@/lib/brand-defaults";
+import { downloadCashClosingPdf } from "@/lib/cash-closing-pdf";
 import { formatCurrency, formatLongDate, formatTime } from "@/lib/format";
 
 export function CashView() {
+  const { user } = useAuth();
+  const { settings } = useSettings();
   const { summary, isLoading, isError, isClosed, closeCash, isClosing, addExpense, isAddingExpense } =
     useCash();
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -18,6 +25,7 @@ export function CashView() {
   const [expenseOpen, setExpenseOpen] = useState(false);
   const [expenseDescription, setExpenseDescription] = useState("");
   const [expenseAmount, setExpenseAmount] = useState("");
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
   async function saveExpense() {
     const amount = Number(expenseAmount);
@@ -38,24 +46,53 @@ export function CashView() {
     }
   }
 
+  async function handleDownloadPdf() {
+    if (!summary || !summary.closedAt) return;
+    setIsDownloadingPdf(true);
+    try {
+      await downloadCashClosingPdf({
+        businessName: settings?.businessName ?? "",
+        primaryColor: settings?.primaryColor ?? DEFAULT_PRIMARY_COLOR,
+        secondaryColor: settings?.secondaryColor ?? DEFAULT_SECONDARY_COLOR,
+        closedByName: user?.name ?? "",
+        date: summary.closedAt.slice(0, 10),
+        closedAt: summary.closedAt,
+        income: summary.income,
+        expense: summary.expense,
+        balance: summary.balance,
+        movements: summary.movements,
+      });
+    } finally {
+      setIsDownloadingPdf(false);
+    }
+  }
+
   return (
     <div>
       <PageHeader
         title="Caja"
         subtitle={formatLongDate(new Date())}
         action={
-          <Button variant="dark" onClick={() => setConfirmOpen(true)} disabled={isClosed}>
-            Cerrar caja
-          </Button>
+          <div className="flex items-center gap-3">
+            <Link href="/caja/historial" className="text-sm font-medium text-primary">
+              Cortes anteriores
+            </Link>
+            <Button variant="dark" onClick={() => setConfirmOpen(true)} disabled={isClosed}>
+              Cerrar caja
+            </Button>
+          </div>
         }
       />
 
       {isClosed ? (
-        <Card className="mb-4 bg-success/10">
-          <p className="text-center font-semibold text-success">
+        <Card className="mb-4 flex flex-col items-center gap-3 bg-success/10 text-center sm:flex-row sm:justify-between sm:text-left">
+          <p className="font-semibold text-success">
             Caja cerrada{summary?.closedAt ? ` a las ${formatTime(summary.closedAt)}` : ""} — corte del
             día listo.
           </p>
+          <Button variant="outline" onClick={handleDownloadPdf} disabled={isDownloadingPdf}>
+            {isDownloadingPdf ? "Generando PDF..." : "Descargar PDF"}
+          </Button>
         </Card>
       ) : null}
 

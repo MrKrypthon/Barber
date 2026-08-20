@@ -13,16 +13,13 @@ import { Toggle } from "@/components/toggle";
 import { useAuth } from "@/hooks/use-auth";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useSettings } from "@/hooks/use-settings";
+import { DEFAULT_BACKGROUND_COLOR, DEFAULT_PRIMARY_COLOR, DEFAULT_SECONDARY_COLOR } from "@/lib/brand-defaults";
 import { cn } from "@/lib/cn";
 import { formatSchedule } from "@/lib/format";
 import { resizeImageToDataUrl } from "@/lib/image";
 import { EditBusinessNameModal } from "./edit-business-name-modal";
 import { EditColorsModal } from "./edit-colors-modal";
 import { EditScheduleModal } from "./edit-schedule-modal";
-
-const DEFAULT_PRIMARY_COLOR = "#24406B";
-const DEFAULT_SECONDARY_COLOR = "#C0392B";
-const DEFAULT_BACKGROUND_COLOR = "#F5F1E8";
 
 function ConfigRow({
   label,

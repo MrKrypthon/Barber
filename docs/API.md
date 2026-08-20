@@ -112,6 +112,14 @@ POST /api/v1/cash/close
 
 &nbsp;&nbsp;Solo `owner`. Corte de caja del día: guarda un snapshot inmutable (`income`, `expense`, `balance` del día al momento de cerrar, quién cerró). No bloquea nuevas ventas ni movimientos — es un registro de auditoría, no un lock. Devuelve 409 si la caja de hoy ya fue cerrada.
 
+GET /api/v1/cash/closings
+
+&nbsp;&nbsp;Solo `owner`. Lista todos los cortes ya hechos del tenant (sin movimientos, solo los totales guardados), ordenados por fecha descendente — alimenta el historial para poder volver a exportar el PDF de un día anterior.
+
+GET /api/v1/cash/closings/{date}
+
+&nbsp;&nbsp;Solo `owner`. `date` en formato `YYYY-MM-DD`. Devuelve el corte de ese día calendario + sus movimientos manuales (`{ ...closing, movements }`). Los totales son el snapshot guardado al cerrar, no se recalculan. 404 si ese día no se cerró la caja, 400 si `date` no tiene el formato esperado.
+
 ---
 
 ## Configuración
