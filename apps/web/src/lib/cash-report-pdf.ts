@@ -63,7 +63,10 @@ export async function downloadCashReportPdf(input: CashReportPdfInput): Promise<
     y,
   );
 
-  y += 10;
+  // Más aire que en el corte diario: acá arriba de las barras va la
+  // etiqueta con el monto (drawBarChart la dibuja por encima de cada
+  // barra), y si el gráfico empieza muy pegado queda debajo del logo.
+  y += 18;
   const chartTop = y;
   const chartHeight = 32;
   drawBarChart(doc, MARGIN_X, chartTop, RIGHT_EDGE - MARGIN_X, chartHeight, [
