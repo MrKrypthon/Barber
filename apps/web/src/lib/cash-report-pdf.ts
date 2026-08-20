@@ -5,6 +5,7 @@ import {
   drawBarChart,
   drawLogo,
   drawMovementsTable,
+  drawTotalBanner,
   hexToRgbTuple,
   movementsTableHeight,
   type PdfMovement,
@@ -63,10 +64,20 @@ export async function downloadCashReportPdf(input: CashReportPdfInput): Promise<
     y,
   );
 
-  // Más aire que en el corte diario: acá arriba de las barras va la
-  // etiqueta con el monto (drawBarChart la dibuja por encima de cada
-  // barra), y si el gráfico empieza muy pegado queda debajo del logo.
-  y += 18;
+  // Más aire que en el corte diario antes de arrancar el apartado
+  // destacado: si empieza muy pegado queda debajo del logo.
+  y += 14;
+  y = drawTotalBanner(
+    doc,
+    MARGIN_X,
+    y,
+    RIGHT_EDGE - MARGIN_X,
+    "Balance total del período",
+    input.balance,
+    input.primaryColor,
+  );
+
+  y += 14;
   const chartTop = y;
   const chartHeight = 32;
   drawBarChart(doc, MARGIN_X, chartTop, RIGHT_EDGE - MARGIN_X, chartHeight, [

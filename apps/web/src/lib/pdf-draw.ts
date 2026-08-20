@@ -1,5 +1,5 @@
 import type { CashMovementType } from "@barber/types";
-import { hexToRgbTriplet } from "./color";
+import { hexToRgbTriplet, lighten } from "./color";
 import { formatCurrency, formatTime, movementLabel } from "./format";
 
 // Helpers de dibujo compartidos entre los distintos PDF de Caja (corte del
@@ -51,6 +51,39 @@ export function drawLogo(
   } catch {
     // omitido a propósito, ver comentario de arriba.
   }
+}
+
+// Apartado destacado con el total del período — a diferencia de las barras
+// de drawBarChart (que comparan Ingresos/Gastos/Balance entre sí), esto es
+// un solo número grande para que "cuánto le quedó al negocio" se vea de
+// entrada, sin tener que leer el gráfico. Devuelve el nuevo `y`.
+export function drawTotalBanner(
+  doc: import("jspdf").jsPDF,
+  x: number,
+  y: number,
+  width: number,
+  label: string,
+  amount: number,
+  primaryHex: string,
+): number {
+  const height = 30;
+  const tint = lighten(primaryHex, 0.88).split(" ").map(Number) as [number, number, number];
+  const primary = hexToRgbTuple(primaryHex);
+
+  doc.setFillColor(...tint);
+  doc.roundedRect(x, y, width, height, 3, 3, "F");
+
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...primary);
+  doc.text(label.toUpperCase(), x + 8, y + 12);
+
+  doc.setFontSize(26);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...DARK);
+  doc.text(formatCurrency(amount), x + 8, y + 24);
+
+  return y + height;
 }
 
 export function drawBarChart(
