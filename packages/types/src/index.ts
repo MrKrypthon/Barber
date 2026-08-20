@@ -117,12 +117,19 @@ export type SalesRange = "today" | "week" | "month";
 
 export type CashMovementType = "income" | "expense";
 
+// "Movimiento" incluye tanto lo cargado a mano (source="manual") como
+// cada venta cobrada en efectivo (source="sale") — para esta última,
+// customerName/serviceNames dicen qué se vendió y a quién; en un
+// movimiento manual quedan null/[].
 export type CashMovement = {
   id: string;
   type: CashMovementType;
   amount: number;
   description: string | null;
   createdAt: string;
+  source: "manual" | "sale";
+  customerName: string | null;
+  serviceNames: string[];
 };
 
 export type CashSummary = {

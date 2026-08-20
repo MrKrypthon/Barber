@@ -1,6 +1,5 @@
-import type { CashMovementType } from "@barber/types";
 import { formatLongDate, formatTime, fromDateParam } from "./format";
-import { DARK, MUTED, drawBarChart, drawMovementsTable, hexToRgbTuple } from "./pdf-draw";
+import { DARK, MUTED, drawBarChart, drawMovementsTable, hexToRgbTuple, type PdfMovement } from "./pdf-draw";
 
 export type CashClosingPdfInput = {
   businessName: string;
@@ -15,7 +14,7 @@ export type CashClosingPdfInput = {
   income: number;
   expense: number;
   balance: number;
-  movements: { type: CashMovementType; amount: number; description: string | null; createdAt: string }[];
+  movements: PdfMovement[];
 };
 
 // jsPDF es client-only (usa document/canvas internamente) — se carga con
@@ -61,7 +60,7 @@ export async function downloadCashClosingPdf(input: CashClosingPdfInput): Promis
   doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...DARK);
-  doc.text("Movimientos manuales", marginX, y);
+  doc.text("Movimientos", marginX, y);
   y += 8;
 
   y = drawMovementsTable(
@@ -72,7 +71,7 @@ export async function downloadCashClosingPdf(input: CashClosingPdfInput): Promis
     input.movements,
     primary,
     secondary,
-    "Sin movimientos manuales este día.",
+    "Sin movimientos este día.",
   );
 
   y += 10;

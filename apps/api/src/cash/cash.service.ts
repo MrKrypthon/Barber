@@ -1,15 +1,38 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
-import { CashClosing, CashMovement, CashMovementType, PaymentMethod, User } from "@prisma/client";
+import {
+  CashClosing,
+  CashMovement,
+  CashMovementType,
+  Customer,
+  PaymentMethod,
+  Sale,
+  SaleItem,
+  Service,
+  User,
+} from "@prisma/client";
 import { DateRange, getDateRangeBounds } from "../common/utils/date-range.util";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateCashMovementDto } from "./dto/create-cash-movement.dto";
 
+// "Movimiento" en Caja no es solo lo que se carga a mano (CashMovement):
+// también incluye cada venta cobrada en efectivo, para poder ver qué
+// servicio, a qué cliente y por cuánto se cobró — no solo el total del
+// día. source distingue el origen; customerName/serviceNames solo se
+// completan para source="sale" (en un CashMovement manual quedan null/[]).
 export type CashMovementResponse = {
   id: string;
   type: CashMovementType;
   amount: number;
   description: string | null;
   createdAt: Date;
+  source: "manual" | "sale";
+  customerName: string | null;
+  serviceNames: string[];
+};
+
+type SaleWithDetails = Sale & {
+  customer: Customer | null;
+  items: (SaleItem & { service: Service })[];
 };
 
 export type CashSummaryResponse = {
@@ -59,6 +82,22 @@ function toCashMovementResponse(movement: CashMovement): CashMovementResponse {
     amount: Number(movement.amount),
     description: movement.description,
     createdAt: movement.createdAt,
+    source: "manual",
+    customerName: null,
+    serviceNames: [],
+  };
+}
+
+function toSaleMovementResponse(sale: SaleWithDetails): CashMovementResponse {
+  return {
+    id: sale.id,
+    type: CashMovementType.income,
+    amount: Number(sale.total),
+    description: null,
+    createdAt: sale.createdAt,
+    source: "sale",
+    customerName: sale.customer?.name ?? null,
+    serviceNames: sale.items.map((item) => item.service.name),
   };
 }
 
@@ -117,13 +156,12 @@ export class CashService {
     const dateFilter = { gte: bounds.start, lt: bounds.end };
 
     const [cashSales, movements, closing] = await Promise.all([
-      this.prisma.sale.aggregate({
+      this.prisma.sale.findMany({
         where: { tenantId, paymentMethod: PaymentMethod.cash, createdAt: dateFilter },
-        _sum: { total: true },
+        include: { customer: true, items: { include: { service: true } } },
       }),
       this.prisma.cashMovement.findMany({
         where: { tenantId, createdAt: dateFilter },
-        orderBy: { createdAt: "desc" },
       }),
       // El corte de caja es por día calendario: solo tiene sentido para
       // range="today" (una semana/mes no tiene un único cierre).
@@ -134,7 +172,7 @@ export class CashService {
         : null,
     ]);
 
-    const salesIncome = Number(cashSales._sum.total ?? 0);
+    const salesIncome = cashSales.reduce((sum, sale) => sum + Number(sale.total), 0);
     const manualIncome = movements
       .filter((movement) => movement.type === CashMovementType.income)
       .reduce((sum, movement) => sum + Number(movement.amount), 0);
@@ -143,12 +181,16 @@ export class CashService {
       .reduce((sum, movement) => sum + Number(movement.amount), 0);
     const income = salesIncome + manualIncome;
 
+    const allMovements = [...cashSales.map(toSaleMovementResponse), ...movements.map(toCashMovementResponse)].sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+    );
+
     return {
       range,
       income,
       expense,
       balance: income - expense,
-      movements: movements.map(toCashMovementResponse),
+      movements: allMovements,
       closedAt: closing?.createdAt ?? null,
     };
   }
@@ -217,14 +259,21 @@ export class CashService {
   async findClosingByDate(tenantId: string, dateParam: string): Promise<CashClosingDetailResponse> {
     const bounds = getDateRangeBounds("today", parseDateParam(dateParam))!;
 
-    const [closing, movements] = await Promise.all([
+    const [closing, cashSales, movements] = await Promise.all([
       this.prisma.cashClosing.findUnique({
         where: { tenantId_date: { tenantId, date: bounds.start } },
         include: { closedBy: true },
       }),
+      this.prisma.sale.findMany({
+        where: {
+          tenantId,
+          paymentMethod: PaymentMethod.cash,
+          createdAt: { gte: bounds.start, lt: bounds.end },
+        },
+        include: { customer: true, items: { include: { service: true } } },
+      }),
       this.prisma.cashMovement.findMany({
         where: { tenantId, createdAt: { gte: bounds.start, lt: bounds.end } },
-        orderBy: { createdAt: "asc" },
       }),
     ]);
 
@@ -232,7 +281,11 @@ export class CashService {
       throw new NotFoundException("No hay un corte de caja para ese día");
     }
 
-    return { ...toCashClosingResponse(closing), movements: movements.map(toCashMovementResponse) };
+    const allMovements = [...cashSales.map(toSaleMovementResponse), ...movements.map(toCashMovementResponse)].sort(
+      (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+    );
+
+    return { ...toCashClosingResponse(closing), movements: allMovements };
   }
 
   // Reporte de un rango arbitrario (semana/quincena/mes/personalizado): a
@@ -258,11 +311,10 @@ export class CashService {
     const [cashSales, movements] = await Promise.all([
       this.prisma.sale.findMany({
         where: { tenantId, paymentMethod: PaymentMethod.cash, createdAt: { gte: from, lt: rangeEnd } },
-        select: { total: true, createdAt: true },
+        include: { customer: true, items: { include: { service: true } } },
       }),
       this.prisma.cashMovement.findMany({
         where: { tenantId, createdAt: { gte: from, lt: rangeEnd } },
-        orderBy: { createdAt: "asc" },
       }),
     ]);
 
@@ -273,7 +325,9 @@ export class CashService {
 
     for (const sale of cashSales) {
       const day = days.get(dayKey(sale.createdAt));
-      if (day) day.income += Number(sale.total);
+      if (!day) continue;
+      day.income += Number(sale.total);
+      day.movements.push(toSaleMovementResponse(sale));
     }
     for (const movement of movements) {
       const day = days.get(dayKey(movement.createdAt));
@@ -287,6 +341,7 @@ export class CashService {
     let income = 0;
     let expense = 0;
     for (const day of days.values()) {
+      day.movements.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
       day.balance = day.income - day.expense;
       income += day.income;
       expense += day.expense;

@@ -120,7 +120,7 @@ export async function downloadCashReportPdf(input: CashReportPdfInput): Promise<
         day.movements,
         primary,
         secondary,
-        "Sin movimientos manuales este día.",
+        "Sin movimientos este día.",
       );
       y += 10;
     });

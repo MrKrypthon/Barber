@@ -3,6 +3,25 @@ export function formatCurrency(amount: number): string {
   return `$${Math.round(amount).toLocaleString("es-AR")}`;
 }
 
+// Etiqueta de un movimiento de Caja para la lista y el PDF: una venta
+// muestra qué servicio(s) y a quién ("Corte, Barba — Juan Pérez"); un
+// movimiento manual muestra su descripción (o "Ingreso"/"Gasto" si no
+// tiene). Un solo lugar para este criterio — lo usan cash-view.tsx y
+// pdf-draw.ts, y no deben divergir.
+export function movementLabel(movement: {
+  type: "income" | "expense";
+  description: string | null;
+  source: "manual" | "sale";
+  customerName: string | null;
+  serviceNames: string[];
+}): string {
+  if (movement.source === "sale") {
+    const services = movement.serviceNames.join(", ") || "Venta";
+    return movement.customerName ? `${services} — ${movement.customerName}` : services;
+  }
+  return movement.description ?? (movement.type === "income" ? "Ingreso" : "Gasto");
+}
+
 // Formato compacto para gráficos: $98k (panel del administrador).
 export function formatCompactCurrency(amount: number): string {
   return `$${Math.round(amount / 1000)}k`;

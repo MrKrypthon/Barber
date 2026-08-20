@@ -1,6 +1,6 @@
 import type { CashMovementType } from "@barber/types";
 import { hexToRgbTriplet } from "./color";
-import { formatCurrency, formatTime } from "./format";
+import { formatCurrency, formatTime, movementLabel } from "./format";
 
 // Helpers de dibujo compartidos entre los distintos PDF de Caja (corte del
 // día y reporte por rango) — jsPDF no tiene un plugin de tablas instalado
@@ -12,11 +12,9 @@ export type PdfMovement = {
   amount: number;
   description: string | null;
   createdAt: string;
-};
-
-const MOVEMENT_TYPE_LABEL: Record<CashMovementType, string> = {
-  income: "Ingreso",
-  expense: "Gasto",
+  source: "manual" | "sale";
+  customerName: string | null;
+  serviceNames: string[];
 };
 
 export const DARK: [number, number, number] = [38, 38, 38];
@@ -104,11 +102,7 @@ export function drawMovementsTable(
     doc.setFont("helvetica", "normal");
     doc.setTextColor(...DARK);
     doc.text(formatTime(movement.createdAt), x + 2, y);
-    doc.text(
-      `${MOVEMENT_TYPE_LABEL[movement.type]}${movement.description ? ` — ${movement.description}` : ""}`,
-      x + 26,
-      y,
-    );
+    doc.text(movementLabel(movement), x + 26, y);
     doc.setTextColor(...(movement.type === "expense" ? secondary : primary));
     doc.setFont("helvetica", "bold");
     doc.text(
