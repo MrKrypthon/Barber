@@ -42,6 +42,27 @@ export function formatRelativeVisit(iso: string | null): string {
   return weeks === 1 ? "Hace 1 semana" : `Hace ${weeks} semanas`;
 }
 
+// "2026-08-20" a partir de un Date local — nunca vía toISOString (eso
+// convierte a UTC y puede correr el día calendario en husos horarios
+// detrás de UTC). Es el formato que espera la API para rangos de fecha
+// (parseDateParam en apps/api/src/cash/cash.service.ts).
+export function toDateParam(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+// Inversa de toDateParam. NUNCA usar new Date("YYYY-MM-DD") para mostrar
+// una fecha: ese formato se interpreta como medianoche UTC, así que en
+// cualquier huso horario detrás de UTC (todo el continente americano) el
+// día calendario mostrado queda corrido uno para atrás (mismo bug que
+// parseDateParam evita en apps/api/src/cash/cash.service.ts).
+export function fromDateParam(dateParam: string): Date {
+  const [year, month, day] = dateParam.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
 // Combina una fecha (día) con un horario "HH:MM" en un único Date local.
 export function withTime(date: Date, time: string): Date {
   const [h, m] = time.split(":").map(Number);

@@ -7,6 +7,7 @@ import type {
   AuthTokens,
   CashClosing,
   CashClosingDetail,
+  CashReport,
   CashSummary,
   CreateAppointmentInput,
   CreateCashMovementInput,
@@ -176,6 +177,8 @@ export function createApiClient(config: ApiClientConfig) {
       close: () => call<CashClosing>("/cash/close", { method: "POST" }),
       listClosings: () => call<CashClosing[]>("/cash/closings"),
       getClosing: (date: string) => call<CashClosingDetail>(`/cash/closings/${date}`),
+      getReport: (from: string, to: string) =>
+        call<CashReport>(`/cash/report?from=${from}&to=${to}`),
     },
     products: {
       list: () => call<Product[]>("/products"),
@@ -223,6 +226,7 @@ export type {
   AuthTokens,
   CashClosing,
   CashClosingDetail,
+  CashReport,
   CashSummary,
   CreateAppointmentInput,
   CreateCashMovementInput,

@@ -5,14 +5,14 @@ import { CashService } from "./cash.service";
 describe("CashService", () => {
   let service: CashService;
   let prisma: {
-    sale: { aggregate: jest.Mock };
+    sale: { aggregate: jest.Mock; findMany: jest.Mock };
     cashMovement: { findMany: jest.Mock; create: jest.Mock };
     cashClosing: { findUnique: jest.Mock; findMany: jest.Mock; create: jest.Mock };
   };
 
   beforeEach(() => {
     prisma = {
-      sale: { aggregate: jest.fn() },
+      sale: { aggregate: jest.fn(), findMany: jest.fn() },
       cashMovement: { findMany: jest.fn(), create: jest.fn() },
       cashClosing: {
         findUnique: jest.fn().mockResolvedValue(null),
@@ -213,6 +213,65 @@ describe("CashService", () => {
 
       expect(result.balance).toBe(250);
       expect(result.movements).toHaveLength(1);
+    });
+  });
+
+  describe("getReport", () => {
+    it("rechaza un rango inválido (from posterior a to)", async () => {
+      await expect(service.getReport("tenant-1", "2026-08-10", "2026-08-05")).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
+    });
+
+    it("rechaza fechas mal formadas", async () => {
+      await expect(service.getReport("tenant-1", "no-es-fecha", "2026-08-05")).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
+    });
+
+    it("desglosa ventas en efectivo y movimientos por día calendario", async () => {
+      prisma.sale.findMany.mockResolvedValue([
+        { total: 100, createdAt: new Date(2026, 7, 1, 10, 0) },
+        { total: 50, createdAt: new Date(2026, 7, 2, 11, 0) },
+      ]);
+      prisma.cashMovement.findMany.mockResolvedValue([
+        {
+          id: "m1",
+          type: "expense",
+          amount: 20,
+          description: "Insumos",
+          createdAt: new Date(2026, 7, 1, 12, 0),
+        },
+      ]);
+
+      const result = await service.getReport("tenant-1", "2026-08-01", "2026-08-02");
+
+      expect(result.days).toHaveLength(2);
+      expect(result.days[0]).toMatchObject({ income: 100, expense: 20, balance: 80 });
+      expect(result.days[0].movements).toHaveLength(1);
+      expect(result.days[1]).toMatchObject({ income: 50, expense: 0, balance: 50 });
+      expect(result.income).toBe(150);
+      expect(result.expense).toBe(20);
+      expect(result.balance).toBe(130);
+    });
+
+    it("incluye días sin actividad en el desglose, en cero", async () => {
+      prisma.sale.findMany.mockResolvedValue([]);
+      prisma.cashMovement.findMany.mockResolvedValue([]);
+
+      const result = await service.getReport("tenant-1", "2026-08-01", "2026-08-03");
+
+      expect(result.days).toHaveLength(3);
+      expect(result.days.every((d) => d.income === 0 && d.expense === 0)).toBe(true);
+    });
+
+    it("rechaza un rango de más de un año", async () => {
+      prisma.sale.findMany.mockResolvedValue([]);
+      prisma.cashMovement.findMany.mockResolvedValue([]);
+
+      await expect(service.getReport("tenant-1", "2025-01-01", "2026-12-31")).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
     });
   });
 });

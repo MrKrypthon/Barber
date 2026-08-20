@@ -154,6 +154,27 @@ export type CashClosingDetail = CashClosing & {
   movements: CashMovement[];
 };
 
+export type CashReportDay = {
+  date: string;
+  income: number;
+  expense: number;
+  balance: number;
+  movements: CashMovement[];
+};
+
+// Reporte por rango (semana/quincena/mes/personalizado): a diferencia de
+// CashClosing, no depende de que cada día se haya cerrado — se calcula en
+// vivo y siempre trae un CashReportDay por cada día del rango (en cero si
+// no hubo actividad).
+export type CashReport = {
+  from: string;
+  to: string;
+  income: number;
+  expense: number;
+  balance: number;
+  days: CashReportDay[];
+};
+
 export type Settings = {
   businessName: string;
   logo: string | null;

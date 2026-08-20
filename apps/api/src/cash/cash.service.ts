@@ -35,6 +35,23 @@ export type CashClosingDetailResponse = CashClosingResponse & {
   movements: CashMovementResponse[];
 };
 
+export type CashReportDayResponse = {
+  date: Date;
+  income: number;
+  expense: number;
+  balance: number;
+  movements: CashMovementResponse[];
+};
+
+export type CashReportResponse = {
+  from: Date;
+  to: Date;
+  income: number;
+  expense: number;
+  balance: number;
+  days: CashReportDayResponse[];
+};
+
 function toCashMovementResponse(movement: CashMovement): CashMovementResponse {
   return {
     id: movement.id,
@@ -72,6 +89,21 @@ function parseDateParam(dateParam: string): Date {
   const [, year, month, day] = match;
   return new Date(Number(year), Number(month) - 1, Number(day));
 }
+
+// Clave de agrupación por día calendario local — mismo criterio que
+// parseDateParam de arriba, nunca vía toISOString (eso desplaza el día en
+// husos horarios detrás de UTC).
+function dayKey(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+// Reporte por rango (semana/quincena/mes/personalizado, docs/ROADMAP.md
+// v0.3): no puede superar un año, para que nadie pida un reporte gigante
+// por accidente (o a propósito) y tumbe la consulta.
+const MAX_REPORT_DAYS = 366;
 
 @Injectable()
 export class CashService {
@@ -201,5 +233,65 @@ export class CashService {
     }
 
     return { ...toCashClosingResponse(closing), movements: movements.map(toCashMovementResponse) };
+  }
+
+  // Reporte de un rango arbitrario (semana/quincena/mes/personalizado): a
+  // diferencia de CashClosing, no depende de que cada día se haya cerrado —
+  // calcula en vivo a partir de ventas en efectivo + movimientos manuales,
+  // mismo criterio que getSummary("week"|"month"), pero desglosado día por
+  // día para poder mostrar el detalle de cada uno en el PDF.
+  async getReport(tenantId: string, fromParam: string, toParam: string): Promise<CashReportResponse> {
+    const from = parseDateParam(fromParam);
+    const to = parseDateParam(toParam);
+    if (from > to) {
+      throw new BadRequestException('"from" no puede ser posterior a "to"');
+    }
+
+    const rangeEnd = new Date(to);
+    rangeEnd.setDate(rangeEnd.getDate() + 1);
+
+    const dayCount = Math.round((rangeEnd.getTime() - from.getTime()) / 86_400_000);
+    if (dayCount > MAX_REPORT_DAYS) {
+      throw new BadRequestException(`El rango no puede superar ${MAX_REPORT_DAYS} días`);
+    }
+
+    const [cashSales, movements] = await Promise.all([
+      this.prisma.sale.findMany({
+        where: { tenantId, paymentMethod: PaymentMethod.cash, createdAt: { gte: from, lt: rangeEnd } },
+        select: { total: true, createdAt: true },
+      }),
+      this.prisma.cashMovement.findMany({
+        where: { tenantId, createdAt: { gte: from, lt: rangeEnd } },
+        orderBy: { createdAt: "asc" },
+      }),
+    ]);
+
+    const days = new Map<string, CashReportDayResponse>();
+    for (let d = new Date(from); d < rangeEnd; d.setDate(d.getDate() + 1)) {
+      days.set(dayKey(d), { date: new Date(d), income: 0, expense: 0, balance: 0, movements: [] });
+    }
+
+    for (const sale of cashSales) {
+      const day = days.get(dayKey(sale.createdAt));
+      if (day) day.income += Number(sale.total);
+    }
+    for (const movement of movements) {
+      const day = days.get(dayKey(movement.createdAt));
+      if (!day) continue;
+      const amount = Number(movement.amount);
+      if (movement.type === CashMovementType.income) day.income += amount;
+      else day.expense += amount;
+      day.movements.push(toCashMovementResponse(movement));
+    }
+
+    let income = 0;
+    let expense = 0;
+    for (const day of days.values()) {
+      day.balance = day.income - day.expense;
+      income += day.income;
+      expense += day.expense;
+    }
+
+    return { from, to, income, expense, balance: income - expense, days: [...days.values()] };
   }
 }

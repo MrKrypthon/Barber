@@ -120,6 +120,10 @@ GET /api/v1/cash/closings/{date}
 
 &nbsp;&nbsp;Solo `owner`. `date` en formato `YYYY-MM-DD`. Devuelve el corte de ese día calendario + sus movimientos manuales (`{ ...closing, movements }`). Los totales son el snapshot guardado al cerrar, no se recalculan. 404 si ese día no se cerró la caja, 400 si `date` no tiene el formato esperado.
 
+GET /api/v1/cash/report
+
+&nbsp;&nbsp;Solo `owner`. Query: `from`, `to` (ambos `YYYY-MM-DD`, requeridos). Reporte de un rango arbitrario (semana/quincena/mes/personalizado, el frontend arma los presets) para exportar a PDF con desglose día por día. A diferencia de `/cash/closings/{date}`, no depende de que cada día se haya cerrado: calcula en vivo a partir de ventas en efectivo + movimientos manuales, mismo criterio que `GET /cash?range=week|month`. Devuelve `{ from, to, income, expense, balance, days }`, donde `days` trae un elemento por cada día del rango (incluso los que no tuvieron actividad, en cero) con sus propios `income`/`expense`/`balance`/`movements`. 400 si `from` es posterior a `to`, si el formato de alguna fecha es inválido, o si el rango supera 366 días.
+
 ---
 
 ## Inventario
