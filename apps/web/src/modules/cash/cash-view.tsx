@@ -13,7 +13,7 @@ import { useCash } from "@/hooks/use-cash";
 import { useSettings } from "@/hooks/use-settings";
 import { DEFAULT_PRIMARY_COLOR, DEFAULT_SECONDARY_COLOR } from "@/lib/brand-defaults";
 import { downloadCashClosingPdf } from "@/lib/cash-closing-pdf";
-import { formatCurrency, formatLongDate, formatTime } from "@/lib/format";
+import { formatCurrency, formatLongDate, formatTime, movementLabel } from "@/lib/format";
 
 export function CashView() {
   const { user } = useAuth();
@@ -52,6 +52,7 @@ export function CashView() {
     try {
       await downloadCashClosingPdf({
         businessName: settings?.businessName ?? "",
+        logo: settings?.logo,
         primaryColor: settings?.primaryColor ?? DEFAULT_PRIMARY_COLOR,
         secondaryColor: settings?.secondaryColor ?? DEFAULT_SECONDARY_COLOR,
         closedByName: user?.name ?? "",
@@ -147,7 +148,7 @@ export function CashView() {
           <Card className="divide-y divide-neutral-100 p-0 dark:divide-neutral-800">
             {summary.movements.length === 0 ? (
               <p className="py-6 text-center text-neutral-400 dark:text-neutral-500">
-                Sin movimientos manuales hoy.
+                Sin movimientos hoy.
               </p>
             ) : (
               summary.movements.map((m) => (
@@ -158,7 +159,7 @@ export function CashView() {
                   <span className="w-12 text-sm font-semibold text-secondary">
                     {formatTime(m.createdAt)}
                   </span>
-                  <p className="flex-1 font-medium">{m.description}</p>
+                  <p className="flex-1 font-medium">{movementLabel(m)}</p>
                   <span className={m.type === "expense" ? "font-bold text-secondary" : "font-bold"}>
                     {m.type === "expense" ? "−" : "+"}
                     {formatCurrency(m.amount)}

@@ -10,12 +10,14 @@ import { apiClient } from "@/lib/api-client";
 import { DEFAULT_PRIMARY_COLOR, DEFAULT_SECONDARY_COLOR } from "@/lib/brand-defaults";
 import { downloadCashClosingPdf } from "@/lib/cash-closing-pdf";
 import { formatCurrency, formatLongDate } from "@/lib/format";
+import { CashReportModal } from "./cash-report-modal";
 
 export function CashHistoryView() {
   const { settings } = useSettings();
   const { closings, isLoading, isError } = useCashClosings();
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [reportOpen, setReportOpen] = useState(false);
 
   // El listado ya trae los totales, pero no los movimientos del día (eso se
   // pide recién al descargar, para no cargar el detalle de cortes que el
@@ -27,6 +29,7 @@ export function CashHistoryView() {
       const detail = await apiClient.cash.getClosing(date.slice(0, 10));
       await downloadCashClosingPdf({
         businessName: settings?.businessName ?? "",
+        logo: settings?.logo,
         primaryColor: settings?.primaryColor ?? DEFAULT_PRIMARY_COLOR,
         secondaryColor: settings?.secondaryColor ?? DEFAULT_SECONDARY_COLOR,
         closedByName: detail.closedBy.name,
@@ -46,7 +49,15 @@ export function CashHistoryView() {
 
   return (
     <div>
-      <PageHeader title="Cortes anteriores" backHref="/caja" />
+      <PageHeader
+        title="Cortes anteriores"
+        backHref="/caja"
+        action={
+          <Button variant="outline" onClick={() => setReportOpen(true)}>
+            Generar reporte
+          </Button>
+        }
+      />
 
       {error ? <p className="mb-4 text-sm text-secondary">{error}</p> : null}
 
@@ -91,6 +102,8 @@ export function CashHistoryView() {
           ))}
         </Card>
       )}
+
+      {reportOpen ? <CashReportModal onClose={() => setReportOpen(false)} /> : null}
     </div>
   );
 }

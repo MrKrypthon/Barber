@@ -3,6 +3,25 @@ export function formatCurrency(amount: number): string {
   return `$${Math.round(amount).toLocaleString("es-AR")}`;
 }
 
+// Etiqueta de un movimiento de Caja para la lista y el PDF: una venta
+// muestra qué servicio(s) y a quién ("Corte, Barba — Juan Pérez"); un
+// movimiento manual muestra su descripción (o "Ingreso"/"Gasto" si no
+// tiene). Un solo lugar para este criterio — lo usan cash-view.tsx y
+// pdf-draw.ts, y no deben divergir.
+export function movementLabel(movement: {
+  type: "income" | "expense";
+  description: string | null;
+  source: "manual" | "sale";
+  customerName: string | null;
+  serviceNames: string[];
+}): string {
+  if (movement.source === "sale") {
+    const services = movement.serviceNames.join(", ") || "Venta";
+    return movement.customerName ? `${services} — ${movement.customerName}` : services;
+  }
+  return movement.description ?? (movement.type === "income" ? "Ingreso" : "Gasto");
+}
+
 // Formato compacto para gráficos: $98k (panel del administrador).
 export function formatCompactCurrency(amount: number): string {
   return `$${Math.round(amount / 1000)}k`;
@@ -40,6 +59,27 @@ export function formatRelativeVisit(iso: string | null): string {
   if (diffDays < 7) return `Hace ${diffDays} días`;
   const weeks = Math.floor(diffDays / 7);
   return weeks === 1 ? "Hace 1 semana" : `Hace ${weeks} semanas`;
+}
+
+// "2026-08-20" a partir de un Date local — nunca vía toISOString (eso
+// convierte a UTC y puede correr el día calendario en husos horarios
+// detrás de UTC). Es el formato que espera la API para rangos de fecha
+// (parseDateParam en apps/api/src/cash/cash.service.ts).
+export function toDateParam(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+// Inversa de toDateParam. NUNCA usar new Date("YYYY-MM-DD") para mostrar
+// una fecha: ese formato se interpreta como medianoche UTC, así que en
+// cualquier huso horario detrás de UTC (todo el continente americano) el
+// día calendario mostrado queda corrido uno para atrás (mismo bug que
+// parseDateParam evita en apps/api/src/cash/cash.service.ts).
+export function fromDateParam(dateParam: string): Date {
+  const [year, month, day] = dateParam.split("-").map(Number);
+  return new Date(year, month - 1, day);
 }
 
 // Combina una fecha (día) con un horario "HH:MM" en un único Date local.

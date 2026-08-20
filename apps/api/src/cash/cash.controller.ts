@@ -7,6 +7,7 @@ import { RolesGuard } from "../auth/guards/roles.guard";
 import { AuthenticatedUser } from "../auth/types/jwt-payload.type";
 import { DateRangeQueryDto } from "../common/dto/date-range-query.dto";
 import { CashService } from "./cash.service";
+import { CashReportQueryDto } from "./dto/cash-report-query.dto";
 import { CreateCashMovementDto } from "./dto/create-cash-movement.dto";
 
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -34,6 +35,14 @@ export class CashController {
   @Get("closings/:date")
   findClosingByDate(@CurrentUser() user: AuthenticatedUser, @Param("date") date: string) {
     return this.cashService.findClosingByDate(user.tenantId, date);
+  }
+
+  // Reporte de un rango (semana/quincena/mes/personalizado) para exportar a
+  // PDF — no depende de que cada día se haya cerrado, calcula en vivo.
+  @Roles(Role.owner)
+  @Get("report")
+  getReport(@CurrentUser() user: AuthenticatedUser, @Query() query: CashReportQueryDto) {
+    return this.cashService.getReport(user.tenantId, query.from, query.to);
   }
 
   // Owner y Employee pueden registrar movimientos (docs/PROJECT.md: el

@@ -117,12 +117,19 @@ export type SalesRange = "today" | "week" | "month";
 
 export type CashMovementType = "income" | "expense";
 
+// "Movimiento" incluye tanto lo cargado a mano (source="manual") como
+// cada venta cobrada en efectivo (source="sale") — para esta última,
+// customerName/serviceNames dicen qué se vendió y a quién; en un
+// movimiento manual quedan null/[].
 export type CashMovement = {
   id: string;
   type: CashMovementType;
   amount: number;
   description: string | null;
   createdAt: string;
+  source: "manual" | "sale";
+  customerName: string | null;
+  serviceNames: string[];
 };
 
 export type CashSummary = {
@@ -152,6 +159,27 @@ export type CashClosing = {
 
 export type CashClosingDetail = CashClosing & {
   movements: CashMovement[];
+};
+
+export type CashReportDay = {
+  date: string;
+  income: number;
+  expense: number;
+  balance: number;
+  movements: CashMovement[];
+};
+
+// Reporte por rango (semana/quincena/mes/personalizado): a diferencia de
+// CashClosing, no depende de que cada día se haya cerrado — se calcula en
+// vivo y siempre trae un CashReportDay por cada día del rango (en cero si
+// no hubo actividad).
+export type CashReport = {
+  from: string;
+  to: string;
+  income: number;
+  expense: number;
+  balance: number;
+  days: CashReportDay[];
 };
 
 export type Settings = {
