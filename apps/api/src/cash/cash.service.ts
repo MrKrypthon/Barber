@@ -1,5 +1,5 @@
-import { ConflictException, Injectable } from "@nestjs/common";
-import { CashMovement, CashMovementType, PaymentMethod } from "@prisma/client";
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
+import { CashClosing, CashMovement, CashMovementType, PaymentMethod, User } from "@prisma/client";
 import { DateRange, getDateRangeBounds } from "../common/utils/date-range.util";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateCashMovementDto } from "./dto/create-cash-movement.dto";
@@ -23,11 +23,16 @@ export type CashSummaryResponse = {
 
 export type CashClosingResponse = {
   id: string;
+  date: Date;
   income: number;
   expense: number;
   balance: number;
   closedBy: { id: string; name: string };
   closedAt: Date;
+};
+
+export type CashClosingDetailResponse = CashClosingResponse & {
+  movements: CashMovementResponse[];
 };
 
 function toCashMovementResponse(movement: CashMovement): CashMovementResponse {
@@ -38,6 +43,34 @@ function toCashMovementResponse(movement: CashMovement): CashMovementResponse {
     description: movement.description,
     createdAt: movement.createdAt,
   };
+}
+
+function toCashClosingResponse(closing: CashClosing & { closedBy: User }): CashClosingResponse {
+  return {
+    id: closing.id,
+    date: closing.date,
+    income: Number(closing.income),
+    expense: Number(closing.expense),
+    balance: Number(closing.balance),
+    closedBy: { id: closing.closedBy.id, name: closing.closedBy.name },
+    closedAt: closing.createdAt,
+  };
+}
+
+// "YYYY-MM-DD" → Date anclada al mediodía local de ese día calendario.
+// new Date("YYYY-MM-DD") NO sirve acá: ese formato lo interpreta como
+// medianoche UTC (a diferencia de un ISO con hora), así que en cualquier
+// servidor con huso horario detrás de UTC (todo el continente americano)
+// el día calendario local queda corrido uno para atrás — justo el caso de
+// closings, que se guardan y buscan por día calendario local
+// (getDateRangeBounds usa getFullYear/getMonth/getDate, siempre locales).
+function parseDateParam(dateParam: string): Date {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateParam);
+  if (!match) {
+    throw new BadRequestException("Fecha inválida, se espera YYYY-MM-DD");
+  }
+  const [, year, month, day] = match;
+  return new Date(Number(year), Number(month) - 1, Number(day));
 }
 
 @Injectable()
@@ -130,13 +163,43 @@ export class CashService {
       include: { closedBy: true },
     });
 
-    return {
-      id: closing.id,
-      income: Number(closing.income),
-      expense: Number(closing.expense),
-      balance: Number(closing.balance),
-      closedBy: { id: closing.closedBy.id, name: closing.closedBy.name },
-      closedAt: closing.createdAt,
-    };
+    return toCashClosingResponse(closing);
+  }
+
+  // Historial de cortes ya hechos (para poder volver a descargar el PDF de
+  // un día anterior) — solo los números guardados al cerrar, sin
+  // movimientos (esos se piden por día con findClosingByDate).
+  async findClosings(tenantId: string): Promise<CashClosingResponse[]> {
+    const closings = await this.prisma.cashClosing.findMany({
+      where: { tenantId },
+      include: { closedBy: true },
+      orderBy: { date: "desc" },
+    });
+    return closings.map(toCashClosingResponse);
+  }
+
+  // Detalle de un corte ya hecho, con sus movimientos, para regenerar el
+  // PDF de un día anterior. Los totales vienen del snapshot guardado al
+  // cerrar (CashClosing), no se recalculan — es un registro de auditoría
+  // inmutable, docs/DATABASE.md.
+  async findClosingByDate(tenantId: string, dateParam: string): Promise<CashClosingDetailResponse> {
+    const bounds = getDateRangeBounds("today", parseDateParam(dateParam))!;
+
+    const [closing, movements] = await Promise.all([
+      this.prisma.cashClosing.findUnique({
+        where: { tenantId_date: { tenantId, date: bounds.start } },
+        include: { closedBy: true },
+      }),
+      this.prisma.cashMovement.findMany({
+        where: { tenantId, createdAt: { gte: bounds.start, lt: bounds.end } },
+        orderBy: { createdAt: "asc" },
+      }),
+    ]);
+
+    if (!closing) {
+      throw new NotFoundException("No hay un corte de caja para ese día");
+    }
+
+    return { ...toCashClosingResponse(closing), movements: movements.map(toCashMovementResponse) };
   }
 }
