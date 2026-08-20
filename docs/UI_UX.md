@@ -64,6 +64,8 @@ Clientes
 
 Caja
 
+Inventario
+
 Configuración
 
 ---

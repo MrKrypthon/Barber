@@ -22,6 +22,11 @@ enum CashMovementType {
   expense
 }
 
+enum ProductMovementType {
+  entry
+  exit
+}
+
 model Tenant {
   id        String   @id @default(uuid())
   name      String
@@ -36,6 +41,8 @@ model Tenant {
   cashClosings     CashClosing[]
   businessSettings BusinessSettings?
   appointments     Appointment[]
+  products         Product[]
+  productMovements ProductMovement[]
 
   @@map("tenants")
 }
@@ -232,4 +239,49 @@ model Appointment {
 
   @@index([tenantId, startAt])
   @@map("appointments")
+}
+
+// Inventario v0.3 (docs/ROADMAP.md): solo productos de reventa (pomada,
+// shampoo, cera), sin vincular todavía con Ventas ni con Servicios — el
+// stock se mueve exclusivamente a mano vía ProductMovement, igual que Caja
+// se mueve vía CashMovement. "stock" es un total corriente que se actualiza
+// en la misma transacción que crea el movimiento (nunca se recalcula desde
+// cero ni se edita directo, ver ProductsService.registerMovement).
+model Product {
+  id        String    @id @default(uuid())
+  tenantId  String    @map("tenant_id")
+  name      String
+  // Data URI (base64) ya redimensionada/comprimida en el cliente, mismo
+  // criterio que BusinessSettings.logo (ADR-008, docs/DECISIONS.md) — sin
+  // almacenamiento de archivos en el MVP.
+  photo     String?
+  stock     Int       @default(0)
+  // Debajo de este número se marca "stock bajo" en la UI. Opcional: sin
+  // configurar, el producto nunca se marca.
+  minStock  Int?      @map("min_stock")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  tenant    Tenant            @relation(fields: [tenantId], references: [id])
+  movements ProductMovement[]
+
+  @@index([tenantId])
+  @@map("products")
+}
+
+model ProductMovement {
+  id          String              @id @default(uuid())
+  tenantId    String              @map("tenant_id")
+  productId   String              @map("product_id")
+  type        ProductMovementType
+  quantity    Int
+  description String?
+  createdAt   DateTime            @default(now()) @map("created_at")
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([tenantId, productId, createdAt])
+  @@map("product_movements")
 }
