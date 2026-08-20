@@ -26,6 +26,33 @@ export function hexToRgbTuple(hex: string): [number, number, number] {
   return [r, g, b];
 }
 
+// resizeImageToDataUrl (apps/web/src/lib/image.ts) siempre guarda JPEG,
+// pero se lee el mime real del data URI por si algún logo viejo quedó en
+// otro formato — jsPDF necesita el formato explícito, a diferencia del
+// <img> del resto de la app.
+function imageFormatFromDataUri(dataUri: string): string {
+  const mime = /^data:image\/(\w+);base64,/.exec(dataUri)?.[1]?.toUpperCase();
+  return mime === "JPG" ? "JPEG" : (mime ?? "JPEG");
+}
+
+// Logo del negocio en la esquina superior derecha (settings.logo, mismo
+// data URI cuadrado que ya usa Avatar). Si no hay logo, o si el data URI
+// está corrupto, se omite en silencio — un logo roto no debe impedir
+// descargar el PDF.
+export function drawLogo(
+  doc: import("jspdf").jsPDF,
+  logo: string | null | undefined,
+  rightEdge: number,
+): void {
+  if (!logo) return;
+  const size = 22;
+  try {
+    doc.addImage(logo, imageFormatFromDataUri(logo), rightEdge - size, 11, size, size);
+  } catch {
+    // omitido a propósito, ver comentario de arriba.
+  }
+}
+
 export function drawBarChart(
   doc: import("jspdf").jsPDF,
   x: number,

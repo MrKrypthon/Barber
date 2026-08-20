@@ -52,6 +52,7 @@ export function CashView() {
     try {
       await downloadCashClosingPdf({
         businessName: settings?.businessName ?? "",
+        logo: settings?.logo,
         primaryColor: settings?.primaryColor ?? DEFAULT_PRIMARY_COLOR,
         secondaryColor: settings?.secondaryColor ?? DEFAULT_SECONDARY_COLOR,
         closedByName: user?.name ?? "",

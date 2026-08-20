@@ -62,6 +62,7 @@ export function CashReportModal({ onClose }: { onClose: () => void }) {
       const report = await apiClient.cash.getReport(from, to);
       await downloadCashReportPdf({
         businessName: settings?.businessName ?? "",
+        logo: settings?.logo,
         primaryColor: settings?.primaryColor ?? DEFAULT_PRIMARY_COLOR,
         secondaryColor: settings?.secondaryColor ?? DEFAULT_SECONDARY_COLOR,
         from: report.from.slice(0, 10),

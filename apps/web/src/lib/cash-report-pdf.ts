@@ -3,6 +3,7 @@ import {
   DARK,
   MUTED,
   drawBarChart,
+  drawLogo,
   drawMovementsTable,
   hexToRgbTuple,
   movementsTableHeight,
@@ -19,6 +20,7 @@ export type CashReportPdfDay = {
 
 export type CashReportPdfInput = {
   businessName: string;
+  logo?: string | null;
   primaryColor: string;
   secondaryColor: string;
   from: string;
@@ -43,6 +45,7 @@ export async function downloadCashReportPdf(input: CashReportPdfInput): Promise<
 
   doc.setFillColor(...primary);
   doc.rect(0, 0, 210, 6, "F");
+  drawLogo(doc, input.logo, RIGHT_EDGE);
 
   let y = 22;
   doc.setFontSize(18);

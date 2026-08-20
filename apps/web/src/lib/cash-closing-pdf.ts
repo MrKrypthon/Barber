@@ -1,8 +1,17 @@
 import { formatLongDate, formatTime, fromDateParam } from "./format";
-import { DARK, MUTED, drawBarChart, drawMovementsTable, hexToRgbTuple, type PdfMovement } from "./pdf-draw";
+import {
+  DARK,
+  MUTED,
+  drawBarChart,
+  drawLogo,
+  drawMovementsTable,
+  hexToRgbTuple,
+  type PdfMovement,
+} from "./pdf-draw";
 
 export type CashClosingPdfInput = {
   businessName: string;
+  logo?: string | null;
   primaryColor: string;
   secondaryColor: string;
   closedByName: string;
@@ -30,6 +39,7 @@ export async function downloadCashClosingPdf(input: CashClosingPdfInput): Promis
   // Franja de color de marca arriba de todo, puro detalle visual.
   doc.setFillColor(...primary);
   doc.rect(0, 0, 210, 6, "F");
+  drawLogo(doc, input.logo, rightEdge);
 
   let y = 22;
   doc.setFontSize(18);

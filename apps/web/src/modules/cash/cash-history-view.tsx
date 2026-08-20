@@ -29,6 +29,7 @@ export function CashHistoryView() {
       const detail = await apiClient.cash.getClosing(date.slice(0, 10));
       await downloadCashClosingPdf({
         businessName: settings?.businessName ?? "",
+        logo: settings?.logo,
         primaryColor: settings?.primaryColor ?? DEFAULT_PRIMARY_COLOR,
         secondaryColor: settings?.secondaryColor ?? DEFAULT_SECONDARY_COLOR,
         closedByName: detail.closedBy.name,
