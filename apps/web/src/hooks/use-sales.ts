@@ -11,7 +11,7 @@ export function useSales(filter: SalesFilter = "today") {
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["sales", filter],
-    queryFn: () => apiClient.sales.list(filter),
+    queryFn: () => apiClient.sales.list({ range: filter }),
   });
 
   const createMutation = useMutation({

@@ -47,7 +47,14 @@ export function ProductCard({
             </span>
           ) : null}
         </div>
-        <p className="px-3 pt-3 font-medium leading-tight line-clamp-2">{product.name}</p>
+        {/* h-10 = 2 líneas a leading-tight, siempre reservado (el padding
+            va en el div, no en el propio párrafo, para que no le reste
+            alto disponible al texto) — así un nombre corto no deja la
+            tarjeta más baja que una con nombre largo, y el stepper de
+            abajo queda a la misma altura en toda la fila del grid. */}
+        <div className="px-3 pt-3">
+          <p className="line-clamp-2 h-10 font-medium leading-tight">{product.name}</p>
+        </div>
       </Link>
 
       <div className="mt-2 flex items-center justify-between gap-2 px-3 pb-3">

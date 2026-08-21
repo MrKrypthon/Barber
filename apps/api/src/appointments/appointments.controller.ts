@@ -18,7 +18,7 @@ export class AppointmentsController {
 
   @Get()
   findAll(@CurrentUser() user: AuthenticatedUser, @Query() query: AppointmentQueryDto) {
-    return this.appointmentsService.findAll(user.tenantId, query.range, query.date);
+    return this.appointmentsService.findAll(user.tenantId, query.range, query.date, query.since);
   }
 
   @Post()

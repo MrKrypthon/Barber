@@ -161,8 +161,16 @@ export function createApiClient(config: ApiClientConfig) {
       remove: (id: string) => call<{ success: boolean }>(`/services/${id}`, { method: "DELETE" }),
     },
     sales: {
-      list: (range?: SalesRange) =>
-        call<Sale[]>(`/sales${range ? `?range=${range}` : ""}`),
+      // since: alternativa a range para pedir "desde esta fecha hasta
+      // ahora" (ej. el Panel del administrador, que no encaja en ninguno
+      // de los buckets fijos de SalesRange).
+      list: (params?: { range?: SalesRange; since?: string }) => {
+        const query = new URLSearchParams();
+        if (params?.range) query.set("range", params.range);
+        if (params?.since) query.set("since", params.since);
+        const qs = query.toString();
+        return call<Sale[]>(`/sales${qs ? `?${qs}` : ""}`);
+      },
       create: (input: CreateSaleInput) =>
         call<Sale>("/sales", { method: "POST", body: JSON.stringify(input) }),
     },
@@ -200,10 +208,11 @@ export function createApiClient(config: ApiClientConfig) {
         call<Settings>("/settings", { method: "PUT", body: JSON.stringify(input) }),
     },
     appointments: {
-      list: (params?: { date?: string; range?: AppointmentsRange }) => {
+      list: (params?: { date?: string; range?: AppointmentsRange; since?: string }) => {
         const query = new URLSearchParams();
         if (params?.date) query.set("date", params.date);
         if (params?.range) query.set("range", params.range);
+        if (params?.since) query.set("since", params.since);
         const qs = query.toString();
         return call<Appointment[]>(`/appointments${qs ? `?${qs}` : ""}`);
       },

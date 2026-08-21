@@ -25,7 +25,7 @@ export class SalesController {
   @Roles(Role.owner)
   @Get()
   findAll(@CurrentUser() user: AuthenticatedUser, @Query() query: DateRangeQueryDto) {
-    return this.salesService.findAll(user.tenantId, query.range);
+    return this.salesService.findAll(user.tenantId, query.range, query.since);
   }
 
   @Roles(Role.owner)
