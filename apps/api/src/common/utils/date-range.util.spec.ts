@@ -1,4 +1,5 @@
-import { getDateRangeBounds } from "./date-range.util";
+import { BadRequestException } from "@nestjs/common";
+import { getDateRangeBounds, parseDateParam } from "./date-range.util";
 
 describe("getDateRangeBounds", () => {
   // Miércoles 10 de enero de 2024, 15:00.
@@ -38,5 +39,16 @@ describe("getDateRangeBounds", () => {
     const bounds = getDateRangeBounds("month", december)!;
     expect(bounds.start).toEqual(new Date(2024, 11, 1, 0, 0, 0));
     expect(bounds.end).toEqual(new Date(2025, 0, 1, 0, 0, 0));
+  });
+});
+
+describe("parseDateParam", () => {
+  it("interpreta YYYY-MM-DD como medianoche local, no UTC", () => {
+    expect(parseDateParam("2024-01-10")).toEqual(new Date(2024, 0, 10, 0, 0, 0));
+  });
+
+  it("rechaza un formato inválido", () => {
+    expect(() => parseDateParam("10-01-2024")).toThrow(BadRequestException);
+    expect(() => parseDateParam("no-es-una-fecha")).toThrow(BadRequestException);
   });
 });

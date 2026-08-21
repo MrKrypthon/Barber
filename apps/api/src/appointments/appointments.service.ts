@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { Appointment, Prisma } from "@prisma/client";
-import { DateRange, getDateRangeBounds } from "../common/utils/date-range.util";
+import { DateRange, getDateRangeBounds, parseDateParam } from "../common/utils/date-range.util";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateAppointmentDto } from "./dto/create-appointment.dto";
 import { UpdateAppointmentDto } from "./dto/update-appointment.dto";
@@ -54,10 +54,14 @@ export class AppointmentsService {
 
   // Sin range, devuelve todos los turnos del tenant (igual que sales/customers
   // cuando no se pasa filtro), en vez de asumir "today" implícitamente.
+  // since: cota inferior abierta, mismo criterio que sales — para el Panel
+  // del administrador, que necesita una ventana de meses, no todo el
+  // historial.
   async findAll(
     tenantId: string,
     range?: DateRange,
     date?: string,
+    since?: string,
   ): Promise<AppointmentResponse[]> {
     const bounds = getDateRangeBounds(range, date ? new Date(date) : undefined);
     const appointments = await this.prisma.appointment.findMany({
@@ -65,6 +69,7 @@ export class AppointmentsService {
         tenantId,
         deletedAt: null,
         ...(bounds ? { startAt: { gte: bounds.start, lt: bounds.end } } : {}),
+        ...(since ? { startAt: { gte: parseDateParam(since) } } : {}),
       },
       include: APPOINTMENT_INCLUDE,
       orderBy: { startAt: "asc" },

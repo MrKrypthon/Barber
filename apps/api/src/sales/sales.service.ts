@@ -1,6 +1,6 @@
 import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { Prisma, Role } from "@prisma/client";
-import { DateRange, getDateRangeBounds } from "../common/utils/date-range.util";
+import { DateRange, getDateRangeBounds, parseDateParam } from "../common/utils/date-range.util";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateSaleDto } from "./dto/create-sale.dto";
 
@@ -103,11 +103,16 @@ export class SalesService {
     return toSaleResponse(sale);
   }
 
-  async findAll(tenantId: string, range?: DateRange): Promise<SaleResponse[]> {
+  // since: cota inferior abierta ("desde esta fecha hasta ahora"),
+  // alternativa a range cuando se necesita una ventana que no coincide con
+  // ninguno de los buckets fijos (ej. el Panel del administrador, que
+  // necesita "los últimos ~2 meses" y no "todo el historial").
+  async findAll(tenantId: string, range?: DateRange, since?: string): Promise<SaleResponse[]> {
     const bounds = getDateRangeBounds(range);
     const where: Prisma.SaleWhereInput = {
       tenantId,
       ...(bounds ? { createdAt: { gte: bounds.start, lt: bounds.end } } : {}),
+      ...(since ? { createdAt: { gte: parseDateParam(since) } } : {}),
     };
 
     const sales = await this.prisma.sale.findMany({

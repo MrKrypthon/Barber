@@ -90,7 +90,7 @@ POST /api/v1/sales
 
 GET /api/v1/sales
 
-&nbsp;&nbsp;Solo `owner` (`docs/TECHNOLOGIES.md` §17: "Consultar ventas" está listado solo para Owner). Acepta `?range=today|week|month` para los filtros de Historial de `docs/PROJECT.md`; sin el parámetro devuelve todas las ventas del tenant.
+&nbsp;&nbsp;Solo `owner` (`docs/TECHNOLOGIES.md` §17: "Consultar ventas" está listado solo para Owner). Acepta `?range=today|week|month` para los filtros de Historial de `docs/PROJECT.md`; sin parámetros devuelve todas las ventas del tenant. `?since=YYYY-MM-DD` es una alternativa a `range` — cota inferior abierta ("desde esa fecha hasta ahora") para pedir una ventana que no coincide con ninguno de los buckets fijos, como usa el Panel del administrador para no traer todo el historial.
 
 GET /api/v1/sales/{id}
 
@@ -176,7 +176,7 @@ Agenda manual (v0.2, `docs/ROADMAP.md`): el empleado registra los turnos recibid
 
 GET /api/v1/appointments
 
-&nbsp;&nbsp;Acepta `?date=<ISO date>&range=today|week`; sin `range` devuelve todos los turnos del tenant (mismo criterio que `/sales` y `/customers`). `date` es la fecha de referencia para navegar la agenda a cualquier día/semana, no solo la actual.
+&nbsp;&nbsp;Acepta `?date=<ISO date>&range=today|week`; sin `range` devuelve todos los turnos del tenant (mismo criterio que `/sales` y `/customers`). `date` es la fecha de referencia para navegar la agenda a cualquier día/semana, no solo la actual. `?since=YYYY-MM-DD` es una alternativa a `range`/`date`, mismo criterio que en `/sales`.
 
 POST /api/v1/appointments
 

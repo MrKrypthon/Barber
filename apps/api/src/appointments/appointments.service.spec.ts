@@ -60,6 +60,18 @@ describe("AppointmentsService", () => {
       );
       expect(result).toEqual([expect.objectContaining({ id: "appt-1" })]);
     });
+
+    it("since filtra desde esa fecha en vez de traer todo el historial", async () => {
+      prisma.appointment.findMany.mockResolvedValue([]);
+
+      await service.findAll("tenant-1", undefined, undefined, "2026-06-01");
+
+      expect(prisma.appointment.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ startAt: { gte: new Date(2026, 5, 1) } }),
+        }),
+      );
+    });
   });
 
   describe("create", () => {

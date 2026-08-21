@@ -1,3 +1,5 @@
+import { BadRequestException } from "@nestjs/common";
+
 export type DateRange = "today" | "week" | "month";
 
 export type DateRangeBounds = {
@@ -33,4 +35,20 @@ export function getDateRangeBounds(
   }
 
   return { start, end };
+}
+
+// "YYYY-MM-DD" → Date anclada a medianoche local de ese día calendario.
+// new Date("YYYY-MM-DD") NO sirve acá: ese formato lo interpreta como
+// medianoche UTC (a diferencia de un ISO con hora), así que en cualquier
+// servidor con huso horario detrás de UTC (todo el continente americano)
+// el día calendario local queda corrido uno para atrás. Compartido por
+// cash, sales y appointments — todos filtran por un rango de fecha que
+// llega como string desde el cliente.
+export function parseDateParam(dateParam: string): Date {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateParam);
+  if (!match) {
+    throw new BadRequestException("Fecha inválida, se espera YYYY-MM-DD");
+  }
+  const [, year, month, day] = match;
+  return new Date(Number(year), Number(month) - 1, Number(day));
 }

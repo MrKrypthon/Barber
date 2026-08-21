@@ -10,7 +10,7 @@ import {
   Service,
   User,
 } from "@prisma/client";
-import { DateRange, getDateRangeBounds } from "../common/utils/date-range.util";
+import { DateRange, getDateRangeBounds, parseDateParam } from "../common/utils/date-range.util";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateCashMovementDto } from "./dto/create-cash-movement.dto";
 
@@ -111,22 +111,6 @@ function toCashClosingResponse(closing: CashClosing & { closedBy: User }): CashC
     closedBy: { id: closing.closedBy.id, name: closing.closedBy.name },
     closedAt: closing.createdAt,
   };
-}
-
-// "YYYY-MM-DD" → Date anclada al mediodía local de ese día calendario.
-// new Date("YYYY-MM-DD") NO sirve acá: ese formato lo interpreta como
-// medianoche UTC (a diferencia de un ISO con hora), así que en cualquier
-// servidor con huso horario detrás de UTC (todo el continente americano)
-// el día calendario local queda corrido uno para atrás — justo el caso de
-// closings, que se guardan y buscan por día calendario local
-// (getDateRangeBounds usa getFullYear/getMonth/getDate, siempre locales).
-function parseDateParam(dateParam: string): Date {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateParam);
-  if (!match) {
-    throw new BadRequestException("Fecha inválida, se espera YYYY-MM-DD");
-  }
-  const [, year, month, day] = match;
-  return new Date(Number(year), Number(month) - 1, Number(day));
 }
 
 // Clave de agrupación por día calendario local — mismo criterio que

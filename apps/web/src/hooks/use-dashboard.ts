@@ -53,13 +53,13 @@ export function useDashboard() {
 
   const { data: salesToday } = useQuery({
     queryKey: ["sales", "today"],
-    queryFn: () => apiClient.sales.list("today"),
+    queryFn: () => apiClient.sales.list({ range: "today" }),
     enabled: canViewFinancials,
   });
 
   const { data: salesWeek } = useQuery({
     queryKey: ["sales", "week"],
-    queryFn: () => apiClient.sales.list("week"),
+    queryFn: () => apiClient.sales.list({ range: "week" }),
     enabled: canViewFinancials,
   });
 

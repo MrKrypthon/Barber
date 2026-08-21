@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { Sale, Service } from "@barber/types";
 import { useAuth } from "@/hooks/use-auth";
 import { apiClient } from "@/lib/api-client";
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency, toDateParam } from "@/lib/format";
 import type { AdminKpi, AdminSummary } from "@/mocks/types";
 
 // Color de respaldo para servicios sin color configurado (mismo criterio que
@@ -163,9 +163,20 @@ export function useAdminSummary() {
   const { user } = useAuth();
   const canViewFinancials = user?.role === "owner";
 
+  const now = new Date();
+  const monthStart = startOfMonth(now);
+  const nextMonthStart = addMonths(monthStart, 1);
+  const prevMonthStart = addMonths(monthStart, -1);
+  // El gráfico de 6 semanas necesita datos desde la semana más vieja que
+  // muestra, y la comparación mes actual/anterior desde el mes pasado —
+  // "since" es lo más antiguo entre las dos, nunca todo el historial (que
+  // crece para siempre y no aporta nada extra acá).
+  const sixWeeksAgo = addDays(startOfWeek(now), -35);
+  const since = toDateParam(sixWeeksAgo < prevMonthStart ? sixWeeksAgo : prevMonthStart);
+
   const { data: sales } = useQuery({
-    queryKey: ["sales", "all"],
-    queryFn: () => apiClient.sales.list(),
+    queryKey: ["sales", "since", since],
+    queryFn: () => apiClient.sales.list({ since }),
     enabled: canViewFinancials,
   });
 
@@ -176,8 +187,8 @@ export function useAdminSummary() {
   });
 
   const { data: appointments } = useQuery({
-    queryKey: ["appointments", "all"],
-    queryFn: () => apiClient.appointments.list(),
+    queryKey: ["appointments", "since", since],
+    queryFn: () => apiClient.appointments.list({ since }),
     enabled: canViewFinancials,
   });
 
@@ -186,11 +197,6 @@ export function useAdminSummary() {
     queryFn: () => apiClient.services.list(),
     enabled: canViewFinancials,
   });
-
-  const now = new Date();
-  const monthStart = startOfMonth(now);
-  const nextMonthStart = addMonths(monthStart, 1);
-  const prevMonthStart = addMonths(monthStart, -1);
 
   const allSales = sales ?? [];
   const salesThisMonth = allSales.filter((s) => inRange(s.createdAt, monthStart, nextMonthStart));

@@ -203,13 +203,25 @@ describe("SalesService", () => {
       );
     });
 
-    it("no filtra por fecha si no se especifica rango", async () => {
+    it("no filtra por fecha si no se especifica rango ni since", async () => {
       prisma.sale.findMany.mockResolvedValue([]);
 
       await service.findAll("tenant-1");
 
       expect(prisma.sale.findMany).toHaveBeenCalledWith(
         expect.objectContaining({ where: { tenantId: "tenant-1" } }),
+      );
+    });
+
+    it("since filtra desde esa fecha en vez de traer todo el historial", async () => {
+      prisma.sale.findMany.mockResolvedValue([]);
+
+      await service.findAll("tenant-1", undefined, "2026-06-01");
+
+      expect(prisma.sale.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { tenantId: "tenant-1", createdAt: { gte: new Date(2026, 5, 1) } },
+        }),
       );
     });
   });
