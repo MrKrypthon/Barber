@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ApiError } from "@barber/api-client";
 import { Avatar } from "@/components/avatar";
 import { Button } from "@/components/button";
 import { Card } from "@/components/card";
@@ -37,7 +38,9 @@ export function CobrarWizard() {
   const [search, setSearch] = useState("");
   const [addingCustomer, setAddingCustomer] = useState(false);
   const [newCustomerName, setNewCustomerName] = useState("");
+  const [customerError, setCustomerError] = useState<string | null>(null);
   const [employeeId, setEmployeeId] = useState(() => user?.id ?? "");
+  const [saleError, setSaleError] = useState<string | null>(null);
 
   const customerName = customer === OCCASIONAL ? "Cliente ocasional" : customer?.name ?? "";
   const filteredCustomers = customers.filter((c) =>
@@ -63,18 +66,28 @@ export function CobrarWizard() {
   async function saveNewCustomer() {
     const name = newCustomerName.trim();
     if (!name) return;
-    pickCustomer(await addCustomer({ name }));
+    setCustomerError(null);
+    try {
+      pickCustomer(await addCustomer({ name }));
+    } catch (err) {
+      setCustomerError(err instanceof ApiError ? err.message : "No se pudo guardar el cliente.");
+    }
   }
 
   async function confirmSale() {
     if (!service || !customer) return;
-    await addSale({
-      customerId: customer === OCCASIONAL ? undefined : customer.id,
-      serviceIds: [service.id],
-      paymentMethod,
-      employeeId: employeeId || undefined,
-    });
-    setStep(4);
+    setSaleError(null);
+    try {
+      await addSale({
+        customerId: customer === OCCASIONAL ? undefined : customer.id,
+        serviceIds: [service.id],
+        paymentMethod,
+        employeeId: employeeId || undefined,
+      });
+      setStep(4);
+    } catch (err) {
+      setSaleError(err instanceof ApiError ? err.message : "No se pudo registrar la venta.");
+    }
   }
 
   const receiptUrl =
@@ -150,18 +163,21 @@ export function CobrarWizard() {
           </label>
 
           {addingCustomer ? (
-            <div className="flex gap-2">
-              <input
-                autoFocus
-                value={newCustomerName}
-                onChange={(e) => setNewCustomerName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && saveNewCustomer()}
-                placeholder="Nombre del cliente"
-                className="h-12 flex-1 rounded-xl border border-secondary bg-white px-4 outline-none dark:bg-neutral-900 dark:text-neutral-100"
-              />
-              <Button variant="secondary" onClick={saveNewCustomer} disabled={!newCustomerName.trim()}>
-                Guardar
-              </Button>
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-2">
+                <input
+                  autoFocus
+                  value={newCustomerName}
+                  onChange={(e) => setNewCustomerName(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && saveNewCustomer()}
+                  placeholder="Nombre del cliente"
+                  className="h-12 flex-1 rounded-xl border border-secondary bg-white px-4 outline-none dark:bg-neutral-900 dark:text-neutral-100"
+                />
+                <Button variant="secondary" onClick={saveNewCustomer} disabled={!newCustomerName.trim()}>
+                  Guardar
+                </Button>
+              </div>
+              {customerError ? <p className="text-sm text-secondary">{customerError}</p> : null}
             </div>
           ) : (
             <Button variant="danger-outline" fullWidth onClick={() => setAddingCustomer(true)}>
@@ -244,6 +260,8 @@ export function CobrarWizard() {
           {user?.role === "owner" ? (
             <StaffPicker value={employeeId} onChange={setEmployeeId} label="¿Quién cobró?" />
           ) : null}
+
+          {saleError ? <p className="text-sm text-secondary">{saleError}</p> : null}
 
           <Button size="lg" fullWidth onClick={confirmSale} disabled={isAdding}>
             {isAdding ? "Cobrando..." : `Cobrar ${formatCurrency(service.price)}`}
