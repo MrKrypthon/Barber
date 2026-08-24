@@ -89,3 +89,19 @@ El MVP corre en un único VPS sin infraestructura de almacenamiento de archivos 
 Estado:
 
 Si en el futuro el tamaño de las imágenes se vuelve un problema (por ejemplo, al agregar fotos de servicios o galería), reevaluar con almacenamiento de archivos dedicado.
+
+---
+
+## ADR-009
+
+Las suscripciones se gestionan a mano por el dueño de la plataforma (efectivo/transferencia fuera de la app), no con una pasarela de pagos. Para eso existe un panel de SuperAdmin (`/superadmin`), completamente separado del resto del sistema: modelo (`SuperAdmin`, no un `User` de ningún tenant), autenticación (JWT propio, con sus propios secretos y su propio guard/estrategia de Passport) y frontend (rutas, storage de tokens y cliente HTTP aparte).
+
+Motivo:
+
+CLAUDE.md §27/§29 excluye pagos con tarjeta del MVP y exige justificar cualquier costo de infraestructura nuevo; Stripe/Mercado Pago quedan para v1.0 (`docs/ROADMAP.md`). Mientras tanto, alguien tiene que poder activar/suspender negocios sin tocar la base de datos a mano. Un SuperAdmin no puede modelarse como un `User` más porque `tenantId` es obligatorio en ese modelo — y aunque pudiera, mezclar sus permisos con el RBAC por tenant (`Role.owner`/`Role.employee`) arriesgaría accidentalmente exponer datos de un negocio a otro, justo lo que CLAUDE.md §5 prohíbe. La separación completa (JWT, guard, rutas, storage de tokens) hace que ese riesgo sea estructuralmente imposible, no solo una regla de permisos que alguien podría romper por error.
+
+Un negocio suspendido bloquea el login de todos sus usuarios reutilizando el mecanismo de `tokenVersion` que ya existía para dar de baja empleados — nada nuevo que mantener ahí.
+
+Estado:
+
+El SuperAdmin nunca ve clientes, ventas, turnos, caja ni inventario de ningún negocio — solo nombre, contacto del dueño, y estado/historial de la suscripción. Si en el futuro se agrega un procesador de pagos (Stripe, v1.0), este panel probablemente se mantiene para los negocios que sigan pagando por fuera.

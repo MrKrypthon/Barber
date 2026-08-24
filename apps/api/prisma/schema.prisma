@@ -27,11 +27,28 @@ enum ProductMovementType {
   exit
 }
 
+// El pago se gestiona fuera de la app (efectivo/transferencia al dueño de
+// la plataforma, docs/DECISIONS.md) — este estado es lo único que controla
+// si un negocio puede seguir usando el sistema. "suspended" bloquea el
+// login de todos sus usuarios (ver AuthService.login) hasta que un
+// SuperAdmin lo reactive o registre un pago nuevo.
+enum SubscriptionStatus {
+  active
+  suspended
+}
+
 model Tenant {
   id        String   @id @default(uuid())
   name      String
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Todo lo de acá abajo es exclusivo del panel de SuperAdmin — nunca se
+  // expone a través de ninguna ruta de /api/v1 que use el tenant, y ningún
+  // endpoint de SuperAdmin devuelve nada de las relaciones de arriba
+  // (customers, sales, etc.): la separación es estructural, no un permiso.
+  subscriptionStatus    SubscriptionStatus @default(active) @map("subscription_status")
+  subscriptionPaidUntil DateTime?          @map("subscription_paid_until")
 
   users            User[]
   customers        Customer[]
@@ -43,8 +60,45 @@ model Tenant {
   appointments     Appointment[]
   products         Product[]
   productMovements ProductMovement[]
+  payments         TenantPayment[]
 
   @@map("tenants")
+}
+
+// Cuenta del dueño de la plataforma (vos) — deliberadamente separada de
+// User: no pertenece a ningún tenant, así que no puede modelarse como un
+// User más (tenantId es obligatorio ahí). Sin registro propio, se crea con
+// un script de seed (apps/api/prisma/seed-superadmin.ts).
+model SuperAdmin {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  password     String
+  tokenVersion Int      @default(0) @map("token_version")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("super_admins")
+}
+
+// Un pago registrado a mano por el SuperAdmin. Registrar uno nuevo
+// reactiva el tenant automáticamente (SuperAdminTenantsService.recordPayment)
+// — separado de "activar"/"suspender", que son overrides manuales sin pago
+// de por medio (ej. cortesía, o suspender antes de que venza).
+model TenantPayment {
+  id        String        @id @default(uuid())
+  tenantId  String        @map("tenant_id")
+  amount    Decimal       @db.Decimal(10, 2)
+  method    PaymentMethod
+  // Hasta qué fecha queda cubierto el negocio con este pago.
+  paidUntil DateTime      @map("paid_until")
+  note      String?
+  createdAt DateTime      @default(now()) @map("created_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("tenant_payments")
 }
 
 model User {

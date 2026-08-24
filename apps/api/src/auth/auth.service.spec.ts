@@ -1,7 +1,7 @@
-import { ConflictException, UnauthorizedException } from "@nestjs/common";
+import { ConflictException, ForbiddenException, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
-import { Role, User } from "@prisma/client";
+import { Role, SubscriptionStatus, User } from "@prisma/client";
 import * as bcrypt from "bcryptjs";
 import { PrismaService } from "../prisma/prisma.service";
 import { TenantsService } from "../tenants/tenants.service";
@@ -30,6 +30,17 @@ describe("AuthService", () => {
     password: "irrelevant-in-most-tests",
     role: Role.owner,
     tokenVersion: 0,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  // findByEmail incluye el tenant (ver users.service.ts) para que login()
+  // pueda leer subscriptionStatus.
+  const activeTenant = {
+    id: "tenant-1",
+    name: "Mi Barbería",
+    subscriptionStatus: SubscriptionStatus.active,
+    subscriptionPaidUntil: null,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -108,7 +119,7 @@ describe("AuthService", () => {
 
     it("rechaza contraseña incorrecta", async () => {
       const hashed = await bcrypt.hash("correct-password", 4);
-      usersService.findByEmail.mockResolvedValue({ ...baseUser, password: hashed });
+      usersService.findByEmail.mockResolvedValue({ ...baseUser, password: hashed, tenant: activeTenant });
 
       await expect(
         authService.login({ email: baseUser.email, password: "wrong-password" }),
@@ -117,7 +128,7 @@ describe("AuthService", () => {
 
     it("acepta credenciales correctas y devuelve tokens", async () => {
       const hashed = await bcrypt.hash("correct-password", 4);
-      usersService.findByEmail.mockResolvedValue({ ...baseUser, password: hashed });
+      usersService.findByEmail.mockResolvedValue({ ...baseUser, password: hashed, tenant: activeTenant });
 
       const result = await authService.login({
         email: baseUser.email,
@@ -126,6 +137,19 @@ describe("AuthService", () => {
 
       expect(result.accessToken).toBe("signed-token");
       expect(result.user.email).toBe(baseUser.email);
+    });
+
+    it("rechaza el login si el negocio tiene la suscripción suspendida", async () => {
+      const hashed = await bcrypt.hash("correct-password", 4);
+      usersService.findByEmail.mockResolvedValue({
+        ...baseUser,
+        password: hashed,
+        tenant: { ...activeTenant, subscriptionStatus: SubscriptionStatus.suspended },
+      });
+
+      await expect(
+        authService.login({ email: baseUser.email, password: "correct-password" }),
+      ).rejects.toBeInstanceOf(ForbiddenException);
     });
   });
 

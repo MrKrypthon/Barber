@@ -41,6 +41,18 @@ Aplicación nativa de primer nivel para Android/iOS. No se desarrolla durante el
 
 ---
 
+## Panel de SuperAdmin
+
+Gestión manual de suscripciones (ADR-009, `docs/DECISIONS.md`) — completamente separado del resto de la app, no un rol más dentro del multi-tenancy:
+
+- Modelo `SuperAdmin` aparte de `User` (no pertenece a ningún tenant).
+- JWT propio (`SUPERADMIN_JWT_SECRET`/`SUPERADMIN_JWT_REFRESH_SECRET`, estrategia de Passport `"jwt-superadmin"` en vez de `"jwt"`).
+- Frontend en `/superadmin/*`, con su propio storage de tokens y su propia instancia de cliente HTTP (`createSuperAdminApiClient`).
+
+Nunca expone datos de negocio (clientes, ventas, turnos, caja, inventario) de ningún tenant — solo nombre, contacto del dueño y estado de la suscripción.
+
+---
+
 ## Base de datos
 
 PostgreSQL
