@@ -1,0 +1,53 @@
+# Config final (docs/DEPLOYMENT.md) — HTTP redirige a HTTPS, HTTPS
+# reversa-proxea a los contenedores api/web. Reemplaza a
+# bootstrap.conf.template una vez que ya existe el primer certificado
+# (ver el paso "Primer certificado" del runbook).
+#
+# ${DOMAIN} lo resuelve el entrypoint de la imagen oficial de nginx vía
+# envsubst, a partir de la variable de entorno del mismo nombre.
+
+server {
+    listen 80;
+    server_name ${DOMAIN};
+
+    # Certbot renueva contra este mismo path — sin esto, la renovación
+    # automática deja de funcionar en unos meses y el certificado expira.
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name ${DOMAIN};
+
+    ssl_certificate     /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    # El logo del negocio viaja como data URI dentro del body JSON, hasta
+    # 2MB (apps/api/src/main.ts) — el límite default de Nginx (1MB) lo
+    # cortaría antes de que llegue a la API.
+    client_max_body_size 3m;
+
+    location /api/v1/ {
+        proxy_pass http://api:3001/api/v1/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location / {
+        proxy_pass http://web:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}

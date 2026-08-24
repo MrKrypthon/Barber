@@ -35,3 +35,7 @@ pnpm-debug.log*
 
 # Claude Code local settings (per-developer, not shared)
 .claude/settings.local.json
+
+# Nginx de producción: copia activa de bootstrap.conf.template o
+# default.conf.template según la etapa del despliegue (docs/DEPLOYMENT.md)
+docker/nginx/active.conf.template
