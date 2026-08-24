@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
+import { seconds, Throttle, ThrottlerGuard } from "@nestjs/throttler";
 import { CurrentSuperAdmin } from "./decorators/current-superadmin.decorator";
 import { SuperAdminLoginDto } from "./dto/superadmin-login.dto";
 import { SuperAdminRefreshDto } from "./dto/superadmin-refresh.dto";
@@ -12,6 +13,9 @@ import { AuthenticatedSuperAdmin } from "./types/superadmin-jwt-payload.type";
 export class SuperAdminAuthController {
   constructor(private readonly superAdminAuthService: SuperAdminAuthService) {}
 
+  // Mismo criterio que AuthController.login: límite acotado a este endpoint.
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 5, ttl: seconds(60) } })
   @Post("login")
   login(@Body() dto: SuperAdminLoginDto) {
     return this.superAdminAuthService.login(dto);

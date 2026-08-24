@@ -63,7 +63,7 @@ export class AppointmentsService {
     date?: string,
     since?: string,
   ): Promise<AppointmentResponse[]> {
-    const bounds = getDateRangeBounds(range, date ? new Date(date) : undefined);
+    const bounds = getDateRangeBounds(range, date ? parseDateParam(date) : undefined);
     const appointments = await this.prisma.appointment.findMany({
       where: {
         tenantId,

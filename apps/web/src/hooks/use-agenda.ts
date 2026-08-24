@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Appointment as ApiAppointment, CreateAppointmentInput } from "@barber/types";
 import { apiClient } from "@/lib/api-client";
+import { toDateParam } from "@/lib/format";
 import type { Appointment } from "@/mocks/types";
 
 export type WeekDay = {
@@ -90,11 +91,13 @@ export function useAgenda() {
   const isCurrentWeek = week.some((d) => d.isToday);
   // Ancla de semana (lunes) como parte de la query key: cambiar de día
   // dentro de la misma semana no refetchea, solo cruzar de semana.
-  const weekStartIso = week[0].date.toISOString();
+  // toDateParam, no toISOString: la API espera YYYY-MM-DD (parseDateParam),
+  // nunca un ISO datetime — ver apps/web/src/lib/format.ts.
+  const weekStartParam = toDateParam(week[0].date);
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["appointments", "week", weekStartIso],
-    queryFn: () => apiClient.appointments.list({ range: "week", date: weekStartIso }),
+    queryKey: ["appointments", "week", weekStartParam],
+    queryFn: () => apiClient.appointments.list({ range: "week", date: weekStartParam }),
   });
 
   const changeServiceMutation = useMutation({

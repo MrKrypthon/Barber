@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
+import { seconds, Throttle, ThrottlerGuard } from "@nestjs/throttler";
 import { AuthService } from "./auth.service";
 import { CurrentUser } from "./decorators/current-user.decorator";
 import { LoginDto } from "./dto/login.dto";
@@ -16,6 +17,10 @@ export class AuthController {
     return this.authService.register(dto);
   }
 
+  // Límite de intentos contra fuerza bruta/credential stuffing — no es un
+  // guard global, solo protege este endpoint (CLAUDE.md §6).
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 5, ttl: seconds(60) } })
   @Post("login")
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);

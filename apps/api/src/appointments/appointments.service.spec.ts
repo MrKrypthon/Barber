@@ -72,6 +72,23 @@ describe("AppointmentsService", () => {
         }),
       );
     });
+
+    // Regresión: "date" se parsea como día calendario local (parseDateParam),
+    // nunca como new Date(date) — ese segundo formato interpreta un
+    // "YYYY-MM-DD" como medianoche UTC y corre el día en husos horarios
+    // detrás de UTC (apps/api/src/common/utils/date-range.util.ts).
+    it("date ancla el rango 'week' al día calendario local, no a medianoche UTC", async () => {
+      prisma.appointment.findMany.mockResolvedValue([]);
+
+      await service.findAll("tenant-1", "week", "2026-08-24");
+
+      const call = prisma.appointment.findMany.mock.calls[0][0];
+      const start: Date = call.where.startAt.gte;
+      expect(start.getFullYear()).toBe(2026);
+      expect(start.getMonth()).toBe(7);
+      // El lunes de la semana que contiene 2026-08-24 (lunes) es el propio 24.
+      expect(start.getDate()).toBe(24);
+    });
   });
 
   describe("create", () => {
