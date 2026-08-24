@@ -7,6 +7,13 @@ export function buildWhatsAppUrl(message: string, phone?: string | null): string
   return `${base}?text=${encodeURIComponent(message)}`;
 }
 
+// Mensaje predefinido del botón "Reservar por WhatsApp" (docs/PROJECT.md
+// §WhatsApp, primera etapa) — el dueño comparte el enlace resultante fuera
+// de la app (bio de Instagram, WhatsApp Business, etc.).
+export function buildBookingMessage(businessName: string): string {
+  return `¡Hola! Quiero reservar un turno en ${businessName}.`;
+}
+
 export type ReceiptData = {
   businessName: string;
   customerName: string;

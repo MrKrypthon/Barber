@@ -14,6 +14,7 @@ export type SettingsResponse = {
   scheduleDays: string[];
   scheduleOpen: string | null;
   scheduleClose: string | null;
+  remindersEnabled: boolean;
 };
 
 function toSettingsResponse(tenant: Tenant, settings: BusinessSettings | null): SettingsResponse {
@@ -28,6 +29,7 @@ function toSettingsResponse(tenant: Tenant, settings: BusinessSettings | null): 
     scheduleDays: settings?.scheduleDays ?? [],
     scheduleOpen: settings?.scheduleOpen ?? null,
     scheduleClose: settings?.scheduleClose ?? null,
+    remindersEnabled: settings?.remindersEnabled ?? true,
   };
 }
 

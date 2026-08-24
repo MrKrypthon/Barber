@@ -50,19 +50,41 @@ model Tenant {
   subscriptionStatus    SubscriptionStatus @default(active) @map("subscription_status")
   subscriptionPaidUntil DateTime?          @map("subscription_paid_until")
 
-  users            User[]
-  customers        Customer[]
-  services         Service[]
-  sales            Sale[]
-  cashMovements    CashMovement[]
-  cashClosings     CashClosing[]
-  businessSettings BusinessSettings?
-  appointments     Appointment[]
-  products         Product[]
-  productMovements ProductMovement[]
-  payments         TenantPayment[]
+  users              User[]
+  customers          Customer[]
+  services           Service[]
+  sales              Sale[]
+  cashMovements      CashMovement[]
+  cashClosings       CashClosing[]
+  businessSettings   BusinessSettings?
+  appointments       Appointment[]
+  products           Product[]
+  productMovements   ProductMovement[]
+  payments           TenantPayment[]
+  whatsappConnection WhatsAppConnection?
 
   @@map("tenants")
+}
+
+// Credenciales de la API oficial de WhatsApp Business (Meta Cloud API,
+// ADR-010 en docs/DECISIONS.md) — una por negocio, no una compartida por
+// toda la plataforma: cada barbería ya tiene su propio número de WhatsApp
+// al que sus clientes le escriben, y es ese número el que hay que conectar
+// (mismo principio que CLAUDE.md §5, todo lo de negocio va tenant-scoped).
+// accessToken es sensible: nunca se devuelve completo por la API (ver
+// WhatsAppService.toConnectionResponse), solo se usa server-side para
+// llamar a la Graph API de Meta.
+model WhatsAppConnection {
+  tenantId      String   @id @map("tenant_id")
+  phoneNumberId String   @map("phone_number_id")
+  wabaId        String   @map("waba_id")
+  accessToken   String   @map("access_token")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@map("whatsapp_connections")
 }
 
 // Cuenta del dueño de la plataforma (vos) — deliberadamente separada de
@@ -259,6 +281,10 @@ model BusinessSettings {
   scheduleDays    String[] @default([]) @map("schedule_days")
   scheduleOpen    String?  @map("schedule_open")
   scheduleClose   String?  @map("schedule_close")
+  // Apaga el cron de recordatorios de turno por WhatsApp para este tenant
+  // (ADR-010) sin desconectar su WhatsApp — los recibos de pago siguen
+  // mandándose igual, esto solo controla los recordatorios.
+  remindersEnabled Boolean @default(true) @map("reminders_enabled")
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
@@ -285,6 +311,11 @@ model Appointment {
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
   deletedAt       DateTime? @map("deleted_at")
+  // Cuándo se mandó el recordatorio por WhatsApp (null = todavía no). Evita
+  // mandarlo dos veces — el cron de recordatorios corre cada 15 min y sin
+  // esto reenviaría en cada pasada mientras el turno siga dentro de la
+  // ventana de "faltan ~2hs" (RemindersCron).
+  reminderSentAt  DateTime? @map("reminder_sent_at")
 
   tenant   Tenant   @relation(fields: [tenantId], references: [id])
   customer Customer @relation(fields: [customerId], references: [id])

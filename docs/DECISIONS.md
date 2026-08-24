@@ -125,3 +125,23 @@ CLAUDE.md §26/§27 pide mantener la infraestructura simple y de bajo costo, no 
 Estado:
 
 Runbook completo en `docs/DEPLOYMENT.md`. La imagen de producción de la API usa `pnpm deploy` (poda devDependencies) — importante: el paso de `prisma generate` que corre automáticamente durante ese deploy no queda bien (genera un cliente incompleto, sin los enums del schema), así que se regenera explícitamente después, ya en el directorio final, antes de copiarlo a la imagen runtime. El frontend usa `output: "standalone"` de Next.js, con `outputFileTracingRoot` apuntando a la raíz del monorepo (si no, el file tracing no ve los paquetes hermanos `@barber/types`/`@barber/api-client`).
+
+---
+
+## ADR-011
+
+Recordatorios de turno y recibos de pago se mandan por WhatsApp usando la API oficial de Meta (Cloud API), con credenciales propias por tenant (`WhatsAppConnection`: `phoneNumberId`, `wabaId`, `accessToken`), no una automatización no oficial sobre WhatsApp Web ni un proveedor externo (Twilio, etc.).
+
+Motivo:
+
+Cada barbería ya tiene su propio número de WhatsApp al que sus clientes le escriben — igual que la suscripción (ADR-009), esto debe quedar aislado por tenant (CLAUDE.md §5), así que la conexión se guarda una por negocio en vez de una sola credencial de plataforma. La alternativa gratuita (automatizar WhatsApp Web con un navegador headless) viola los términos de servicio de Meta y arriesga que le bloqueen el número al dueño — inaceptable para un negocio real. La API oficial tiene nivel gratuito/muy económico al volumen de una barbería chica (CLAUDE.md §27), sin agregar infraestructura propia: los mensajes salen vía HTTP a la Graph API de Meta, sin colas ni brokers.
+
+El envío nunca puede bloquear ni hacer fallar la operación principal (agendar un turno, cobrar una venta): tanto el cron de recordatorios como el envío de recibos capturan sus propios errores y solo loguean, nunca propagan la excepción hacia arriba.
+
+La imagen del recibo se genera armando un SVG a mano y rasterizándolo con `sharp` — no Puppeteer ni `node-canvas` — para no sumar un navegador headless ni dependencias nativas de Cairo a la imagen de Docker (CLAUDE.md §8/§26).
+
+La verificación de la firma de cada webhook entrante (HMAC-SHA256 sobre el body crudo, con `WHATSAPP_APP_SECRET`) es obligatoria: sin ella, cualquiera que conozca la URL del webhook podría inyectar eventos falsos.
+
+Estado:
+
+Primera etapa: solo recordatorios (2hs antes del turno, vía `@nestjs/schedule`, cada 15 minutos) y recibos de pago en foto al cobrar una venta. Reservar turnos escribiendo por WhatsApp queda deliberadamente afuera de esta etapa — requiere procesar texto libre (o flujos de botones/listas) del lado del webhook, que hoy solo verifica la firma y loguea el evento entrante. El dueño debe crear su propia app de WhatsApp Business en Meta, verificar su número y cargar el `phoneNumberId`/`wabaId`/`accessToken` en Configuración; también debe dar de alta y esperar la aprobación de Meta para la plantilla `recordatorio_turno`.

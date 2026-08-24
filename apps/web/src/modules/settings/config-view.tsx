@@ -19,7 +19,10 @@ import { formatSchedule } from "@/lib/format";
 import { resizeImageToDataUrl } from "@/lib/image";
 import { EditBusinessNameModal } from "./edit-business-name-modal";
 import { EditColorsModal } from "./edit-colors-modal";
+import { EditPhoneModal } from "./edit-phone-modal";
 import { EditScheduleModal } from "./edit-schedule-modal";
+import { WhatsAppBookingCard } from "./whatsapp-booking-card";
+import { WhatsAppConnectionCard } from "./whatsapp-connection-card";
 
 function ConfigRow({
   label,
@@ -72,7 +75,6 @@ const APPEARANCE_OPTIONS: { value: "light" | "dark" | "system"; label: string }[
 ];
 
 export function ConfigView() {
-  const [reminderEnabled, setReminderEnabled] = useState(true);
   const { user, logout } = useAuth();
   const { preference, setPreference } = useColorScheme();
   const canEdit = user?.role === "owner";
@@ -83,6 +85,7 @@ export function ConfigView() {
   const [editingName, setEditingName] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState(false);
   const [editingColors, setEditingColors] = useState(false);
+  const [editingPhone, setEditingPhone] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
 
   async function handleLogout() {
@@ -192,13 +195,22 @@ export function ConfigView() {
               dot={backgroundColor}
               onClick={canEdit ? () => setEditingColors(true) : undefined}
             />
-            {/* Integración de WhatsApp es v0.4 (docs/ROADMAP.md) — todavía no existe. */}
-            <div className="flex items-center gap-3 px-4 py-3.5">
-              <span className="h-3 w-3 rounded-full bg-neutral-300 dark:bg-neutral-700" />
-              <span className="flex-1 font-medium">WhatsApp</span>
-              <span className="text-sm font-medium text-neutral-400 dark:text-neutral-500">No conectado</span>
-            </div>
+            {/* Primera etapa de WhatsApp (docs/PROJECT.md §WhatsApp): el
+                número es lo único que hace falta configurar para tener el
+                enlace de "Reservar por WhatsApp" listo, más abajo. */}
+            <ConfigRow
+              label="WhatsApp"
+              value={settings?.phone ?? "Agregá tu número"}
+              dot={settings?.phone ? "#22c55e" : "#a3a3a3"}
+              onClick={canEdit ? () => setEditingPhone(true) : undefined}
+            />
           </Card>
+
+          {settings?.phone ? (
+            <WhatsAppBookingCard businessName={settings.businessName} phone={settings.phone} />
+          ) : null}
+
+          {canEdit ? <WhatsAppConnectionCard /> : null}
         </>
       )}
 
@@ -229,9 +241,10 @@ export function ConfigView() {
         <Card className="flex items-center justify-between gap-4">
           <span className="font-medium">Recordatorio de turno por WhatsApp</span>
           <Toggle
-            checked={reminderEnabled}
-            onChange={setReminderEnabled}
+            checked={settings?.remindersEnabled ?? true}
+            onChange={(next) => updateSettings({ remindersEnabled: next })}
             label="Recordatorio de turno por WhatsApp"
+            disabled={!canEdit || !settings || isUpdating}
           />
         </Card>
       </div>
@@ -276,6 +289,18 @@ export function ConfigView() {
           onSave={async (input) => {
             await updateSettings(input);
             setEditingColors(false);
+          }}
+        />
+      ) : null}
+
+      {editingPhone ? (
+        <EditPhoneModal
+          currentPhone={settings?.phone ?? null}
+          onClose={() => setEditingPhone(false)}
+          isSaving={isUpdating}
+          onSave={async (phone) => {
+            await updateSettings({ phone });
+            setEditingPhone(false);
           }}
         />
       ) : null}

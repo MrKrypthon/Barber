@@ -53,6 +53,17 @@ Nunca expone datos de negocio (clientes, ventas, turnos, caja, inventario) de ni
 
 ---
 
+## WhatsApp (API oficial de Meta)
+
+Recordatorios de turno y recibos de pago por WhatsApp (ADR-011, `docs/DECISIONS.md`), vía la Cloud API de Meta — sin SDK, un cliente HTTP delgado sobre `fetch` (`WhatsAppApiService`).
+
+- Credenciales por tenant (`WhatsAppConnection`): cada negocio conecta su propia app de WhatsApp Business desde Configuración.
+- `RemindersCron` (`@nestjs/schedule`, cada 15 minutos) manda un recordatorio por plantilla a los turnos que arrancan en ~2 horas y aún no lo recibieron (`Appointment.reminderSentAt`); el dueño puede apagarlo desde Configuración (`BusinessSettings.remindersEnabled`, default `true`) sin desconectar el WhatsApp del negocio.
+- `WhatsAppReceiptService` genera la imagen del recibo (SVG armado a mano, rasterizado con `sharp`) y lo manda al confirmar una venta, en paralelo (`sendReceiptSafely`, fire-and-forget) — nunca bloquea ni hace fallar el cobro.
+- `POST /whatsapp/webhook` verifica la firma HMAC-SHA256 de cada evento entrante contra `WHATSAPP_APP_SECRET` antes de procesarlo; por ahora solo registra los eventos en el log (reservar turnos por mensaje queda para una segunda etapa).
+
+---
+
 ## Base de datos
 
 PostgreSQL

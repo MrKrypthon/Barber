@@ -1,4 +1,5 @@
 import "reflect-metadata";
+import { IncomingMessage } from "http";
 import { ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
@@ -14,6 +15,12 @@ async function bootstrap() {
   // INestApplication todavía, de ahí el cast.
   (app as unknown as { useBodyParser: (type: string, opts: object) => void }).useBodyParser("json", {
     limit: "2mb",
+    // Los webhooks de WhatsApp (WhatsAppWebhookController) firman el body
+    // crudo con HMAC-SHA256 — hay que guardarlo tal cual llega, antes de
+    // que Express lo parsee a JSON, o la verificación de firma no da.
+    verify: (req: IncomingMessage & { rawBody?: Buffer }, _res: unknown, buf: Buffer) => {
+      req.rawBody = buf;
+    },
   });
 
   // En producción, Nginx es el único proceso que habla directo con el

@@ -193,6 +193,7 @@ export type Settings = {
   scheduleDays: string[];
   scheduleOpen: string | null;
   scheduleClose: string | null;
+  remindersEnabled: boolean;
 };
 
 export type UpdateSettingsInput = Partial<{
@@ -206,6 +207,7 @@ export type UpdateSettingsInput = Partial<{
   scheduleDays: string[];
   scheduleOpen: string;
   scheduleClose: string;
+  remindersEnabled: boolean;
 }>;
 
 export type ProductMovementType = "entry" | "exit";
@@ -318,4 +320,21 @@ export type RecordTenantPaymentInput = {
   method: PaymentMethod;
   paidUntil: string;
   note?: string;
+};
+
+// Conexión con la API oficial de WhatsApp Business (Meta Cloud API,
+// ADR-011 en docs/DECISIONS.md) — una por negocio. accessTokenPreview nunca
+// es el token completo (solo los últimos 4 caracteres), la API nunca lo
+// devuelve entero.
+export type WhatsAppConnection = {
+  connected: boolean;
+  phoneNumberId: string | null;
+  wabaId: string | null;
+  accessTokenPreview: string | null;
+};
+
+export type UpdateWhatsAppConnectionInput = {
+  phoneNumberId: string;
+  wabaId: string;
+  accessToken: string;
 };
