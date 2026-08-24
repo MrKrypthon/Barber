@@ -18,7 +18,17 @@ async function bootstrap() {
 
   app.setGlobalPrefix("api/v1");
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
-  app.enableCors();
+
+  // enableCors() sin opciones usa el default del paquete `cors`, que refleja
+  // dinámicamente cualquier Origin del request (Access-Control-Allow-Origin
+  // = el origin recibido) — demasiado permisivo para una API que maneja JWT.
+  // CORS_ORIGIN es una lista separada por comas de orígenes permitidos; en
+  // desarrollo, si no se define, cae a la URL default del frontend local.
+  const corsOrigins = (process.env.CORS_ORIGIN ?? "http://localhost:3000")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+  app.enableCors({ origin: corsOrigins });
 
   const port = process.env.API_PORT ?? 3001;
   await app.listen(port);

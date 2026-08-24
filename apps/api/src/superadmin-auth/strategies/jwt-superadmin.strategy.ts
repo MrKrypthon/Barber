@@ -21,6 +21,9 @@ export class JwtSuperAdminStrategy extends PassportStrategy(Strategy, "jwt-super
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey: config.getOrThrow<string>("SUPERADMIN_JWT_SECRET"),
+      // Mismo motivo que JwtAccessStrategy: algoritmo fijo en vez de
+      // confiar en el `alg` del header del token.
+      algorithms: ["HS256"],
     });
   }
 
