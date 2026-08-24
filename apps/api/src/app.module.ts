@@ -11,6 +11,8 @@ import { ProductsModule } from "./products/products.module";
 import { SalesModule } from "./sales/sales.module";
 import { ServicesModule } from "./services/services.module";
 import { SettingsModule } from "./settings/settings.module";
+import { SuperAdminAuthModule } from "./superadmin-auth/superadmin-auth.module";
+import { SuperAdminTenantsModule } from "./superadmin-tenants/superadmin-tenants.module";
 import { TenantsModule } from "./tenants/tenants.module";
 import { UsersModule } from "./users/users.module";
 
@@ -32,6 +34,8 @@ import { UsersModule } from "./users/users.module";
     ProductsModule,
     SettingsModule,
     AppointmentsModule,
+    SuperAdminAuthModule,
+    SuperAdminTenantsModule,
   ],
   controllers: [HealthController],
 })

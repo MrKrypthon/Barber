@@ -10,6 +10,8 @@ POST /api/v1/auth/register
 
 POST /api/v1/auth/login
 
+&nbsp;&nbsp;403 si el negocio del usuario tiene la suscripción suspendida (`subscriptionStatus`, gestión manual desde el panel de SuperAdmin — ADR-009, `docs/DECISIONS.md`), aunque las credenciales sean correctas.
+
 POST /api/v1/auth/refresh
 
 &nbsp;&nbsp;Intercambia un `refreshToken` vigente por un nuevo par de tokens. Necesario porque `docs/TECHNOLOGIES.md` §16 exige estrategia access + refresh token, pero esta ruta no estaba listada originalmente.
@@ -189,3 +191,39 @@ PUT /api/v1/appointments/{id}
 DELETE /api/v1/appointments/{id}
 
 &nbsp;&nbsp;Cancela el turno (soft delete vía `deletedAt`, igual que Clientes/Servicios) — no se borra físicamente.
+
+---
+
+## Panel de SuperAdmin
+
+Gestión manual de suscripciones (ADR-009, `docs/DECISIONS.md`) — completamente separado del resto de la API. Ningún endpoint de acá abajo acepta ni devuelve nada de las relaciones de negocio de un tenant (clientes, ventas, turnos, caja, inventario): solo nombre del negocio, contacto del dueño y estado de la suscripción.
+
+POST /api/v1/superadmin/auth/login
+
+&nbsp;&nbsp;Sin registro propio — la única cuenta se crea con `pnpm --filter @barber/api seed:superadmin`. Devuelve `accessToken`/`refreshToken` firmados con `SUPERADMIN_JWT_SECRET` (nunca `JWT_SECRET`): un token de negocio no sirve acá, ni viceversa.
+
+POST /api/v1/superadmin/auth/refresh
+
+POST /api/v1/superadmin/auth/logout
+
+GET /api/v1/superadmin/auth/me
+
+GET /api/v1/superadmin/tenants
+
+&nbsp;&nbsp;Lista todos los negocios: `{ id, name, ownerName, ownerEmail, createdAt, subscriptionStatus, subscriptionPaidUntil }`. `ownerName`/`ownerEmail` vienen del primer `user` con `role=owner` del tenant.
+
+GET /api/v1/superadmin/tenants/{id}
+
+&nbsp;&nbsp;Detalle de un negocio + su historial de pagos (`{ ...tenant, payments }`).
+
+POST /api/v1/superadmin/tenants/{id}/suspend
+
+&nbsp;&nbsp;Pone `subscriptionStatus=suspended` e invalida de una las sesiones ya abiertas de todos los usuarios del tenant (incrementa `tokenVersion` de cada uno, mismo mecanismo que dar de baja a un empleado). Los intentos de login nuevos quedan bloqueados por `AuthService.login` mientras siga suspendido.
+
+POST /api/v1/superadmin/tenants/{id}/activate
+
+&nbsp;&nbsp;Reactivación manual sin pago de por medio (ej. cortesía). No toca `tokenVersion` de los usuarios — no hace falta, ellos nunca perdieron su sesión si ya estaba abierta.
+
+POST /api/v1/superadmin/tenants/{id}/payments
+
+&nbsp;&nbsp;Body: `{ amount, method: "cash" | "transfer", paidUntil: "YYYY-MM-DD", note? }`. Crea el registro de pago, actualiza `subscriptionPaidUntil` y reactiva el tenant (`subscriptionStatus=active`) — es el flujo normal; `activate` de arriba es solo para el caso sin pago.

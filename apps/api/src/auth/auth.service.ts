@@ -1,7 +1,7 @@
-import { ConflictException, Injectable, UnauthorizedException } from "@nestjs/common";
+import { ConflictException, ForbiddenException, Injectable, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
-import { Role, User } from "@prisma/client";
+import { Role, SubscriptionStatus, User } from "@prisma/client";
 import * as bcrypt from "bcryptjs";
 import { PrismaService } from "../prisma/prisma.service";
 import { TenantsService } from "../tenants/tenants.service";
@@ -82,6 +82,17 @@ export class AuthService {
 
     if (!user || !passwordMatches) {
       throw new UnauthorizedException("Credenciales inválidas");
+    }
+
+    // Suscripción gestionada a mano por el SuperAdmin (docs/DECISIONS.md):
+    // un negocio suspendido no puede loguearse aunque las credenciales sean
+    // correctas. Las sesiones ya abiertas se cortan aparte, incrementando
+    // tokenVersion de todos sus usuarios al suspender
+    // (SuperAdminTenantsService.suspend).
+    if (user.tenant.subscriptionStatus === SubscriptionStatus.suspended) {
+      throw new ForbiddenException(
+        "La suscripción de este negocio está suspendida. Contactá al administrador.",
+      );
     }
 
     return this.buildAuthResult(user);

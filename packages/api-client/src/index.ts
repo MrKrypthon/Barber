@@ -21,11 +21,17 @@ import type {
   Employee,
   Product,
   ProductMovement,
+  PublicSuperAdmin,
   PublicUser,
+  RecordTenantPaymentInput,
   Sale,
   SalesRange,
   Service,
   Settings,
+  SuperAdminAuthResult,
+  TenantDetail,
+  TenantPayment,
+  TenantSummary,
   UpdateAppointmentInput,
   UpdateCustomerInput,
   UpdateEmployeeInput,
@@ -50,6 +56,9 @@ export type ApiClientConfig = {
   getRefreshToken: () => string | null;
   onTokensRefreshed: (tokens: AuthTokens) => void;
   onSessionExpired: () => void;
+  // "/auth/refresh" por defecto — createSuperAdminApiClient lo pisa con
+  // "/superadmin/auth/refresh", un endpoint completamente distinto.
+  refreshPath?: string;
 };
 
 type RequestOptions = {
@@ -72,7 +81,7 @@ async function tryRefresh(config: ApiClientConfig): Promise<boolean> {
   const refreshToken = config.getRefreshToken();
   if (!refreshToken) return false;
 
-  const res = await fetch(`${config.baseUrl}/auth/refresh`, {
+  const res = await fetch(`${config.baseUrl}${config.refreshPath ?? "/auth/refresh"}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ refreshToken }),
@@ -226,7 +235,45 @@ export function createApiClient(config: ApiClientConfig) {
   };
 }
 
+// Cliente separado a propósito, no un namespace más dentro de
+// createApiClient: usa endpoints, tokens y flujo de refresh completamente
+// distintos (ver ApiClientConfig.refreshPath) de los de negocio. Cada app
+// que lo use debe apuntarlo a su propio storage de tokens (nunca el mismo
+// que usa createApiClient), para que una sesión de SuperAdmin y una de
+// negocio nunca se pisen en el mismo navegador.
+export function createSuperAdminApiClient(config: ApiClientConfig) {
+  const call = <T>(path: string, init?: RequestInit, options?: RequestOptions) =>
+    request<T>(config, path, init, options);
+
+  return {
+    auth: {
+      login: (input: { email: string; password: string }) =>
+        call<SuperAdminAuthResult>(
+          "/superadmin/auth/login",
+          { method: "POST", body: JSON.stringify(input) },
+          { skipAuth: true, skipRefresh: true },
+        ),
+      logout: () => call<{ success: boolean }>("/superadmin/auth/logout", { method: "POST" }),
+      me: () => call<PublicSuperAdmin>("/superadmin/auth/me"),
+    },
+    tenants: {
+      list: () => call<TenantSummary[]>("/superadmin/tenants"),
+      get: (id: string) => call<TenantDetail>(`/superadmin/tenants/${id}`),
+      suspend: (id: string) =>
+        call<TenantSummary>(`/superadmin/tenants/${id}/suspend`, { method: "POST" }),
+      activate: (id: string) =>
+        call<TenantSummary>(`/superadmin/tenants/${id}/activate`, { method: "POST" }),
+      recordPayment: (id: string, input: RecordTenantPaymentInput) =>
+        call<TenantDetail>(`/superadmin/tenants/${id}/payments`, {
+          method: "POST",
+          body: JSON.stringify(input),
+        }),
+    },
+  };
+}
+
 export type ApiClient = ReturnType<typeof createApiClient>;
+export type SuperAdminApiClient = ReturnType<typeof createSuperAdminApiClient>;
 export type {
   Appointment,
   AppointmentsRange,
@@ -249,11 +296,17 @@ export type {
   Employee,
   Product,
   ProductMovement,
+  PublicSuperAdmin,
   PublicUser,
+  RecordTenantPaymentInput,
   Sale,
   SalesRange,
   Service,
   Settings,
+  SuperAdminAuthResult,
+  TenantDetail,
+  TenantPayment,
+  TenantSummary,
   UpdateAppointmentInput,
   UpdateCustomerInput,
   UpdateEmployeeInput,

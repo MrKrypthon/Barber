@@ -16,6 +16,8 @@ Convenciones generales (ver `CLAUDE.md` §15):
 - name
 - created_at
 - updated_at
+- subscription_status (`active` | `suspended`, default `active` — gestión manual de suscripciones, ADR-009 en `docs/DECISIONS.md`. `suspended` bloquea el login de todos los usuarios del tenant. Exclusivo del panel de SuperAdmin, nunca editable desde `/api/v1`)
+- subscription_paid_until (fecha, nullable — hasta cuándo cubre el último pago registrado)
 
 ---
 
@@ -177,3 +179,33 @@ Entrada/salida manual de stock (mismo criterio que `cash_movements` con la caja:
 - created_at
 
 Índice: `(tenant_id, product_id, created_at)`, para el historial de movimientos de un producto.
+
+---
+
+## super_admins
+
+Cuenta del dueño de la plataforma (ADR-009, `docs/DECISIONS.md`) — deliberadamente separada de `users`: no tiene `tenant_id`, no pertenece a ningún negocio. Sin alta propia; se crea con `apps/api/prisma/seed-superadmin.ts`.
+
+- id (uuid)
+- name
+- email (único)
+- password (hash)
+- token_version (mismo criterio que `users.token_version`)
+- created_at
+- updated_at
+
+---
+
+## tenant_payments
+
+Un pago registrado a mano por el SuperAdmin (efectivo o transferencia recibida fuera de la app). Registrar uno nuevo reactiva el tenant automáticamente (`SuperAdminTenantsService.recordPayment`).
+
+- id (uuid)
+- tenant_id
+- amount
+- method (`cash` | `transfer`)
+- paid_until (hasta qué fecha queda cubierto el negocio con este pago)
+- note (nullable)
+- created_at
+
+Índice: `(tenant_id)`, para el historial de pagos de un negocio.

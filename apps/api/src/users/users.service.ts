@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Prisma, Role, User } from "@prisma/client";
+import { Prisma, Role, Tenant, User } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 
 export type CreateUserInput = {
@@ -16,8 +16,10 @@ export class UsersService {
 
   // findFirst (no findUnique) porque se combina con deletedAt: null — un
   // empleado dado de baja no debe poder loguearse ni refrescar su sesión.
-  findByEmail(email: string): Promise<User | null> {
-    return this.prisma.user.findFirst({ where: { email, deletedAt: null } });
+  // Incluye tenant para que AuthService.login pueda rechazar el acceso de
+  // un negocio con la suscripción suspendida (panel de SuperAdmin).
+  findByEmail(email: string): Promise<(User & { tenant: Tenant }) | null> {
+    return this.prisma.user.findFirst({ where: { email, deletedAt: null }, include: { tenant: true } });
   }
 
   findById(id: string): Promise<User | null> {

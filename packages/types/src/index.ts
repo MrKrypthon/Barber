@@ -275,3 +275,47 @@ export type CreateAppointmentInput = {
 };
 
 export type UpdateAppointmentInput = Partial<CreateAppointmentInput>;
+
+// Panel de SuperAdmin: gestión manual de suscripciones (pago en efectivo o
+// transferencia fuera de la app, docs/DECISIONS.md). Completamente separado
+// del resto — un SuperAdmin no pertenece a ningún tenant y nunca ve datos
+// de negocio (clientes, ventas, turnos, etc.), solo lo de acá abajo.
+export type PublicSuperAdmin = {
+  id: string;
+  name: string;
+  email: string;
+};
+
+export type SuperAdminAuthResult = AuthTokens & { superAdmin: PublicSuperAdmin };
+
+export type SubscriptionStatus = "active" | "suspended";
+
+export type TenantSummary = {
+  id: string;
+  name: string;
+  ownerName: string | null;
+  ownerEmail: string | null;
+  createdAt: string;
+  subscriptionStatus: SubscriptionStatus;
+  subscriptionPaidUntil: string | null;
+};
+
+export type TenantPayment = {
+  id: string;
+  amount: number;
+  method: PaymentMethod;
+  paidUntil: string;
+  note: string | null;
+  createdAt: string;
+};
+
+export type TenantDetail = TenantSummary & {
+  payments: TenantPayment[];
+};
+
+export type RecordTenantPaymentInput = {
+  amount: number;
+  method: PaymentMethod;
+  paidUntil: string;
+  note?: string;
+};
