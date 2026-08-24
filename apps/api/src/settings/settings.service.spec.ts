@@ -28,6 +28,7 @@ describe("SettingsService", () => {
         scheduleDays: ["mon", "tue"],
         scheduleOpen: "09:00",
         scheduleClose: "19:00",
+        remindersEnabled: false,
       });
 
       const result = await service.get("t1");
@@ -43,6 +44,7 @@ describe("SettingsService", () => {
         scheduleDays: ["mon", "tue"],
         scheduleOpen: "09:00",
         scheduleClose: "19:00",
+        remindersEnabled: false,
       });
     });
 
@@ -63,6 +65,7 @@ describe("SettingsService", () => {
         scheduleDays: [],
         scheduleOpen: null,
         scheduleClose: null,
+        remindersEnabled: true,
       });
     });
   });

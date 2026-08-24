@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
+import { ScheduleModule } from "@nestjs/schedule";
 import { AppointmentsModule } from "./appointments/appointments.module";
 import { AuthModule } from "./auth/auth.module";
 import { CashModule } from "./cash/cash.module";
@@ -15,6 +16,7 @@ import { SuperAdminAuthModule } from "./superadmin-auth/superadmin-auth.module";
 import { SuperAdminTenantsModule } from "./superadmin-tenants/superadmin-tenants.module";
 import { TenantsModule } from "./tenants/tenants.module";
 import { UsersModule } from "./users/users.module";
+import { WhatsAppModule } from "./whatsapp/whatsapp.module";
 
 @Module({
   imports: [
@@ -22,6 +24,7 @@ import { UsersModule } from "./users/users.module";
       isGlobal: true,
       envFilePath: ["../../.env", ".env"],
     }),
+    ScheduleModule.forRoot(),
     PrismaModule,
     TenantsModule,
     UsersModule,
@@ -36,6 +39,7 @@ import { UsersModule } from "./users/users.module";
     AppointmentsModule,
     SuperAdminAuthModule,
     SuperAdminTenantsModule,
+    WhatsAppModule,
   ],
   controllers: [HealthController],
 })

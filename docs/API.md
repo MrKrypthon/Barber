@@ -164,11 +164,37 @@ POST /api/v1/products/{id}/movements
 
 GET /api/v1/settings
 
-&nbsp;&nbsp;Disponible para `owner` y `employee` (lo usa el sidebar de toda la app). Devuelve `{ businessName, logo, primaryColor, secondaryColor, backgroundColor, phone, address }`. `businessName` viene de `tenants.name` (existe desde Fase 1); el resto de `business_settings`, que es 1:1 con el tenant pero no se crea automáticamente al registrarse — antes de la primera edición, todos esos campos son `null`. El frontend aplica `primaryColor`/`secondaryColor`/`backgroundColor` como variables CSS en tiempo real (`ThemeVars`, `apps/web/src/components/theme-vars.tsx`); si son `null` usa los valores por defecto de `globals.css`.
+&nbsp;&nbsp;Disponible para `owner` y `employee` (lo usa el sidebar de toda la app). Devuelve `{ businessName, logo, primaryColor, secondaryColor, backgroundColor, phone, address, scheduleDays, scheduleOpen, scheduleClose, remindersEnabled }`. `businessName` viene de `tenants.name` (existe desde Fase 1); el resto de `business_settings`, que es 1:1 con el tenant pero no se crea automáticamente al registrarse — antes de la primera edición, todos esos campos son `null` salvo `remindersEnabled`, que por defecto es `true` (ADR-011). El frontend aplica `primaryColor`/`secondaryColor`/`backgroundColor` como variables CSS en tiempo real (`ThemeVars`, `apps/web/src/components/theme-vars.tsx`); si son `null` usa los valores por defecto de `globals.css`.
 
 PUT /api/v1/settings
 
-&nbsp;&nbsp;Solo `owner`. Body: todos los campos de arriba, opcionales (se actualiza solo lo que se envía). Hace upsert de `business_settings` la primera vez que se edita.
+&nbsp;&nbsp;Solo `owner`. Body: todos los campos de arriba, opcionales (se actualiza solo lo que se envía). Hace upsert de `business_settings` la primera vez que se edita. `remindersEnabled` controla únicamente `RemindersCron` (recordatorios de turno) — no afecta el envío de recibos de pago, que sigue mandándose mientras haya conexión de WhatsApp.
+
+---
+
+## WhatsApp
+
+Conexión con la API oficial de WhatsApp Business (Meta Cloud API), para mandar recordatorios de turno y recibos de pago en foto (ADR-011, `docs/DECISIONS.md`). Rutas de conexión disponibles solo para `owner`.
+
+GET /api/v1/whatsapp/connection
+
+&nbsp;&nbsp;Devuelve `{ connected, phoneNumberId, wabaId, accessTokenPreview }`. `accessTokenPreview` nunca es el token completo — solo los últimos 4 caracteres, con "••••" adelante. Sin conexión cargada, devuelve `{ connected: false, phoneNumberId: null, wabaId: null, accessTokenPreview: null }`.
+
+PUT /api/v1/whatsapp/connection
+
+&nbsp;&nbsp;Body: `{ phoneNumberId, wabaId, accessToken }`, los tres obligatorios. Hace upsert — pisa la conexión anterior si ya existía una.
+
+DELETE /api/v1/whatsapp/connection
+
+&nbsp;&nbsp;Borra la conexión del tenant. A partir de acá no se mandan más recordatorios ni recibos hasta que se vuelva a conectar.
+
+GET /api/v1/whatsapp/webhook
+
+&nbsp;&nbsp;Handshake de verificación de Meta al dar de alta el webhook — si `hub.verify_token` coincide con `WHATSAPP_VERIFY_TOKEN`, devuelve `hub.challenge` tal cual (200); si no, 403. No requiere autenticación (lo llama Meta, no el frontend).
+
+POST /api/v1/whatsapp/webhook
+
+&nbsp;&nbsp;Recibe eventos entrantes (mensajes, estados de entrega). Verifica la firma HMAC-SHA256 del body (`X-Hub-Signature-256` contra `WHATSAPP_APP_SECRET`) antes de procesar nada; responde 200 siempre (lo exige Meta) aunque la firma sea inválida, para no generar reintentos. Por ahora solo loguea los eventos — procesar reservas por mensaje de texto queda para una segunda etapa (ADR-011).
 
 ---
 

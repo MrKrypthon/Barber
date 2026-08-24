@@ -38,6 +38,8 @@ import type {
   UpdateProductInput,
   UpdateServiceInput,
   UpdateSettingsInput,
+  UpdateWhatsAppConnectionInput,
+  WhatsAppConnection,
 } from "@barber/types";
 
 export class ApiError extends Error {
@@ -216,6 +218,16 @@ export function createApiClient(config: ApiClientConfig) {
       update: (input: UpdateSettingsInput) =>
         call<Settings>("/settings", { method: "PUT", body: JSON.stringify(input) }),
     },
+    whatsapp: {
+      getConnection: () => call<WhatsAppConnection>("/whatsapp/connection"),
+      upsertConnection: (input: UpdateWhatsAppConnectionInput) =>
+        call<WhatsAppConnection>("/whatsapp/connection", {
+          method: "PUT",
+          body: JSON.stringify(input),
+        }),
+      removeConnection: () =>
+        call<{ success: boolean }>("/whatsapp/connection", { method: "DELETE" }),
+    },
     appointments: {
       list: (params?: { date?: string; range?: AppointmentsRange; since?: string }) => {
         const query = new URLSearchParams();
@@ -313,4 +325,6 @@ export type {
   UpdateProductInput,
   UpdateServiceInput,
   UpdateSettingsInput,
+  UpdateWhatsAppConnectionInput,
+  WhatsAppConnection,
 };

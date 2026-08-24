@@ -1,5 +1,6 @@
 import {
   IsArray,
+  IsBoolean,
   IsHexColor,
   IsIn,
   IsOptional,
@@ -69,4 +70,8 @@ export class UpdateSettingsDto {
   @IsString()
   @Matches(TIME_PATTERN, { message: "scheduleClose debe tener formato HH:MM" })
   scheduleClose?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  remindersEnabled?: boolean;
 }

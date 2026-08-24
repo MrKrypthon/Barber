@@ -1,6 +1,7 @@
 import { ForbiddenException, NotFoundException } from "@nestjs/common";
 import { Role } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
+import { WhatsAppReceiptService } from "../whatsapp/whatsapp-receipt.service";
 import { SalesService } from "./sales.service";
 
 describe("SalesService", () => {
@@ -11,6 +12,7 @@ describe("SalesService", () => {
     sale: { create: jest.Mock; findMany: jest.Mock; findFirst: jest.Mock };
     user: { findFirst: jest.Mock };
   };
+  let whatsAppReceiptService: { sendReceiptSafely: jest.Mock };
 
   const employee = { id: "user-1", name: "Ada" };
   const owner = { userId: "user-1", role: Role.owner };
@@ -44,7 +46,11 @@ describe("SalesService", () => {
       sale: { create: jest.fn(), findMany: jest.fn(), findFirst: jest.fn() },
       user: { findFirst: jest.fn() },
     };
-    service = new SalesService(prisma as unknown as PrismaService);
+    whatsAppReceiptService = { sendReceiptSafely: jest.fn() };
+    service = new SalesService(
+      prisma as unknown as PrismaService,
+      whatsAppReceiptService as unknown as WhatsAppReceiptService,
+    );
   });
 
   describe("create", () => {
@@ -73,6 +79,28 @@ describe("SalesService", () => {
         }),
         include: expect.anything(),
       });
+    });
+
+    it("manda el recibo por WhatsApp de forma fire-and-forget, sin bloquear la venta", async () => {
+      prisma.customer.findFirst.mockResolvedValue(customer);
+      prisma.service.findMany.mockResolvedValue([serviceA, serviceB]);
+      prisma.sale.create.mockResolvedValue(saleFixture());
+
+      await service.create("tenant-1", owner, {
+        customerId: customer.id,
+        serviceIds: [serviceA.id, serviceB.id],
+        paymentMethod: "cash",
+      } as never);
+
+      expect(whatsAppReceiptService.sendReceiptSafely).toHaveBeenCalledWith(
+        "tenant-1",
+        expect.objectContaining({
+          customerName: "Juan",
+          serviceNames: ["Corte", "Barba"],
+          total: 150,
+          paymentMethodLabel: "Efectivo",
+        }),
+      );
     });
 
     it("rechaza si el cliente pertenece a otro tenant", async () => {

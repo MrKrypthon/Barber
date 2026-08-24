@@ -126,6 +126,7 @@ Corte de caja: snapshot inmutable del resumen del día al momento de cerrar (`PO
 - background_color
 - phone
 - address
+- reminders_enabled (booleano, default `true` — apaga el cron de recordatorios de turno por WhatsApp para este tenant sin desconectar su `whatsapp_connections`, ADR-011)
 - created_at
 - updated_at
 
@@ -145,6 +146,7 @@ Agenda manual (v0.2, `docs/ROADMAP.md`): el empleado registra los turnos que lle
 - created_at
 - updated_at
 - deleted_at (soft delete, nullable)
+- reminder_sent_at (nullable — cuándo se mandó el recordatorio por WhatsApp de este turno, ADR-011; `null` = todavía no, lo revisa `RemindersCron` cada 15 minutos)
 
 Índice: `(tenant_id, start_at)`, para las consultas de agenda por día/semana.
 
@@ -209,3 +211,16 @@ Un pago registrado a mano por el SuperAdmin (efectivo o transferencia recibida f
 - created_at
 
 Índice: `(tenant_id)`, para el historial de pagos de un negocio.
+
+---
+
+## whatsapp_connections
+
+Credenciales de la app de WhatsApp Business del negocio en Meta (ADR-011, `docs/DECISIONS.md`) — una por tenant, cargadas por el dueño en Configuración. `access_token` nunca se devuelve entero por la API, solo un preview con los últimos 4 caracteres.
+
+- tenant_id (PK — un tenant tiene a lo sumo una conexión)
+- phone_number_id
+- waba_id
+- access_token
+- created_at
+- updated_at

@@ -1,7 +1,8 @@
 import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
-import { Prisma, Role } from "@prisma/client";
+import { PaymentMethod, Prisma, Role } from "@prisma/client";
 import { DateRange, getDateRangeBounds, parseDateParam } from "../common/utils/date-range.util";
 import { PrismaService } from "../prisma/prisma.service";
+import { WhatsAppReceiptService } from "../whatsapp/whatsapp-receipt.service";
 import { CreateSaleDto } from "./dto/create-sale.dto";
 
 export type RequestingUser = {
@@ -45,7 +46,10 @@ function toSaleResponse(sale: SaleWithRelations): SaleResponse {
 
 @Injectable()
 export class SalesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly whatsAppReceiptService: WhatsAppReceiptService,
+  ) {}
 
   async create(
     tenantId: string,
@@ -98,6 +102,17 @@ export class SalesService {
         items: { create: items },
       },
       include: SALE_INCLUDE,
+    });
+
+    // Fire-and-forget: si WhatsApp no está conectado, el cliente no tiene
+    // teléfono, o falla la llamada a Meta, la venta ya quedó registrada de
+    // todos modos — ver WhatsAppReceiptService.sendReceiptSafely.
+    this.whatsAppReceiptService.sendReceiptSafely(tenantId, {
+      customerPhone: sale.customer?.phone ?? null,
+      customerName: sale.customer?.name ?? "Cliente",
+      serviceNames: sale.items.map((item) => item.service.name),
+      total: Number(sale.total),
+      paymentMethodLabel: sale.paymentMethod === PaymentMethod.cash ? "Efectivo" : "Transferencia",
     });
 
     return toSaleResponse(sale);
