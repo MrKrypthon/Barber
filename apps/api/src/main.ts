@@ -16,6 +16,14 @@ async function bootstrap() {
     limit: "2mb",
   });
 
+  // En producción, Nginx es el único proceso que habla directo con el
+  // proceso de Node (docs/DEPLOYMENT.md) — sin esto, Express ve la IP de
+  // Nginx en cada request en vez de la del cliente real, y el rate
+  // limiting de /auth/login (auth.controller.ts) terminaría agrupando a
+  // TODOS los usuarios en un solo balde. "1" = confiar solo en el primer
+  // salto (el propio Nginx), no en cualquier proxy intermedio.
+  (app as unknown as { set: (key: string, value: unknown) => void }).set("trust proxy", 1);
+
   app.setGlobalPrefix("api/v1");
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 

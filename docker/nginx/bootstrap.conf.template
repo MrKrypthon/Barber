@@ -1,0 +1,37 @@
+# Config de arranque inicial (docs/DEPLOYMENT.md, paso "Primer certificado").
+# Solo HTTP — todavía no hay certificado de Let's Encrypt la primera vez que
+# se levanta el servidor, así que el bloque HTTPS de default.conf.template
+# haría fallar a Nginx (apunta a archivos de certificado que no existen
+# todavía). Este archivo sirve el sitio por HTTP mientras tanto y expone la
+# ruta que certbot necesita para validar el dominio (ACME HTTP-01
+# challenge). Una vez emitido el primer certificado, se reemplaza por
+# default.conf.template y no se vuelve a usar.
+#
+# ${DOMAIN} lo resuelve el entrypoint de la imagen oficial de nginx vía
+# envsubst, a partir de la variable de entorno del mismo nombre (ver
+# docker-compose.prod.yml) — no hace falta un script propio para esto.
+
+server {
+    listen 80;
+    server_name ${DOMAIN};
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location /api/v1/ {
+        proxy_pass http://api:3001/api/v1/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location / {
+        proxy_pass http://web:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}

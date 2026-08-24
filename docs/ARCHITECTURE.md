@@ -65,7 +65,7 @@ tenant_id en todas las tablas.
 
 ## Infraestructura
 
-Oracle Cloud Free Tier
+Hetzner Cloud (ADR-010, `docs/DECISIONS.md`)
 
 Ubuntu
 
@@ -76,6 +76,8 @@ Docker Compose
 Nginx
 
 Let's Encrypt
+
+Runbook completo de despliegue: `docs/DEPLOYMENT.md`.
 
 ---
 

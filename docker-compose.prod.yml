@@ -1,0 +1,80 @@
+# Compose de producción (docs/DEPLOYMENT.md) — a diferencia de
+# docker-compose.yml (desarrollo, con bind mounts y hot reload), acá las
+# imágenes son las multi-stage (docker/*/Dockerfile.prod), sin código fuente
+# ni devDependencies, y ningún servicio salvo Nginx expone puertos al host.
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/api/Dockerfile.prod
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/web/Dockerfile.prod
+      # NEXT_PUBLIC_* se hornea en el bundle del cliente al momento del
+      # build (Next.js), no se puede pasar como variable de entorno en
+      # runtime — por eso va como build arg, no en `environment:`.
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+    restart: unless-stopped
+    depends_on:
+      - api
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # active.conf.template no se commitea (.gitignore) — es una copia de
+      # bootstrap.conf.template o default.conf.template según la etapa del
+      # despliegue en la que se esté (docs/DEPLOYMENT.md), así nunca hace
+      # falta editar este archivo a mano.
+      - ./docker/nginx/active.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - letsencrypt:/etc/letsencrypt
+      - certbot_webroot:/var/www/certbot
+    depends_on:
+      - api
+      - web
+
+  # Solo renueva (certbot/certbot). La emisión del primer certificado es un
+  # comando aparte, a mano, una única vez — ver docs/DEPLOYMENT.md.
+  certbot:
+    image: certbot/certbot
+    restart: unless-stopped
+    volumes:
+      - letsencrypt:/etc/letsencrypt
+      - certbot_webroot:/var/www/certbot
+    entrypoint: >
+      /bin/sh -c "trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot; sleep 12h & wait $${!}; done;"
+
+volumes:
+  postgres_data:
+  letsencrypt:
+  certbot_webroot:

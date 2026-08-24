@@ -105,3 +105,23 @@ Un negocio suspendido bloquea el login de todos sus usuarios reutilizando el mec
 Estado:
 
 El SuperAdmin nunca ve clientes, ventas, turnos, caja ni inventario de ningún negocio — solo nombre, contacto del dueño, y estado/historial de la suscripción. Si en el futuro se agrega un procesador de pagos (Stripe, v1.0), este panel probablemente se mantiene para los negocios que sigan pagando por fuera.
+
+---
+
+## ADR-010
+
+Producción corre en un único VPS de Hetzner Cloud, no en Oracle Cloud Free Tier (el plan original de `docs/ARCHITECTURE.md`) ni en una combinación de Vercel + Supabase + Fly.io.
+
+Motivo:
+
+Se evaluaron las tres alternativas gratuitas/casi-gratuitas antes de decidir:
+
+- **Oracle Cloud Free Tier**: gratis de por vida, pero el alta es notoriamente conflictiva (verificación estricta de tarjeta, cuentas suspendidas sin aviso, "sin capacidad disponible" recurrente en la capa gratuita según reportes de usuarios) — inaceptable para la infraestructura de un negocio real que depende de que la app esté arriba.
+- **Vercel (Hobby) + Supabase + Fly.io**: el plan gratuito de Vercel prohíbe explícitamente uso comercial ("cualquier deployment usado con fines de lucro", lo cual describe exactamente a este SaaS) y Vercel puede desactivar el proyecto sin aviso por incumplirlo — haría falta el plan Pro (20 USD/mes). Fly.io ya no tiene capa gratuita desde fines de 2024. Supabase gratis pausa el proyecto tras una semana sin actividad en la base. Sumando todo, esta combinación termina costando más que un VPS y con más piezas para mantener.
+- **Un VPS de Hetzner** (~5 USD/mes): sin restricciones de uso comercial, sin capas que se pausan solas, un solo lugar para todo (Docker Compose + Nginx + Postgres, igual al esquema ya documentado en `docs/ARCHITECTURE.md`), y más barato que la alternativa "gratuita".
+
+CLAUDE.md §26/§27 pide mantener la infraestructura simple y de bajo costo, no necesariamente gratis a cualquier precio — un VPS confiable de 5 USD/mes cumple mejor ese objetivo que apilar tres servicios gratuitos con riesgos de downtime o de que te corten el servicio.
+
+Estado:
+
+Runbook completo en `docs/DEPLOYMENT.md`. La imagen de producción de la API usa `pnpm deploy` (poda devDependencies) — importante: el paso de `prisma generate` que corre automáticamente durante ese deploy no queda bien (genera un cliente incompleto, sin los enums del schema), así que se regenera explícitamente después, ya en el directorio final, antes de copiarlo a la imagen runtime. El frontend usa `output: "standalone"` de Next.js, con `outputFileTracingRoot` apuntando a la raíz del monorepo (si no, el file tracing no ve los paquetes hermanos `@barber/types`/`@barber/api-client`).
