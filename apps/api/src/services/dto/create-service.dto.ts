@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsString,
   Max,
+  MaxLength,
   Min,
   MinLength,
 } from "class-validator";
@@ -13,6 +14,7 @@ import {
 export class CreateServiceDto {
   @IsString()
   @MinLength(1)
+  @MaxLength(200)
   name!: string;
 
   @IsNumber({ maxDecimalPlaces: 2 })

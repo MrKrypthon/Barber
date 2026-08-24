@@ -1,5 +1,5 @@
 import { CashMovementType } from "@prisma/client";
-import { IsEnum, IsNumber, IsOptional, IsString, Min } from "class-validator";
+import { IsEnum, IsNumber, IsOptional, IsString, MaxLength, Min } from "class-validator";
 
 export class CreateCashMovementDto {
   @IsEnum(CashMovementType)
@@ -11,5 +11,6 @@ export class CreateCashMovementDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(500)
   description?: string;
 }

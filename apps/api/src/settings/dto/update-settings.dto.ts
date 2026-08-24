@@ -23,6 +23,7 @@ export class UpdateSettingsDto {
   @IsOptional()
   @IsString()
   @MinLength(1)
+  @MaxLength(200)
   businessName?: string;
 
   // Data URI (base64) ya redimensionada/comprimida en el cliente —
@@ -46,10 +47,12 @@ export class UpdateSettingsDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(30)
   phone?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(300)
   address?: string;
 
   @IsOptional()

@@ -1,5 +1,5 @@
 import { ProductMovementType } from "@prisma/client";
-import { IsEnum, IsInt, IsOptional, IsString, Min } from "class-validator";
+import { IsEnum, IsInt, IsOptional, IsString, MaxLength, Min } from "class-validator";
 
 export class CreateProductMovementDto {
   @IsEnum(ProductMovementType)
@@ -11,5 +11,6 @@ export class CreateProductMovementDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(500)
   description?: string;
 }

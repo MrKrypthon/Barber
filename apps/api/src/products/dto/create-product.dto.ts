@@ -13,6 +13,7 @@ const MAX_PHOTO_LENGTH = 300_000;
 export class CreateProductDto {
   @IsString()
   @MinLength(1)
+  @MaxLength(200)
   name!: string;
 
   // Data URI (base64) ya redimensionada/comprimida en el cliente, mismo
